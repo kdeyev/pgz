@@ -1,244 +1,198 @@
-"""
-This is tested on pygame 1.9 and python 2.7 and 3.3+.
-Leif Theden "bitcraft", 2012-2017
-
-Rendering demo for the TMXLoader.
-
-Typically this is run to verify that any code changes do do break the loader.
-Tests all Tiled features -except- terrains and object rotation.
-
-If you are not familiar with python classes, you might want to check the
-'tutorial' app.
-
-Missing interactive_tests:
-- object rotation
-- terrains
-"""
-
-import logging
-
+from pytmx.util_pygame import load_pygame
 import pygame
+import pyscroll
+import pyscroll.data
+import collections
+import logging
 from pygame.locals import *
 
-import pytmx
-from pytmx import TiledImageLayer
-from pytmx import TiledObjectGroup
-from pytmx import TiledTileLayer
-from pytmx.util_pygame import load_pygame
+import pyscroll.orthographic
 
 logger = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+logger.addHandler(ch)
+logger.setLevel(logging.INFO)
+
+SCROLL_SPEED = 5000
 
 
+# simple wrapper to keep the screen resizeable
 def init_screen(width, height):
-    """ Set the screen mode
-    This function is used to handle window resize events
-    """
     return pygame.display.set_mode((width, height), pygame.RESIZABLE)
 
 
-class TiledRenderer(object):
+class ScrollTest:
+    """ Test and demo of pyscroll
+    For normal use, please see the quest demo, not this.
     """
-    Super simple way to render a tiled map
-    """
-
     def __init__(self, filename):
-        tm = load_pygame(filename)
 
-        # self.size will be the pixel size of the map
-        # this value is used later to render the entire map to a pygame surface
-        self.pixel_size = tm.width * tm.tilewidth, tm.height * tm.tileheight
-        self.tmx_data = tm
+        # load data from pytmx
+        tmx_data = load_pygame(filename)
 
-    def render_map(self, surface):
-        """ Render our map to a pygame surface
-        
-        Feel free to use this as a starting point for your pygame app.
-        This method expects that the surface passed is the same pixel
-        size as the map.
-        
-        Scrolling is a often requested feature, but pytmx is a map
-        loader, not a renderer!  If you'd like to have a scrolling map
-        renderer, please see my pyscroll project.
-        """
+        # create new data source
+        map_data = pyscroll.data.TiledMapData(tmx_data)
 
-        # fill the background color of our render surface
-        if self.tmx_data.background_color:
-            surface.fill(pygame.Color(self.tmx_data.background_color))
+        # create new renderer
+        self.map_layer = pyscroll.orthographic.BufferedRenderer(map_data, screen.get_size())
 
-        # iterate over all the visible layers, then draw them
-        for layer in self.tmx_data.visible_layers:
-            # each layer can be handled differently by checking their type
+        # create a font and pre-render some text to be displayed over the map
+        f = pygame.font.Font(pygame.font.get_default_font(), 20)
+        t = ["scroll demo. press escape to quit",
+             "arrow keys move"]
 
-            if isinstance(layer, TiledTileLayer):
-                self.render_tile_layer(surface, layer)
+        # save the rendered text
+        self.text_overlay = [f.render(i, 1, (180, 180, 0)) for i in t]
 
-            elif isinstance(layer, TiledObjectGroup):
-                self.render_object_layer(surface, layer)
+        # set our initial viewpoint in the center of the map
+        self.center = [self.map_layer.map_rect.width / 2,
+                       self.map_layer.map_rect.height / 2]
 
-            elif isinstance(layer, TiledImageLayer):
-                self.render_image_layer(surface, layer)
+        # the camera vector is used to handle camera movement
+        self.camera_acc = [0, 0, 0]
+        self.camera_vel = [0, 0, 0]
+        self.last_update_time = 0
 
-    def render_tile_layer(self, surface, layer):
-        """ Render all TiledTiles in this layer
-        """
-        # deref these heavily used references for speed
-        tw = self.tmx_data.tilewidth
-        th = self.tmx_data.tileheight
-        surface_blit = surface.blit
-
-        # iterate over the tiles in the layer, and blit them
-        for x, y, image in layer.tiles():
-            surface_blit(image, (x * tw, y * th))
-
-    def render_object_layer(self, surface, layer):
-        """ Render all TiledObjects contained in this layer
-        """
-        # deref these heavily used references for speed
-        draw_rect = pygame.draw.rect
-        draw_lines = pygame.draw.lines
-        surface_blit = surface.blit
-
-        # these colors are used to draw vector shapes,
-        # like polygon and box shapes
-        rect_color = (255, 0, 0)
-        poly_color = (0, 255, 0)
-
-        # iterate over all the objects in the layer
-        # These may be Tiled shapes like circles or polygons, GID objects, or Tiled Objects
-        for obj in layer:
-            logger.info(obj)
-
-            # objects with points are polygons or lines
-            if hasattr(obj, 'points'):
-                draw_lines(surface, poly_color, obj.closed, obj.points, 3)
-
-            # some objects have an image
-            # Tiled calls them "GID Objects"
-            elif obj.image:
-                surface_blit(obj.image, (obj.x, obj.y))
-
-            # draw a rect for everything else
-            # Mostly, I am lazy, but you could check if it is circle/oval
-            # and use pygame to draw an oval here...I just do a rect.
-            else:
-                draw_rect(surface, rect_color,
-                          (obj.x, obj.y, obj.width, obj.height), 3)
-
-    def render_image_layer(self, surface, layer):
-        if layer.image:
-            surface.blit(layer.image, (0, 0))
-
-
-class SimpleTest(object):
-    """ Basic app to display a rendered Tiled map
-    """
-
-    def __init__(self, filename):
-        self.renderer = None
+        # true when running
         self.running = False
-        self.dirty = False
-        self.exit_status = 0
-        self.load_map(filename)
-
-    def load_map(self, filename):
-        """ Create a renderer, load data, and print some debug info
-        """
-        self.renderer = TiledRenderer(filename)
-
-        logger.info("Objects in map:")
-        for obj in self.renderer.tmx_data.objects:
-            logger.info(obj)
-            for k, v in obj.properties.items():
-                logger.info("%s\t%s", k, v)
-
-        logger.info("GID (tile) properties:")
-        for k, v in self.renderer.tmx_data.tile_properties.items():
-            logger.info("%s\t%s", k, v)
 
     def draw(self, surface):
-        """ Draw our map to some surface (probably the display)
-        """
-        # first we make a temporary surface that will accommodate the entire
-        # size of the map.
-        # because this demo does not implement scrolling, we render the
-        # entire map each frame
-        temp = pygame.Surface(self.renderer.pixel_size)
 
-        # render the map onto the temporary surface
-        self.renderer.render_map(temp)
+        # tell the map_layer (BufferedRenderer) to draw to the surface
+        # the draw function requires a rect to draw to.
+        self.map_layer.draw(surface, surface.get_rect())
 
-        # now resize the temporary surface to the size of the display
-        # this will also 'blit' the temp surface to the display
-        pygame.transform.smoothscale(temp, surface.get_size(), surface)
+        # blit our text over the map
+        self.draw_text(surface)
 
-        # display a bit of use info on the display
-        f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        i = f.render('press any key for next map or ESC to quit',
-                     1, (180, 180, 0))
-        surface.blit(i, (0, 0))
+    def draw_text(self, surface):
+        y = 0
+        for text in self.text_overlay:
+            surface.blit(text, (0, y))
+            y += text.get_height()
 
     def handle_input(self):
-        try:
-            event = pygame.event.wait()
-
+        """ Simply handle pygame input events
+        """
+        for event in pygame.event.get():
             if event.type == QUIT:
-                self.exit_status = 0
                 self.running = False
+                break
 
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    self.exit_status = 0
                     self.running = False
-                else:
-                    self.running = False
+                    break
 
+            # this will be handled if the window is resized
             elif event.type == VIDEORESIZE:
                 init_screen(event.w, event.h)
-                self.dirty = True
+                self.map_layer.set_size((event.w, event.h))
 
-        except KeyboardInterrupt:
-            self.exit_status = 0
-            self.running = False
+        # these keys will change the camera vector
+        # the camera vector changes the center of the viewport,
+        # which causes the map to scroll
+
+        # using get_pressed is slightly less accurate than testing for events
+        # but is much easier to use.
+        pressed = pygame.key.get_pressed()
+        if pressed[K_UP]:
+            self.camera_acc[1] = -SCROLL_SPEED * self.last_update_time
+        elif pressed[K_DOWN]:
+            self.camera_acc[1] = SCROLL_SPEED * self.last_update_time
+        else:
+            self.camera_acc[1] = 0
+
+        if pressed[K_LEFT]:
+            self.camera_acc[0] = -SCROLL_SPEED * self.last_update_time
+        elif pressed[K_RIGHT]:
+            self.camera_acc[0] = SCROLL_SPEED * self.last_update_time
+        else:
+            self.camera_acc[0] = 0
+
+    def update(self, td):
+        self.last_update_time = td
+
+        friction = pow(.0001, self.last_update_time)
+
+        # update the camera vector
+        self.camera_vel[0] += self.camera_acc[0] * td
+        self.camera_vel[1] += self.camera_acc[1] * td
+
+        self.camera_vel[0] *= friction
+        self.camera_vel[1] *= friction
+
+        # make sure the movement vector stops when scrolling off the screen
+        if self.center[0] < 0:
+            self.center[0] -= self.camera_vel[0]
+            self.camera_acc[0] = 0
+            self.camera_vel[0] = 0
+        if self.center[0] >= self.map_layer.map_rect.width:
+            self.center[0] -= self.camera_vel[0]
+            self.camera_acc[0] = 0
+            self.camera_vel[0] = 0
+
+        if self.center[1] < 0:
+            self.center[1] -= self.camera_vel[1]
+            self.camera_acc[1] = 0
+            self.camera_vel[1] = 0
+        if self.center[1] >= self.map_layer.map_rect.height:
+            self.center[1] -= self.camera_vel[1]
+            self.camera_acc[1] = 0
+            self.camera_vel[1] = 0
+
+        self.center[0] += self.camera_vel[0]
+        self.center[1] += self.camera_vel[1]
+
+        # set the center somewhere else
+        # in a game, you would set center to a playable character
+        self.map_layer.center(self.center)
 
     def run(self):
-        """ This is our app main loop
-        """
-        self.dirty = True
+        clock = pygame.time.Clock()
         self.running = True
-        self.exit_status = 1
+        fps = 60.
+        fps_log = collections.deque(maxlen=20)
 
-        while self.running:
-            self.handle_input()
+        try:
+            while self.running:
+                # somewhat smoother way to get fps and limit the framerate
+                clock.tick(fps*2)
 
-            # we don't want to constantly draw on the display, as that is way
-            # inefficient.  so, this 'dirty' values is used.  If dirty is True,
-            # then re-render the map, display it, then mark 'dirty' False.
-            if self.dirty:
+                try:
+                    fps_log.append(clock.get_fps())
+                    fps = sum(fps_log)/len(fps_log)
+                    dt = 1/fps
+                except ZeroDivisionError:
+                    continue
+
+                self.handle_input()
+                self.update(dt)
                 self.draw(screen)
-                self.dirty = False
                 pygame.display.flip()
 
-        return self.exit_status
+        except KeyboardInterrupt:
+            self.running = False
 
 
-if __name__ == '__main__':
-    import os.path
-    import glob
+if __name__ == "__main__":
+    import sys
 
     pygame.init()
     pygame.font.init()
-    screen = init_screen(600, 600)
-    pygame.display.set_caption('PyTMX Map Viewer')
-    logging.basicConfig(level=logging.DEBUG)
+    screen = init_screen(800, 600)
+    pygame.display.set_caption('pyscroll Test')
 
-    logger.info(pytmx.__version__)
-
-    # loop through a bunch of maps in the maps folder
     try:
-        for filename in glob.glob(os.path.join('data', '*.tmx')):
-            logger.info("Testing %s", filename)
-            if not SimpleTest(filename).run():
-                break
+        filename = 'resources/maps/default.tmx'
+    except IndexError:
+        logger.info("no TMX map specified, using default")
+        filename = "desert.tmx"
+
+    try:
+        test = ScrollTest(filename)
+        test.run()
     except:
         pygame.quit()
         raise
