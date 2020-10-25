@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.4" tiledversion="1.4.2" name="tiles_sheet" tilewidth="64" tileheight="64" tilecount="96" columns="16" backgroundcolor="#000000">
- <image source="pirate-pack/Tilesheet/tiles_sheet.png" trans="000000" width="1024" height="384"/>
+ <image source="tiles_sheet.png" trans="000000" width="1024" height="384"/>
  <terraintypes>
   <terrain name="New Terrain" tile="17"/>
   <terrain name="New Terrain" tile="22"/>
@@ -48,7 +48,13 @@
    </object>
   </objectgroup>
  </tile>
- <tile id="6" terrain=",,1,1"/>
+ <tile id="6" terrain=",,1,1">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="-1.33333" y="-1">
+    <polygon points="0,0 28.3333,3.33333 49,4.66667 69,3.33333 65,67.3333 -4.66667,67.3333"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="7" terrain=",,1,1">
   <objectgroup draworder="index" id="3">
    <object id="2" x="-0.545455" y="0.363636">
@@ -100,10 +106,22 @@
    </object>
   </objectgroup>
  </tile>
- <tile id="21" terrain=",1,,1"/>
+ <tile id="21" terrain=",1,,1">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="1.66667" y="0">
+    <polygon points="0,0 2.33333,16 0,36 -0.333333,63 63,63.6667 62.6667,-1.66667"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="22" terrain="1,1,1,1"/>
  <tile id="23" terrain="1,1,1,1"/>
- <tile id="24" terrain="1,,1,"/>
+ <tile id="24" terrain="1,,1,">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="-1.33333" y="-1.66667">
+    <polygon points="0,0 0,67 63,67 62.3333,60 62,35.6667 65.6667,13.6667 62,-1.33333"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="25" terrain=",2,,2"/>
  <tile id="26" terrain="2,2,2,2"/>
  <tile id="27" terrain="2,,2,"/>
@@ -138,12 +156,36 @@
    </object>
   </objectgroup>
  </tile>
- <tile id="35" terrain="1,1,1,"/>
- <tile id="36" terrain="1,1,,1"/>
- <tile id="37" terrain=",1,,1"/>
+ <tile id="35" terrain="1,1,1,">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="64.3333" y="-0.333333">
+    <polygon points="0,0 0.666667,63 -1,66.3333 -65,65 -65.3333,-2.33333"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="36" terrain="1,1,,1">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="-2.33333" y="-1.33333">
+    <polygon points="0,0 68,0 67.6667,65.3333 -0.333333,67.3333"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="37" terrain=",1,,1">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0.333333">
+    <polygon points="0,0 1,20 3.66667,43.3333 1.33333,64.6667 64.3333,63.6667 64.3333,-1.33333"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="38" terrain="1,1,1,1"/>
  <tile id="39" terrain="1,1,1,1"/>
- <tile id="40" terrain="1,,1,"/>
+ <tile id="40" terrain="1,,1,">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="64" y="-0.666667">
+    <polygon points="0,0 -1.33333,21 -4.33333,48 -1.66667,63 -1.33333,65.6667 -65.6667,64.3333 -65,-3.33333"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="41" terrain=",2,,"/>
  <tile id="42" terrain="2,2,,"/>
  <tile id="43" terrain="2,,,"/>
@@ -157,12 +199,48 @@
    <object id="1" type="cannon" x="32.7273" y="32"/>
   </objectgroup>
  </tile>
- <tile id="51" terrain="1,,1,1"/>
- <tile id="52" terrain=",1,1,1"/>
- <tile id="53" terrain=",1,,"/>
- <tile id="54" terrain="1,1,,"/>
- <tile id="55" terrain="1,1,,"/>
- <tile id="56" terrain="1,,,"/>
+ <tile id="51" terrain="1,,1,1">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="-2.66667" y="-1.33333">
+    <polygon points="0,0 68.3333,-1.33333 68.6667,67.6667 -2.33333,65.6667"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="52" terrain=",1,1,1">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="-4" y="-2.66667">
+    <polygon points="0,0 70.6667,1.33333 70,68.3333 1,69"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="53" terrain=",1,,">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0.333333" y="0.666667">
+    <polygon points="0,0 12,40.3333 26,56.3333 64.3333,63.6667 64,-2.66667"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="54" terrain="1,1,,">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="-1.66667" y="-0.666667">
+    <polygon points="0,0 -0.666667,63.6667 9.33333,61.3333 24.3333,61.3333 38.6667,62.6667 59,63.3333 69.3333,61.6667 66,-3.66667"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="55" terrain="1,1,,">
+  <objectgroup draworder="index" id="3">
+   <object id="2" x="-3" y="62.6667">
+    <polygon points="0,0 14,-3.33333 29.3333,-2.66667 45,0.333333 68.6667,-1 67.3333,-66 -0.666667,-64.3333"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="56" terrain="1,,,">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="-1.33333" y="63">
+    <polygon points="0,0 32.3333,-10.3333 54.3333,-21 62.6667,-38.6667 64,-66.3333 -0.333333,-65"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="57" terrain="2,2,2,"/>
  <tile id="58" terrain="2,2,,2"/>
  <tile id="60">
