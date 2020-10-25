@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="1">
+ <tileset firstgid="1" source="tiles_sheet.tsx"/>
+ <layer id="2" name="Water" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztwwEJAAAMBKGr9/0LDZZDwVVTVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/ATccJDY=
+  </data>
+ </layer>
+ <layer id="3" name="Islands" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt1clKRDEQBdA469Kxn0tn3att//+PdRX94AVxbYk5By7ZFrlU0hoAAAD8L3uR/S4HteMM7zxyMecw8lA7zvD6Pq6a/aiUb9V1W/rIXJZONLZ+N/RR66fd8H/UuYsctaWH+6aLatmJHv6248jJnLPiWUaWPZxGPiJT5CVyWzrRmPoeVpHX7tTH73tuu13I+5++5a1wrlHdtOV9yqzm8zGyKZxrVNlH3v/Unbkr782fXuEz8jVnHXlqu91Yz7EjtbIfHQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAo9gC/T8Juw==
+  </data>
+ </layer>
+ <layer id="6" name="Tile Layer 3" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt07ENwCAQA0BvAIuRDWD/MZICKRX1F9xJlly6cQIAAAAAAAAA3GB86TtP8RaSdujUmPn/sYq3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA9V4iqwG1
+  </data>
+ </layer>
+</map>
