@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="1">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="64" tileheight="64" infinite="0" nextlayerid="9" nextobjectid="4">
  <tileset firstgid="1" source="tiles_sheet.tsx"/>
  <layer id="2" name="Water" width="100" height="100">
   <data encoding="base64" compression="zlib">
@@ -8,12 +8,12 @@
  </layer>
  <layer id="3" name="Islands" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt1clKRDEQBdA469Kxn0tn3att//+PdRX94AVxbYk5By7ZFrlU0hoAAAD8L3uR/S4HteMM7zxyMecw8lA7zvD6Pq6a/aiUb9V1W/rIXJZONLZ+N/RR66fd8H/UuYsctaWH+6aLatmJHv6248jJnLPiWUaWPZxGPiJT5CVyWzrRmPoeVpHX7tTH73tuu13I+5++5a1wrlHdtOV9yqzm8zGyKZxrVNlH3v/Unbkr782fXuEz8jVnHXlqu91Yz7EjtbIfHQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAo9gC/T8Juw==
+   eJzt2MluU0EQBdAOCSQMGyBgQ9gwhmkJMcMfJP//P6lSXisv1otgQ7dRnyNdeVvqq7K7XQq08yDycCGPeg41kO3zv4icLORVrwEHkl3cdv7bOS925V97Wf6uC7vSxufI73LzrH9FvvwhX3sMO4jsxFkD/5u9yJ2F7PccamCPI08W8rTnUAO7rY/jYkday++qZ2W5DzvS3tJuHETeTHnbb7ThLO1GdqGDPl5H7pabO6GLvrITPey2e5HDKfc7zzKy7OEo8j2yjpxGXnSdaEzzHlaRj7NPfbT3oVztQp7/eiufOs41qufl+vsps5o+30V+dpxrVNlHnv969pm78q34Te/hLPJjyibyvlztxmaKHekr+9EBsIvm7/Gj4je8h/oGzLOv7/F6r8o7Vt6tdNJO3nHr2dc7bmZVrt8f3ubtzN8c9b+R+j9J7UYf7eSdNt8Z8y7qm6O+Q9x528pONsW7DwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADYTZfgdhjw
   </data>
  </layer>
  <layer id="6" name="Tile Layer 3" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt07ENwCAQA0BvAIuRDWD/MZICKRX1F9xJlly6cQIAAAAAAAAA3GB86TtP8RaSdujUmPn/sYq3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA9V4iqwG1
+   eJzt18EJgEAMBMDtQCuwhOtEO9D+y/AewuHDnxDBGQjkuRACSQIAAAAAAAAA/MHaa75qK85CMj301Ngz9uMozgIAAG9oGTeuP7Dekvs8/B0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB9JwEIAw0=
   </data>
  </layer>
 </map>
