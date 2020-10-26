@@ -5,3 +5,12 @@ python_version = "3.6"
 pygame = "*"
 pytmx = "*"
 pyscroll = "*"
+
+[dev-packages]
+pre-commit = "*"
+pylint = "*"
+mypy = "*"
+black = "*"
+
+[pipenv]
+allow_prereleases = true
