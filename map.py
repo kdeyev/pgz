@@ -74,13 +74,6 @@ class ScrollMap(object):
         """Tasks that occur over time should be handled here"""
         self.group.update(dt)
 
-        # # check if the sprite's feet are colliding with wall
-        # # sprite must have a rect called feet, and move_back method,
-        # # otherwise this will fail
-        # for sprite in self.group.sprites():
-        #     if sprite.rect.collidelist(self.walls) > -1:
-        #         sprite.move_back(dt)
-
     def collide(self, sprite):
         return sprite.rect.collidelist(self.walls) > -1
 
@@ -100,26 +93,3 @@ class ScrollMap(object):
 
     def set_size(self, size):
         self.map_layer.set_size(size)
-
-    # def run(self):
-    #     """ Run the game loop
-    #     """
-    #     clock = pygame.time.Clock()
-    #     self.running = True
-
-    #     from collections import deque
-    #     times = deque(maxlen=30)
-
-    #     try:
-    #         while self.running:
-    #             dt = clock.tick() / 1000.
-    #             times.append(clock.get_fps())
-    #             # print(sum(times)/len(times))
-
-    #             self.handle_input()
-    #             self.update(dt)
-    #             self.draw(screen)
-    #             pygame.display.flip()
-
-    #     except KeyboardInterrupt:
-    #         self.running = False
