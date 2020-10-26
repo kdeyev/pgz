@@ -88,13 +88,13 @@ def extract_collision_objects_from_tile_layers(tmx_data, collision_layer_names):
     return collison_objects
 
 
-class QuestGame(object):
+class ScrollMap(object):
     """ This class is a basic game.
     This class will load data, create a pyscroll group, a hero object.
     It also reads input and moves the Hero around the map.
     Finally, it uses a pyscroll group to render the map and Hero.
     """
-    def __init__(self, filename):
+    def __init__(self, filename, collision_layers):
 
         self.filename = filename
         
@@ -105,7 +105,7 @@ class QuestGame(object):
         tmx_data = load_pygame(self.filename)
 
         # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls = extract_collision_objects_from_tile_layers(tmx_data, ["Islands"])
+        self.walls = extract_collision_objects_from_tile_layers(tmx_data, collision_layers)
 
         # create new data source for pyscroll
         map_data = pyscroll.data.TiledMapData(tmx_data)
@@ -120,24 +120,97 @@ class QuestGame(object):
         # layer for sprites as 2
         self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
 
-        self.hero = Hero()
+    def draw(self, surface):
+        # draw the map and all sprites
+        self.group.draw(surface)
 
+    def update(self, dt):
+        """ Tasks that occur over time should be handled here
+        """
+        self.group.update(dt)
+
+        # # check if the sprite's feet are colliding with wall
+        # # sprite must have a rect called feet, and move_back method,
+        # # otherwise this will fail
+        # for sprite in self.group.sprites():
+        #     if sprite.rect.collidelist(self.walls) > -1:
+        #         sprite.move_back(dt)
+        
+    def collide(self, sprite):
+        return sprite.rect.collidelist(self.walls) > -1
+
+    def add_sprite(self, sprite):
+        self.group.add(sprite)
+        
+    def set_center(self, point):
+        self.group.center(point)
+
+    def get_center(self):
+        return self.map_layer.map_rect.center
+    
+    def change_zoom(self, change):
+        value = self.map_layer.zoom - .25
+        if value > 0:
+            self.map_layer.zoom = value
+
+    def set_size(self, size):
+        self.map_layer.set_size(size)
+
+    # def run(self):
+    #     """ Run the game loop
+    #     """
+    #     clock = pygame.time.Clock()
+    #     self.running = True
+
+    #     from collections import deque
+    #     times = deque(maxlen=30)
+
+    #     try:
+    #         while self.running:
+    #             dt = clock.tick() / 1000.
+    #             times.append(clock.get_fps())
+    #             # print(sum(times)/len(times))
+
+    #             self.handle_input()
+    #             self.update(dt)
+    #             self.draw(screen)
+    #             pygame.display.flip()
+
+    #     except KeyboardInterrupt:
+    #         self.running = False
+
+
+class QuestGame(object):
+    def __init__(self, map):
+        self.map = map
+
+        self.hero = Hero()
         # put the hero in the center of the map
-        self.hero.position = self.map_layer.map_rect.center
+        self.hero.position = self.map.get_center()
         self.hero._position[0] += 600
         self.hero._position[1] += 400
 
         # add our hero to the group
-        self.group.add(self.hero)
-
+        self.map.add_sprite(self.hero)
 
     def draw(self, surface):
 
+        
         # center the map/screen on our Hero
-        self.group.center(self.hero.rect.center)
+        self.map.set_center(self.hero.rect.center)
 
-        # draw the map and all sprites
-        self.group.draw(surface)
+        self.map.draw(surface)
+    
+    def update(self, dt):
+        """ Tasks that occur over time should be handled here
+        """
+        self.map.update(dt)
+
+        # check if the sprite's feet are colliding with wall
+        # sprite must have a rect called feet, and move_back method,
+        # otherwise this will fail
+        if self.map.collide(self.hero):
+            self.hero.move_back(dt)
 
     def handle_input(self):
         """ Handle pygame input events
@@ -156,17 +229,16 @@ class QuestGame(object):
                     break
 
                 elif event.key == K_EQUALS:
-                    self.map_layer.zoom += .25
+                    self.map.change_zoom(.25)
 
                 elif event.key == K_MINUS:
-                    value = self.map_layer.zoom - .25
-                    if value > 0:
-                        self.map_layer.zoom = value
+                    self.map.change_zoom(-0.25)
+  
 
             # this will be handled if the window is resized
             elif event.type == VIDEORESIZE:
                 init_screen(event.w, event.h)
-                self.map_layer.set_size((event.w, event.h))
+                self.map.set_size((event.w, event.h))
 
             event = poll()
 
@@ -186,19 +258,6 @@ class QuestGame(object):
             self.hero.velocity[0] = HERO_MOVE_SPEED
         else:
             self.hero.velocity[0] = 0
-
-    def update(self, dt):
-        """ Tasks that occur over time should be handled here
-        """
-        self.group.update(dt)
-
-        # check if the sprite's feet are colliding with wall
-        # sprite must have a rect called feet, and move_back method,
-        # otherwise this will fail
-        for sprite in self.group.sprites():
-            if sprite.rect.collidelist(self.walls) > -1:
-                print("hit")
-                sprite.move_back(dt)
 
     def run(self):
         """ Run the game loop
@@ -223,7 +282,6 @@ class QuestGame(object):
         except KeyboardInterrupt:
             self.running = False
 
-
 if __name__ == "__main__":
     pygame.init()
     pygame.font.init()
@@ -231,7 +289,8 @@ if __name__ == "__main__":
     pygame.display.set_caption('Quest - An epic journey.')
 
     try:
-        game = QuestGame('resources/maps/default.tmx')
+        map = ScrollMap('resources/maps/default.tmx', ['Islands'])
+        game = QuestGame(map)
         game.run()
     except:
         pygame.quit()
