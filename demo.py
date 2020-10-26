@@ -41,7 +41,6 @@ class Hero(pygame.sprite.Sprite):
         self._position = [0, 0]
         self._old_position = self.position
         self.rect = self.image.get_rect()
-        self.feet = pygame.Rect(0, 0, self.rect.width * .5, 8)
 
     @property
     def position(self):
@@ -56,14 +55,12 @@ class Hero(pygame.sprite.Sprite):
         self._position[0] += self.velocity[0] * dt
         self._position[1] += self.velocity[1] * dt
         self.rect.topleft = self._position
-        self.feet.midbottom = self.rect.midbottom
 
     def move_back(self, dt):
         """ If called after an update, the sprite can move back
         """
         self._position = self._old_position
         self.rect.topleft = self._position
-        self.feet.midbottom = self.rect.midbottom
 
 
 class QuestGame(object):
@@ -88,6 +85,15 @@ class QuestGame(object):
             self.walls.append(pygame.Rect(
                 object.x, object.y,
                 object.width, object.height))
+
+        collision_layer = tmx_data.get_layer_by_name("Islands")
+        for x in range(collision_layer.width):
+            for y in range(collision_layer.height):
+                image = tmx_data.get_tile_image(x, y, 1)
+                if image != None:
+                    self.walls.append(pygame.Rect(
+                        x*tmx_data.tilewidth, y*tmx_data.tileheight,
+                        tmx_data.tilewidth, tmx_data.tileheight))
 
         # create new data source for pyscroll
         map_data = pyscroll.data.TiledMapData(tmx_data)
@@ -177,7 +183,8 @@ class QuestGame(object):
         # sprite must have a rect called feet, and move_back method,
         # otherwise this will fail
         for sprite in self.group.sprites():
-            if sprite.feet.collidelist(self.walls) > -1:
+            if sprite.rect.collidelist(self.walls) > -1:
+                print("hit")
                 sprite.move_back(dt)
 
     def run(self):
