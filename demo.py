@@ -1,19 +1,16 @@
-import os.path
-
 import pygame
-from pygame.locals import *
-from pytmx.util_pygame import load_pygame
+from pygame.locals import K_DOWN, K_EQUALS, K_ESCAPE, K_LEFT, K_MINUS, K_RIGHT, K_UP, KEYDOWN, QUIT, VIDEORESIZE
 
-import pyscroll
-import pyscroll.data
-from pyscroll.group import PyscrollGroup
+from map import ScrollMap
 
 HERO_MOVE_SPEED = 200  # pixels per second
+
 
 # simple wrapper to keep the screen resizeable
 def init_screen(width, height):
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
     return screen
+
 
 # make loading images a little easier
 def load_image(filename):
@@ -21,7 +18,7 @@ def load_image(filename):
 
 
 class Hero(pygame.sprite.Sprite):
-    """ Our Hero
+    """Our Hero
     The Hero has three collision rects, one for the whole sprite "rect" and
     "old_rect", and another to check collisions with walls, called "feet".
     The position list is used because pygame rects are inaccurate for
@@ -36,7 +33,7 @@ class Hero(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_image('resources/images/ship.png').convert_alpha()
+        self.image = load_image("resources/images/ship.png").convert_alpha()
         self.velocity = [0, 0]
         self._position = [0, 0]
         self._old_position = self.position
@@ -57,127 +54,9 @@ class Hero(pygame.sprite.Sprite):
         self.rect.topleft = self._position
 
     def move_back(self, dt):
-        """ If called after an update, the sprite can move back
-        """
+        """If called after an update, the sprite can move back"""
         self._position = self._old_position
         self.rect.topleft = self._position
-
-
-def extract_collision_objects_from_object_layers(tmx_data, collision_layer_names):
-    collison_objects = list()
-    for object in tmx_data.objects:
-        collison_objects.append(pygame.Rect(
-            object.x, object.y,
-            object.width, object.height))
-        
-    return collison_objects
-
-
-def extract_collision_objects_from_tile_layers(tmx_data, collision_layer_names):
-    collison_objects = list()
-
-    for layer_name in collision_layer_names:
-        collision_layer = tmx_data.get_layer_by_name(layer_name)
-        for x in range(collision_layer.width):
-            for y in range(collision_layer.height):
-                image = tmx_data.get_tile_image(x, y, 1)
-                if image != None:
-                    collison_objects.append(pygame.Rect(
-                        x*tmx_data.tilewidth, y*tmx_data.tileheight,
-                        tmx_data.tilewidth, tmx_data.tileheight))
-    return collison_objects
-
-
-class ScrollMap(object):
-    """ This class is a basic game.
-    This class will load data, create a pyscroll group, a hero object.
-    It also reads input and moves the Hero around the map.
-    Finally, it uses a pyscroll group to render the map and Hero.
-    """
-    def __init__(self, filename, collision_layers):
-
-        self.filename = filename
-        
-        # true while running
-        self.running = False
-
-        # load data from pytmx
-        tmx_data = load_pygame(self.filename)
-
-        # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls = extract_collision_objects_from_tile_layers(tmx_data, collision_layers)
-
-        # create new data source for pyscroll
-        map_data = pyscroll.data.TiledMapData(tmx_data)
-
-        # create new renderer (camera)
-        self.map_layer = pyscroll.BufferedRenderer(map_data, screen.get_size(), clamp_camera=False, tall_sprites=1)
-        self.map_layer.zoom = 1
-
-        # pyscroll supports layered rendering.  our map has 3 'under' layers
-        # layers begin with 0, so the layers are 0, 1, and 2.
-        # since we want the sprite to be on top of layer 1, we set the default
-        # layer for sprites as 2
-        self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
-
-    def draw(self, surface):
-        # draw the map and all sprites
-        self.group.draw(surface)
-
-    def update(self, dt):
-        """ Tasks that occur over time should be handled here
-        """
-        self.group.update(dt)
-
-        # # check if the sprite's feet are colliding with wall
-        # # sprite must have a rect called feet, and move_back method,
-        # # otherwise this will fail
-        # for sprite in self.group.sprites():
-        #     if sprite.rect.collidelist(self.walls) > -1:
-        #         sprite.move_back(dt)
-        
-    def collide(self, sprite):
-        return sprite.rect.collidelist(self.walls) > -1
-
-    def add_sprite(self, sprite):
-        self.group.add(sprite)
-        
-    def set_center(self, point):
-        self.group.center(point)
-
-    def get_center(self):
-        return self.map_layer.map_rect.center
-    
-    def change_zoom(self, change):
-        value = self.map_layer.zoom - .25
-        if value > 0:
-            self.map_layer.zoom = value
-
-    def set_size(self, size):
-        self.map_layer.set_size(size)
-
-    # def run(self):
-    #     """ Run the game loop
-    #     """
-    #     clock = pygame.time.Clock()
-    #     self.running = True
-
-    #     from collections import deque
-    #     times = deque(maxlen=30)
-
-    #     try:
-    #         while self.running:
-    #             dt = clock.tick() / 1000.
-    #             times.append(clock.get_fps())
-    #             # print(sum(times)/len(times))
-
-    #             self.handle_input()
-    #             self.update(dt)
-    #             self.draw(screen)
-    #             pygame.display.flip()
-
-    #     except KeyboardInterrupt:
-    #         self.running = False
 
 
 class QuestGame(object):
@@ -195,15 +74,13 @@ class QuestGame(object):
 
     def draw(self, surface):
 
-        
         # center the map/screen on our Hero
         self.map.set_center(self.hero.rect.center)
 
         self.map.draw(surface)
-    
+
     def update(self, dt):
-        """ Tasks that occur over time should be handled here
-        """
+        """Tasks that occur over time should be handled here"""
         self.map.update(dt)
 
         # check if the sprite's feet are colliding with wall
@@ -213,8 +90,7 @@ class QuestGame(object):
             self.hero.move_back(dt)
 
     def handle_input(self):
-        """ Handle pygame input events
-        """
+        """Handle pygame input events"""
         poll = pygame.event.poll
 
         event = poll()
@@ -229,11 +105,10 @@ class QuestGame(object):
                     break
 
                 elif event.key == K_EQUALS:
-                    self.map.change_zoom(.25)
+                    self.map.change_zoom(0.25)
 
                 elif event.key == K_MINUS:
                     self.map.change_zoom(-0.25)
-  
 
             # this will be handled if the window is resized
             elif event.type == VIDEORESIZE:
@@ -260,17 +135,17 @@ class QuestGame(object):
             self.hero.velocity[0] = 0
 
     def run(self):
-        """ Run the game loop
-        """
+        """Run the game loop"""
         clock = pygame.time.Clock()
         self.running = True
 
         from collections import deque
+
         times = deque(maxlen=30)
 
         try:
             while self.running:
-                dt = clock.tick() / 1000.
+                dt = clock.tick() / 1000.0
                 times.append(clock.get_fps())
                 # print(sum(times)/len(times))
 
@@ -282,16 +157,17 @@ class QuestGame(object):
         except KeyboardInterrupt:
             self.running = False
 
+
 if __name__ == "__main__":
     pygame.init()
     pygame.font.init()
     screen = init_screen(1600, 1200)
-    pygame.display.set_caption('Quest - An epic journey.')
+    pygame.display.set_caption("Quest - An epic journey.")
 
     try:
-        map = ScrollMap('resources/maps/default.tmx', ['Islands'])
+        map = ScrollMap(screen, "resources/maps/default.tmx", ["Islands"])
         game = QuestGame(map)
         game.run()
-    except:
+    except Exception:
         pygame.quit()
         raise

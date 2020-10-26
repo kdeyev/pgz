@@ -11,6 +11,7 @@ pre-commit = "*"
 pylint = "*"
 mypy = "*"
 black = "*"
+isort = "*"
 
 [pipenv]
 allow_prereleases = true
