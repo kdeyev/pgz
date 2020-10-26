@@ -1,81 +1,132 @@
-from pytmx.util_pygame import load_pygame
+import os.path
+
 import pygame
+from pygame.locals import *
+from pytmx.util_pygame import load_pygame
+
 import pyscroll
 import pyscroll.data
-import collections
-import logging
-from pygame.locals import *
+from pyscroll.group import PyscrollGroup
 
-import pyscroll.orthographic
-
-logger = logging.getLogger(__name__)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-logger.addHandler(ch)
-logger.setLevel(logging.INFO)
-
-SCROLL_SPEED = 5000
-
+HERO_MOVE_SPEED = 200  # pixels per second
 
 # simple wrapper to keep the screen resizeable
 def init_screen(width, height):
-    return pygame.display.set_mode((width, height), pygame.RESIZABLE)
+    screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+    return screen
+
+# make loading images a little easier
+def load_image(filename):
+    return pygame.image.load(filename)
 
 
-class ScrollTest:
-    """ Test and demo of pyscroll
-    For normal use, please see the quest demo, not this.
+class Hero(pygame.sprite.Sprite):
+    """ Our Hero
+    The Hero has three collision rects, one for the whole sprite "rect" and
+    "old_rect", and another to check collisions with walls, called "feet".
+    The position list is used because pygame rects are inaccurate for
+    positioning sprites; because the values they get are 'rounded down'
+    as integers, the sprite would move faster moving left or up.
+    Feet is 1/2 as wide as the normal rect, and 8 pixels tall.  This size size
+    allows the top of the sprite to overlap walls.  The feet rect is used for
+    collisions, while the 'rect' rect is used for drawing.
+    There is also an old_rect that is used to reposition the sprite if it
+    collides with level walls.
+    """
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image('resources/images/ship.png').convert_alpha()
+        self.velocity = [0, 0]
+        self._position = [0, 0]
+        self._old_position = self.position
+        self.rect = self.image.get_rect()
+        self.feet = pygame.Rect(0, 0, self.rect.width * .5, 8)
+
+    @property
+    def position(self):
+        return list(self._position)
+
+    @position.setter
+    def position(self, value):
+        self._position = list(value)
+
+    def update(self, dt):
+        self._old_position = self._position[:]
+        self._position[0] += self.velocity[0] * dt
+        self._position[1] += self.velocity[1] * dt
+        self.rect.topleft = self._position
+        self.feet.midbottom = self.rect.midbottom
+
+    def move_back(self, dt):
+        """ If called after an update, the sprite can move back
+        """
+        self._position = self._old_position
+        self.rect.topleft = self._position
+        self.feet.midbottom = self.rect.midbottom
+
+
+class QuestGame(object):
+    """ This class is a basic game.
+    This class will load data, create a pyscroll group, a hero object.
+    It also reads input and moves the Hero around the map.
+    Finally, it uses a pyscroll group to render the map and Hero.
     """
     def __init__(self, filename):
 
-        # load data from pytmx
-        tmx_data = load_pygame(filename)
+        self.filename = filename
+        
+        # true while running
+        self.running = False
 
-        # create new data source
+        # load data from pytmx
+        tmx_data = load_pygame(self.filename)
+
+        # setup level geometry with simple pygame rects, loaded from pytmx
+        self.walls = list()
+        for object in tmx_data.objects:
+            self.walls.append(pygame.Rect(
+                object.x, object.y,
+                object.width, object.height))
+
+        # create new data source for pyscroll
         map_data = pyscroll.data.TiledMapData(tmx_data)
 
-        # create new renderer
-        self.map_layer = pyscroll.orthographic.BufferedRenderer(map_data, screen.get_size())
+        # create new renderer (camera)
+        self.map_layer = pyscroll.BufferedRenderer(map_data, screen.get_size(), clamp_camera=False, tall_sprites=1)
+        self.map_layer.zoom = 1
 
-        # create a font and pre-render some text to be displayed over the map
-        f = pygame.font.Font(pygame.font.get_default_font(), 20)
-        t = ["scroll demo. press escape to quit",
-             "arrow keys move"]
+        # pyscroll supports layered rendering.  our map has 3 'under' layers
+        # layers begin with 0, so the layers are 0, 1, and 2.
+        # since we want the sprite to be on top of layer 1, we set the default
+        # layer for sprites as 2
+        self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
 
-        # save the rendered text
-        self.text_overlay = [f.render(i, 1, (180, 180, 0)) for i in t]
+        self.hero = Hero()
 
-        # set our initial viewpoint in the center of the map
-        self.center = [self.map_layer.map_rect.width / 2,
-                       self.map_layer.map_rect.height / 2]
+        # put the hero in the center of the map
+        self.hero.position = self.map_layer.map_rect.center
+        self.hero._position[0] += 600
+        self.hero._position[1] += 400
 
-        # the camera vector is used to handle camera movement
-        self.camera_acc = [0, 0, 0]
-        self.camera_vel = [0, 0, 0]
-        self.last_update_time = 0
-
-        # true when running
-        self.running = False
+        # add our hero to the group
+        self.group.add(self.hero)
 
     def draw(self, surface):
 
-        # tell the map_layer (BufferedRenderer) to draw to the surface
-        # the draw function requires a rect to draw to.
-        self.map_layer.draw(surface, surface.get_rect())
+        # center the map/screen on our Hero
+        self.group.center(self.hero.rect.center)
 
-        # blit our text over the map
-        self.draw_text(surface)
-
-    def draw_text(self, surface):
-        y = 0
-        for text in self.text_overlay:
-            surface.blit(text, (0, y))
-            y += text.get_height()
+        # draw the map and all sprites
+        self.group.draw(surface)
 
     def handle_input(self):
-        """ Simply handle pygame input events
+        """ Handle pygame input events
         """
-        for event in pygame.event.get():
+        poll = pygame.event.poll
+
+        event = poll()
+        while event:
             if event.type == QUIT:
                 self.running = False
                 break
@@ -85,87 +136,64 @@ class ScrollTest:
                     self.running = False
                     break
 
+                elif event.key == K_EQUALS:
+                    self.map_layer.zoom += .25
+
+                elif event.key == K_MINUS:
+                    value = self.map_layer.zoom - .25
+                    if value > 0:
+                        self.map_layer.zoom = value
+
             # this will be handled if the window is resized
             elif event.type == VIDEORESIZE:
                 init_screen(event.w, event.h)
                 self.map_layer.set_size((event.w, event.h))
 
-        # these keys will change the camera vector
-        # the camera vector changes the center of the viewport,
-        # which causes the map to scroll
+            event = poll()
 
         # using get_pressed is slightly less accurate than testing for events
         # but is much easier to use.
         pressed = pygame.key.get_pressed()
         if pressed[K_UP]:
-            self.camera_acc[1] = -SCROLL_SPEED * self.last_update_time
+            self.hero.velocity[1] = -HERO_MOVE_SPEED
         elif pressed[K_DOWN]:
-            self.camera_acc[1] = SCROLL_SPEED * self.last_update_time
+            self.hero.velocity[1] = HERO_MOVE_SPEED
         else:
-            self.camera_acc[1] = 0
+            self.hero.velocity[1] = 0
 
         if pressed[K_LEFT]:
-            self.camera_acc[0] = -SCROLL_SPEED * self.last_update_time
+            self.hero.velocity[0] = -HERO_MOVE_SPEED
         elif pressed[K_RIGHT]:
-            self.camera_acc[0] = SCROLL_SPEED * self.last_update_time
+            self.hero.velocity[0] = HERO_MOVE_SPEED
         else:
-            self.camera_acc[0] = 0
+            self.hero.velocity[0] = 0
 
-    def update(self, td):
-        self.last_update_time = td
+    def update(self, dt):
+        """ Tasks that occur over time should be handled here
+        """
+        self.group.update(dt)
 
-        friction = pow(.0001, self.last_update_time)
-
-        # update the camera vector
-        self.camera_vel[0] += self.camera_acc[0] * td
-        self.camera_vel[1] += self.camera_acc[1] * td
-
-        self.camera_vel[0] *= friction
-        self.camera_vel[1] *= friction
-
-        # make sure the movement vector stops when scrolling off the screen
-        if self.center[0] < 0:
-            self.center[0] -= self.camera_vel[0]
-            self.camera_acc[0] = 0
-            self.camera_vel[0] = 0
-        if self.center[0] >= self.map_layer.map_rect.width:
-            self.center[0] -= self.camera_vel[0]
-            self.camera_acc[0] = 0
-            self.camera_vel[0] = 0
-
-        if self.center[1] < 0:
-            self.center[1] -= self.camera_vel[1]
-            self.camera_acc[1] = 0
-            self.camera_vel[1] = 0
-        if self.center[1] >= self.map_layer.map_rect.height:
-            self.center[1] -= self.camera_vel[1]
-            self.camera_acc[1] = 0
-            self.camera_vel[1] = 0
-
-        self.center[0] += self.camera_vel[0]
-        self.center[1] += self.camera_vel[1]
-
-        # set the center somewhere else
-        # in a game, you would set center to a playable character
-        self.map_layer.center(self.center)
+        # check if the sprite's feet are colliding with wall
+        # sprite must have a rect called feet, and move_back method,
+        # otherwise this will fail
+        for sprite in self.group.sprites():
+            if sprite.feet.collidelist(self.walls) > -1:
+                sprite.move_back(dt)
 
     def run(self):
+        """ Run the game loop
+        """
         clock = pygame.time.Clock()
         self.running = True
-        fps = 60.
-        fps_log = collections.deque(maxlen=20)
+
+        from collections import deque
+        times = deque(maxlen=30)
 
         try:
             while self.running:
-                # somewhat smoother way to get fps and limit the framerate
-                clock.tick(fps*2)
-
-                try:
-                    fps_log.append(clock.get_fps())
-                    fps = sum(fps_log)/len(fps_log)
-                    dt = 1/fps
-                except ZeroDivisionError:
-                    continue
+                dt = clock.tick() / 1000.
+                times.append(clock.get_fps())
+                # print(sum(times)/len(times))
 
                 self.handle_input()
                 self.update(dt)
@@ -177,22 +205,14 @@ class ScrollTest:
 
 
 if __name__ == "__main__":
-    import sys
-
     pygame.init()
     pygame.font.init()
-    screen = init_screen(800, 600)
-    pygame.display.set_caption('pyscroll Test')
+    screen = init_screen(1600, 1200)
+    pygame.display.set_caption('Quest - An epic journey.')
 
     try:
-        filename = 'resources/maps/default.tmx'
-    except IndexError:
-        logger.info("no TMX map specified, using default")
-        filename = "desert.tmx"
-
-    try:
-        test = ScrollTest(filename)
-        test.run()
+        game = QuestGame('resources/maps/default.tmx')
+        game.run()
     except:
         pygame.quit()
         raise
