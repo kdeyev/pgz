@@ -63,6 +63,31 @@ class Hero(pygame.sprite.Sprite):
         self.rect.topleft = self._position
 
 
+def extract_collision_objects_from_object_layers(tmx_data, collision_layer_names):
+    collison_objects = list()
+    for object in tmx_data.objects:
+        collison_objects.append(pygame.Rect(
+            object.x, object.y,
+            object.width, object.height))
+        
+    return collison_objects
+
+
+def extract_collision_objects_from_tile_layers(tmx_data, collision_layer_names):
+    collison_objects = list()
+
+    for layer_name in collision_layer_names:
+        collision_layer = tmx_data.get_layer_by_name(layer_name)
+        for x in range(collision_layer.width):
+            for y in range(collision_layer.height):
+                image = tmx_data.get_tile_image(x, y, 1)
+                if image != None:
+                    collison_objects.append(pygame.Rect(
+                        x*tmx_data.tilewidth, y*tmx_data.tileheight,
+                        tmx_data.tilewidth, tmx_data.tileheight))
+    return collison_objects
+
+
 class QuestGame(object):
     """ This class is a basic game.
     This class will load data, create a pyscroll group, a hero object.
@@ -80,20 +105,7 @@ class QuestGame(object):
         tmx_data = load_pygame(self.filename)
 
         # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls = list()
-        for object in tmx_data.objects:
-            self.walls.append(pygame.Rect(
-                object.x, object.y,
-                object.width, object.height))
-
-        collision_layer = tmx_data.get_layer_by_name("Islands")
-        for x in range(collision_layer.width):
-            for y in range(collision_layer.height):
-                image = tmx_data.get_tile_image(x, y, 1)
-                if image != None:
-                    self.walls.append(pygame.Rect(
-                        x*tmx_data.tilewidth, y*tmx_data.tileheight,
-                        tmx_data.tilewidth, tmx_data.tileheight))
+        self.walls = extract_collision_objects_from_tile_layers(tmx_data, ["Islands"])
 
         # create new data source for pyscroll
         map_data = pyscroll.data.TiledMapData(tmx_data)
@@ -117,6 +129,7 @@ class QuestGame(object):
 
         # add our hero to the group
         self.group.add(self.hero)
+
 
     def draw(self, surface):
 
