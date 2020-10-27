@@ -1,7 +1,8 @@
 from math import atan2, cos, degrees, radians, sin, sqrt
 
 import pygame
-import rect
+
+from .rect import ZRect
 
 ANCHORS = {
     "x": {
@@ -100,7 +101,7 @@ def _set_opacity(actor, current_surface):
 
 class Actor(pygame.sprite.Sprite):
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
-    DELEGATED_ATTRIBUTES = [a for a in dir(rect.ZRect) if not a.startswith("_")]
+    DELEGATED_ATTRIBUTES = [a for a in dir(ZRect) if not a.startswith("_")]
 
     function_order = [_set_opacity, _set_angle]
     _anchor = _anchor_value = (0, 0)
@@ -124,7 +125,7 @@ class Actor(pygame.sprite.Sprite):
         # self._handle_unexpected_kwargs(kwargs)
 
         self._surface_cache = []
-        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
+        self.__dict__["_rect"] = ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
 

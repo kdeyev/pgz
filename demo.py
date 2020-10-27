@@ -1,60 +1,43 @@
 import pygame
-from pygame.locals import K_DOWN, K_EQUALS, K_LEFT, K_MINUS, K_RIGHT, K_UP, KEYDOWN, VIDEORESIZE
 
 import pgz
-from scroll_map import ScrollMap
 
 HERO_MOVE_SPEED = 200
 
 
-# make loading images a little easier
-def load_image(filename):
-    return pygame.image.load(filename)
-
-
-class Hero(pygame.sprite.Sprite):
+class Hero(pgz.Actor):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = load_image("resources/images/ship.png").convert_alpha()
+        super().__init__("resources/images/ship.png")
+
         self.velocity = [0, 0]
-        self._position = [0, 0]
-        self._old_position = self.position
-        self.rect = self.image.get_rect()
-
-    @property
-    def position(self):
-        return list(self._position)
-
-    @position.setter
-    def position(self, value):
-        self._position = list(value)
+        self._old_pos = self.pos
 
     def update(self, dt):
-        self._old_position = self._position[:]
+        self._old_pos = self.pos[:]
 
         pressed = pygame.key.get_pressed()
-        if pressed[K_UP]:
+        if pressed[pygame.K_UP]:
             self.velocity[1] = -HERO_MOVE_SPEED
-        elif pressed[K_DOWN]:
+        elif pressed[pygame.K_DOWN]:
             self.velocity[1] = HERO_MOVE_SPEED
         else:
             self.velocity[1] = 0
 
-        if pressed[K_LEFT]:
+        if pressed[pygame.K_LEFT]:
             self.velocity[0] = -HERO_MOVE_SPEED
-        elif pressed[K_RIGHT]:
+        elif pressed[pygame.K_RIGHT]:
             self.velocity[0] = HERO_MOVE_SPEED
         else:
             self.velocity[0] = 0
 
-        self._position[0] += self.velocity[0] * dt
-        self._position[1] += self.velocity[1] * dt
-        self.rect.topleft = self._position
+        self.x += self.velocity[0] * dt
+        self.y += self.velocity[1] * dt
+        # self.rect.topleft = self._position
 
     def move_back(self, dt):
         """If called after an update, the sprite can move back"""
-        self._position = self._old_position
-        self.rect.topleft = self._position
+        self.pos = self._old_pos[:]
+        # self.rect.topleft = self._position
 
 
 class QuestGame(pgz.Scene):
@@ -64,8 +47,8 @@ class QuestGame(pgz.Scene):
         self.hero = Hero()
         # put the hero in the center of the map
         self.hero.position = self.map.get_center()
-        self.hero._position[0] += 600
-        self.hero._position[1] += 400
+        self.hero.x += 600
+        self.hero.y += 400
 
         # add our hero to the group
         self.map.add_sprite(self.hero)
@@ -73,7 +56,7 @@ class QuestGame(pgz.Scene):
     def draw(self, surface):
 
         # center the map/screen on our Hero
-        self.map.set_center(self.hero.rect.center)
+        self.map.set_center(self.hero.pos)
 
         self.map.draw(surface)
 
@@ -91,15 +74,20 @@ class QuestGame(pgz.Scene):
         """Handle pygame input events"""
 
         # this will be handled if the window is resized
-        if event.type == VIDEORESIZE:
+        if event.type == pygame.VIDEORESIZE:
             self.map.set_size((event.w, event.h))
 
-        if event.type == KEYDOWN:
-            if event.key == K_EQUALS:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_EQUALS:
                 self.map.change_zoom(0.25)
 
-            elif event.key == K_MINUS:
+            elif event.key == pygame.K_MINUS:
                 self.map.change_zoom(-0.25)
+
+        if event.type == pygame.MOUSEMOTION:
+            pos = self.map.transform(event.pos)
+            angle = self.hero.angle_to(pos) + 90
+            self.hero.angle = angle
 
 
 if __name__ == "__main__":
@@ -111,7 +99,7 @@ if __name__ == "__main__":
     )
 
     try:
-        map = ScrollMap(app.resolution, "resources/maps/default.tmx", ["Islands"])
+        map = pgz.ScrollMap(app.resolution, "resources/maps/default.tmx", ["Islands"])
         game = QuestGame(map)
         app.run(game)
 

@@ -66,6 +66,12 @@ class ScrollMap(object):
         # layer for sprites as 2
         self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
 
+    def view(self):
+        return self.group.view
+
+    def transform(self, pos):
+        return (pos[0] + self.group.view.left, pos[1] + self.group.view.top)
+
     def draw(self, surface):
         # draw the map and all sprites
         self.group.draw(surface)
