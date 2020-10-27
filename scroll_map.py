@@ -40,7 +40,7 @@ class ScrollMap(object):
     Finally, it uses a pyscroll group to render the map and Hero.
     """
 
-    def __init__(self, screen, filename, collision_layers):
+    def __init__(self, screen_size, filename, collision_layers):
 
         self.filename = filename
 
@@ -57,7 +57,7 @@ class ScrollMap(object):
         map_data = pyscroll.data.TiledMapData(tmx_data)
 
         # create new renderer (camera)
-        self.map_layer = pyscroll.BufferedRenderer(map_data, screen.get_size(), clamp_camera=False, tall_sprites=1)
+        self.map_layer = pyscroll.BufferedRenderer(map_data, screen_size, clamp_camera=False, tall_sprites=1)
         self.map_layer.zoom = 1
 
         # pyscroll supports layered rendering.  our map has 3 'under' layers
