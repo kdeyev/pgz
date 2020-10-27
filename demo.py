@@ -70,15 +70,18 @@ class QuestGame(pgz.Scene):
         if self.map.collide(self.hero):
             self.hero.move_back(dt)
 
-    def on_mouse_move(self, event):
-        pos = self.map.transform(event.pos)
+    def on_mouse_move(self, pos):
+        pos = self.map.transform(pos)
         angle = self.hero.angle_to(pos) + 90
         self.hero.angle = angle
 
-    def on_key_down(self, event):
-        if event.key == pygame.K_EQUALS:
+    def on_mouse_down(self, button):
+        pass
+
+    def on_key_down(self, key):
+        if key == pygame.K_EQUALS:
             self.map.change_zoom(0.25)
-        elif event.key == pygame.K_MINUS:
+        elif key == pygame.K_MINUS:
             self.map.change_zoom(-0.25)
 
     def handle_event(self, event):
