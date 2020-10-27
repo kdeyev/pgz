@@ -1,3 +1,6 @@
+import pygame
+
+
 class Scene:
     """An isolated scene which can be ran by an application.
 
@@ -89,6 +92,33 @@ class Scene:
     resolution = None
     update_rate = None
 
+    EVENT_HANDLERS = {
+        pygame.MOUSEBUTTONDOWN: "on_mouse_down",
+        pygame.MOUSEBUTTONUP: "on_mouse_up",
+        pygame.MOUSEMOTION: "on_mouse_move",
+        pygame.KEYDOWN: "on_key_down",
+        pygame.KEYUP: "on_key_up",
+        # MUSIC_END: "on_music_end",
+    }
+
+    def load_handlers(self):
+        # from .spellcheck import spellcheck
+
+        # spellcheck(vars(self.mod))
+        self.handlers = {}
+        for type, name in self.EVENT_HANDLERS.items():
+            handler = getattr(self, name, None)
+            if callable(handler):
+                self.handlers[type] = handler
+
+    def dispatch_event(self, event):
+        handler = self.handlers.get(event.type)
+        if handler:
+            handler(event)
+            return True
+        else:
+            self.handle_event(event)
+
     def __init__(self, title=None, resolution=None, update_rate=None):
         self._application = None
         if title is not None:
@@ -141,6 +171,8 @@ class Scene:
             value = getattr(self, attr)
             if value is not None:
                 setattr(self.application, attr.lower(), value)
+
+        self.load_handlers()
 
     def on_exit(self, next_scene):
         """Override this to deinitialize upon scene exiting.

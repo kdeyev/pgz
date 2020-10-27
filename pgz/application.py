@@ -1,4 +1,9 @@
+import asyncio
+import sys
+
 import pygame
+
+from .clock import Clock
 
 
 class Application:
@@ -38,6 +43,8 @@ class Application:
         pygame.init()
         self.update_rate = update_rate
         self._scene = None
+        self._clock = Clock()
+
         # Trigger property setters
         self.title = title
         self.resolution = resolution
@@ -81,6 +88,45 @@ class Application:
             self.active_scene._application = self
             self.active_scene.on_enter(previous_scene=old_scene)
 
+    def draw(self):
+        self.active_scene.draw(self._screen)
+
+    def update(self, dt):
+        self.active_scene.update(dt)
+
+    def handle_event(self, event):
+        self.active_scene.dispatch_event(event)
+
+    # def run(self, scene=None):
+    #     """Execute the application.
+
+    #     :param scene.Scene|None scene: scene to start the execution from
+    #     """
+    #     if scene is None:
+    #         if self.active_scene is None:
+    #             raise ValueError("No scene provided")
+    #     else:
+    #         self.change_scene(scene)
+
+    #     clock = pygame.time.Clock()
+
+    #     while self.active_scene is not None:
+
+    #         for event in pygame.event.get():
+    #             self.active_scene.handle_event(event)
+    #             if event.type == pygame.VIDEORESIZE:
+    #                 self.resolution = (event.w, event.h)
+
+    #             if event.type == pygame.QUIT:
+    #                 self.change_scene(None)  # Trigger Scene.on_exit()
+    #                 return
+
+    #         dt = clock.tick(self.update_rate) / 1000
+    #         self.active_scene.update(dt)
+
+    #         self.active_scene.draw(self._screen)
+    #         pygame.display.update()
+
     def run(self, scene=None):
         """Execute the application.
 
@@ -92,21 +138,56 @@ class Application:
         else:
             self.change_scene(scene)
 
+        loop = asyncio.SelectorEventLoop()
+        try:
+            loop.run_until_complete(self.run_as_coroutine())
+        finally:
+            loop.close()
+
+    @asyncio.coroutine
+    def run_as_coroutine(self):
+        self.running = True
+        try:
+            yield from self.mainloop()
+        finally:
+            pygame.display.quit()
+            pygame.mixer.quit()
+            self.running = False
+
+    @asyncio.coroutine
+    def mainloop(self):
+        """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
 
-        while self.active_scene is not None:
-
+        # self.need_redraw = True
+        while True:
+            # TODO: Use asyncio.sleep() for frame delay if accurate enough
+            yield from asyncio.sleep(0)
             for event in pygame.event.get():
-                self.active_scene.handle_event(event)
+
                 if event.type == pygame.VIDEORESIZE:
                     self.resolution = (event.w, event.h)
 
                 if event.type == pygame.QUIT:
                     self.change_scene(None)  # Trigger Scene.on_exit()
                     return
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q and event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
+                        sys.exit(0)
+                    # self.keyboard._press(event.key)
+                # elif event.type == pygame.KEYUP:
+                #     self.keyboard._release(event.key)
+
+                self.handle_event(event)
 
             dt = clock.tick(self.update_rate) / 1000
-            self.active_scene.update(dt)
 
-            self.active_scene.draw(self._screen)
+            self._clock.tick(dt)
+
+            self.update(dt)
+
+            # screen_change = self.reinit_screen()
+            # if screen_change or update or self._clock.fired or self.need_redraw:
+            self.draw()
             pygame.display.update()
+            # self.need_redraw = False
