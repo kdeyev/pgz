@@ -305,9 +305,9 @@ class Actor(pygame.sprite.Sprite):
         self._calc_anchor()
         self.pos = p
 
-    # def draw(self):
-    #     s = self._build_transformed_surf()
-    #     game.screen.blit(s, self.topleft)
+    def draw(self, screen):
+        s = self._build_transformed_surf()
+        screen.blit(s, self.topleft)
 
     def angle_to(self, target):
         """Return the angle from this actors position to target, in degrees."""

@@ -93,7 +93,7 @@ class ScrollMap(object):
         return self.map_layer.map_rect.center
 
     def change_zoom(self, change):
-        value = self.map_layer.zoom - 0.25
+        value = self.map_layer.zoom + change
         if value > 0:
             self.map_layer.zoom = value
 
