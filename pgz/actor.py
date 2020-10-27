@@ -2,7 +2,7 @@ from math import atan2, cos, degrees, radians, sin, sqrt
 
 import pygame
 
-from .rect import ZRect
+from . import loaders, rect, spellcheck
 
 ANCHORS = {
     "x": {
@@ -51,11 +51,6 @@ ANCHOR_CENTER = None
 MAX_ALPHA = 255  # Based on pygame's max alpha.
 
 
-# make loading images a little easier
-def load_image(filename):
-    return pygame.image.load(filename)
-
-
 def transform_anchor(ax, ay, w, h, angle):
     """Transform anchor based upon a rotation of a surface of size w x h."""
     theta = -radians(angle)
@@ -101,7 +96,7 @@ def _set_opacity(actor, current_surface):
 
 class Actor(pygame.sprite.Sprite):
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
-    DELEGATED_ATTRIBUTES = [a for a in dir(ZRect) if not a.startswith("_")]
+    DELEGATED_ATTRIBUTES = [a for a in dir(rect.ZRect) if not a.startswith("_")]
 
     function_order = [_set_opacity, _set_angle]
     _anchor = _anchor_value = (0, 0)
@@ -122,10 +117,10 @@ class Actor(pygame.sprite.Sprite):
 
     def __init__(self, image_name, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         pygame.sprite.Sprite.__init__(self)
-        # self._handle_unexpected_kwargs(kwargs)
+        self._handle_unexpected_kwargs(kwargs)
 
         self._surface_cache = []
-        self.__dict__["_rect"] = ZRect((0, 0), (0, 0))
+        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
 
@@ -156,14 +151,14 @@ class Actor(pygame.sprite.Sprite):
         standard_attributes = [key for key in self.__dict__.keys() if not key.startswith("_")]
         return standard_attributes + self.__class__.DELEGATED_ATTRIBUTES
 
-    # def _handle_unexpected_kwargs(self, kwargs):
-    #     unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
-    #     if not unexpected_kwargs:
-    #         return
+    def _handle_unexpected_kwargs(self, kwargs):
+        unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
+        if not unexpected_kwargs:
+            return
 
-    #     typos, _ = spellcheck.compare(unexpected_kwargs, self.EXPECTED_INIT_KWARGS)
-    #     for found, suggested in typos:
-    #         raise TypeError("Unexpected keyword argument '{}' (did you mean '{}'?)".format(found, suggested))
+        typos, _ = spellcheck.compare(unexpected_kwargs, self.EXPECTED_INIT_KWARGS)
+        for found, suggested in typos:
+            raise TypeError("Unexpected keyword argument '{}' (did you mean '{}'?)".format(found, suggested))
 
     def _init_position(self, pos, anchor, **kwargs):
         if anchor is None:
@@ -295,8 +290,8 @@ class Actor(pygame.sprite.Sprite):
     @image_name.setter
     def image_name(self, image_name):
         self._image_name = image_name
-        self._orig_surf = load_image(image_name).convert_alpha()
-        self._surface_cache.clear()  # Clear out old image_name's cache.
+        self._orig_surf = loaders.images.load(image_name)
+        self._surface_cache.clear()  # Clear out old image's cache.
         self._update_pos()
 
     def _update_pos(self):
@@ -331,8 +326,8 @@ class Actor(pygame.sprite.Sprite):
         dy = ty - myy
         return sqrt(dx * dx + dy * dy)
 
-    # def unload_image(self):
-    #     loaders.images.unload(self._image_name)
+    def unload_image(self):
+        loaders.images.unload(self._image_name)
 
     @property
     def image(self):

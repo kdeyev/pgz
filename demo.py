@@ -7,7 +7,7 @@ HERO_MOVE_SPEED = 200
 
 class Hero(pgz.Actor):
     def __init__(self):
-        super().__init__("resources/images/ship.png")
+        super().__init__("ship")
 
         self.velocity = [0, 0]
         self._old_pos = self.pos
