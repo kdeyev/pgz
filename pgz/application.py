@@ -50,6 +50,10 @@ class Application:
         self.resolution = resolution
 
     @property
+    def clock(self):
+        return self._clock
+
+    @property
     def title(self):
         return pygame.display.get_caption()
 

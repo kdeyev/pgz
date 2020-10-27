@@ -75,8 +75,11 @@ class QuestGame(pgz.Scene):
         angle = self.hero.angle_to(pos) + 90
         self.hero.angle = angle
 
+    def boom(self):
+        print("boom")
+
     def on_mouse_down(self, button):
-        pass
+        self.clock.schedule_interval(self.boom, 1)
 
     def on_key_down(self, key):
         if key == pygame.K_EQUALS:
