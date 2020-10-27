@@ -13,19 +13,21 @@ class Hero(pgz.Actor):
         self._old_pos = self.pos
 
     def update(self, dt):
+        from pgz import keyboard
+
         self._old_pos = self.pos[:]
 
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_UP]:
+        # pressed = pygame.key.get_pressed()
+        if keyboard.up:
             self.velocity[1] = -HERO_MOVE_SPEED
-        elif pressed[pygame.K_DOWN]:
+        elif keyboard.down:
             self.velocity[1] = HERO_MOVE_SPEED
         else:
             self.velocity[1] = 0
 
-        if pressed[pygame.K_LEFT]:
+        if keyboard.left:
             self.velocity[0] = -HERO_MOVE_SPEED
-        elif pressed[pygame.K_RIGHT]:
+        elif keyboard.right:
             self.velocity[0] = HERO_MOVE_SPEED
         else:
             self.velocity[0] = 0

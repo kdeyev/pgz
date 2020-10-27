@@ -4,6 +4,7 @@ import sys
 import pygame
 
 from .clock import Clock
+from .keyboard import keyboard
 
 
 class Application:
@@ -44,6 +45,7 @@ class Application:
         self.update_rate = update_rate
         self._scene = None
         self._clock = Clock()
+        self.keyboard = keyboard
 
         # Trigger property setters
         self.title = title
@@ -178,9 +180,9 @@ class Application:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
                         sys.exit(0)
-                    # self.keyboard._press(event.key)
-                # elif event.type == pygame.KEYUP:
-                #     self.keyboard._release(event.key)
+                    self.keyboard._press(event.key)
+                elif event.type == pygame.KEYUP:
+                    self.keyboard._release(event.key)
 
                 self.handle_event(event)
 
