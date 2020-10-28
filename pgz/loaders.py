@@ -28,6 +28,10 @@ def set_root(path):
     sys.path.insert(0, root)
 
 
+def get_root():
+    return root
+
+
 class InvalidCase(Exception):
     """Indicate case errors early so they don't bite cross-platform users."""
 

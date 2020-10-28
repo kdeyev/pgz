@@ -1,3 +1,5 @@
+import os
+
 import pygame
 import pyscroll
 import pyscroll.data
@@ -40,7 +42,14 @@ class ScrollMap(object):
     Finally, it uses a pyscroll group to render the map and Hero.
     """
 
+    _subpath = "maps"
+
     def __init__(self, screen_size, filename, collision_layers):
+        from .loaders import get_root
+
+        maps = os.path.join(get_root(), self._subpath)
+        filename = os.path.join(maps, filename)
+        filename = os.path.abspath(filename)
 
         self.filename = filename
 

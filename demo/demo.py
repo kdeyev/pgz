@@ -4,6 +4,8 @@ import pgz
 
 HERO_MOVE_SPEED = 200
 
+pgz.set_resource_root("demo/resources")
+
 
 class Hero(pgz.Actor):
     def __init__(self):
@@ -108,7 +110,7 @@ if __name__ == "__main__":
     )
 
     try:
-        map = pgz.ScrollMap(app.resolution, "resources/maps/default.tmx", ["Islands"])
+        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
         game = QuestGame(map)
         app.run(game)
 
