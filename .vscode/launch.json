@@ -8,8 +8,11 @@
             "name": "Demo",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/demo.py",
-            "console": "integratedTerminal"
+            "program": "${workspaceFolder}/demo/demo.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            }
         }
     ]
 }

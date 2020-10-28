@@ -103,36 +103,6 @@ class Application:
     def handle_event(self, event):
         self.active_scene.dispatch_event(event)
 
-    # def run(self, scene=None):
-    #     """Execute the application.
-
-    #     :param scene.Scene|None scene: scene to start the execution from
-    #     """
-    #     if scene is None:
-    #         if self.active_scene is None:
-    #             raise ValueError("No scene provided")
-    #     else:
-    #         self.change_scene(scene)
-
-    #     clock = pygame.time.Clock()
-
-    #     while self.active_scene is not None:
-
-    #         for event in pygame.event.get():
-    #             self.active_scene.handle_event(event)
-    #             if event.type == pygame.VIDEORESIZE:
-    #                 self.resolution = (event.w, event.h)
-
-    #             if event.type == pygame.QUIT:
-    #                 self.change_scene(None)  # Trigger Scene.on_exit()
-    #                 return
-
-    #         dt = clock.tick(self.update_rate) / 1000
-    #         self.active_scene.update(dt)
-
-    #         self.active_scene.draw(self._screen)
-    #         pygame.display.update()
-
     def run(self, scene=None):
         """Execute the application.
 

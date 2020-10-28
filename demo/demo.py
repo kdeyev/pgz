@@ -81,6 +81,8 @@ class QuestGame(pgz.Scene):
         print("boom")
 
     def on_mouse_down(self, button):
+        pgz.sounds.arrr.play()
+
         self.clock.schedule_interval(self.boom, 1)
 
     def on_key_down(self, key):
