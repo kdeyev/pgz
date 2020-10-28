@@ -95,6 +95,9 @@ class ScrollMap(object):
     def add_sprite(self, sprite):
         self.group.add(sprite)
 
+    def remove_sprite(self, sprite):
+        sprite.remove(self.group)
+
     def set_center(self, point):
         self.group.center(point)
 
