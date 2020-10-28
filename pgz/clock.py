@@ -189,7 +189,7 @@ class Clock:
 
 
 # # One instance of a clock is available by default, to simplify the API
-# clock = Clock()
+clock = Clock()
 # tick = clock.tick
 # schedule = clock.schedule
 # schedule_interval = clock.schedule_interval

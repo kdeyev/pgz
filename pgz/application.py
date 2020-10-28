@@ -3,7 +3,7 @@ import sys
 
 import pygame
 
-from .clock import Clock
+from .clock import clock as global_clock
 from .keyboard import keyboard
 
 
@@ -44,16 +44,17 @@ class Application:
         pygame.init()
         self.update_rate = update_rate
         self._scene = None
-        self._clock = Clock()
+        # self._clock = global_clock
+
         self.keyboard = keyboard
 
         # Trigger property setters
         self.title = title
         self.resolution = resolution
 
-    @property
-    def clock(self):
-        return self._clock
+    # @property
+    # def clock(self):
+    #     return self._clock
 
     @property
     def title(self):
@@ -158,7 +159,7 @@ class Application:
 
             dt = clock.tick(self.update_rate) / 1000
 
-            self._clock.tick(dt)
+            global_clock.tick(dt)
 
             self.update(dt)
 
