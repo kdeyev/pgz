@@ -80,7 +80,7 @@ class CannonBall(pgz.Actor):
         # self.rect.topleft = self._position
 
 
-class QuestGame(pgz.Scene):
+class Game(pgz.Scene):
     def __init__(self, map):
         self.map = map
 
@@ -104,9 +104,6 @@ class QuestGame(pgz.Scene):
         """Tasks that occur over time should be handled here"""
         self.map.update(dt)
 
-        # check if the sprite's feet are colliding with wall
-        # sprite must have a rect called feet, and move_back method,
-        # otherwise this will fail
         if self.map.collide(self.ship):
             self.ship.move_back(dt)
 
@@ -142,6 +139,23 @@ class QuestGame(pgz.Scene):
             self.map.set_size((event.w, event.h))
 
 
+class Menu(pgz.MenuScene):
+    def __init__(self):
+        super().__init__()
+        import pygame_menu
+
+        self.menu = pygame_menu.Menu(300, 400, "Welcome", theme=pygame_menu.themes.THEME_BLUE)
+
+        self.menu.add_text_input("Name :", default="John Doe")
+        # self.menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
+        self.menu.add_button("Play", self.start_the_game)
+        self.menu.add_button("Quit", pygame_menu.events.EXIT)
+
+    def start_the_game(self):
+        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
+        self.application.change_scene(Game(map))
+
+
 if __name__ == "__main__":
 
     app = pgz.Application(
@@ -152,8 +166,9 @@ if __name__ == "__main__":
 
     try:
         map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
-        game = QuestGame(map)
-        app.run(game)
+        game = Game(map)
+        menu = Menu()
+        app.run(menu)
 
     except Exception:
         # pygame.quit()

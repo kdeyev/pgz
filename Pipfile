@@ -5,6 +5,7 @@ python_version = "3.6"
 pygame = "*"
 pytmx = "*"
 pyscroll = "*"
+pygame-menu = "*"
 
 [dev-packages]
 pre-commit = "*"
