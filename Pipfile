@@ -6,6 +6,7 @@ pygame = "*"
 pytmx = "*"
 pyscroll = "*"
 pygame-menu = "*"
+websockets = "*"
 
 [dev-packages]
 pre-commit = "*"

@@ -5,6 +5,7 @@ import pygame
 
 from .clock import clock as global_clock
 from .keyboard import keyboard
+from .rpc import rpc
 
 
 class Application:
@@ -131,15 +132,17 @@ class Application:
             pygame.mixer.quit()
             self.running = False
 
-    @asyncio.coroutine
-    def mainloop(self):
+    async def mainloop(self):
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
+
+        rpc.start_server()
+        await rpc.connect_to_server()
 
         # self.need_redraw = True
         while True:
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
-            yield from asyncio.sleep(0)
+            await asyncio.sleep(0)
             for event in pygame.event.get():
 
                 if event.type == pygame.VIDEORESIZE:
