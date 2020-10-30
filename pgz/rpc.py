@@ -1,89 +1,53 @@
 import asyncio
 import json
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Tuple
 
 import websockets
 
 from .json_rpc import Registrator
 
 
-class RPC:
-    def __init__(self, url: Optional[str] = None) -> None:
-        # self.client = None
-        # if url:
-        #     self.client = Server(url)
-        self._websocket = None
+def serialize_json_rpc(method_name, args=None, kwargs=None, is_notification=True):
+    """Generate the raw JSON message to be sent to the server"""
+    data = {"jsonrpc": "2.0", "method": method_name}
 
-        self._loop = asyncio.get_event_loop()
-        self.registrator = Registrator(self._loop)
-        # self.start_server()
+    if args and kwargs:
+        raise Exception("JSON-RPC spec forbids mixing arguments and keyword arguments")
 
-        # self.connect_to_server()
+    import collections
 
-    def register(self, name: str, func):
-        self.registrator._set_rpc(name, func)
+    # from the specs:
+    # "If resent, parameters for the rpc call MUST be provided as a Structured value.
+    #  Either by-position through an Array or by-name through an Object."
+    if args and len(args) == 1 and isinstance(args[0], collections.Mapping):
+        args = dict(args[0])
 
-    def _handle_message(self, message):
-        self.registrator.dispatch(message)
+    is_notification = True
+    params = args or kwargs
 
-    async def _run_server(self, websocket, path):
-        async for message in websocket:
-            message = json.loads(message)
-            self._handle_message(message)
+    if params:
+        data["params"] = params
+    if not is_notification:
+        import random
+        import sys
 
-    def start_server(self, host: str = "localhost", port: int = 8765):
-        start_server = websockets.serve(self._run_server, host, port)
-        asyncio.ensure_future(start_server)
-
-    async def connect_to_server(self, host: str = "localhost", port: int = 8765):
-        self._websocket = await websockets.connect(f"ws://{host}:{port}")
-        self.client = True
-
-    # def send(self, method_name, args=None, kwargs=None):
-    #     message = {"method_name": method_name}
-    #     if args:
-    #         message["args"] = args
-    #     if kwargs:
-    #         message["kwargs"] = kwargs
-
-    #     send = self._websocket.send(json.dumps(kwargs))
-    #     self._loop.run_until_complete(send)
-
-    def serialize(self, method_name, params, is_notification):
-        """Generate the raw JSON message to be sent to the server"""
-        data = {"jsonrpc": "2.0", "method": method_name}
-        if params:
-            data["params"] = params
-        if not is_notification:
-            import random
-            import sys
-
-            # some JSON-RPC servers complain when receiving str(uuid.uuid4()). Let's pick something simpler.
-            data["id"] = random.randint(1, sys.maxsize)
-        return json.dumps(data)
-
-    def send(self, method_name, args=None, kwargs=None):
-        """Perform the actual RPC call. If _notification=True, send a notification and don't wait for a response"""
-        if args and kwargs:
-            raise Exception("JSON-RPC spec forbids mixing arguments and keyword arguments")
-
-        import collections
-
-        # from the specs:
-        # "If resent, parameters for the rpc call MUST be provided as a Structured value.
-        #  Either by-position through an Array or by-name through an Object."
-        if args and len(args) == 1 and isinstance(args[0], collections.Mapping):
-            args = dict(args[0])
-
-        is_notification = True
-        params = args or kwargs
-        message = self.serialize(method_name, params, is_notification)
-        send = self._websocket.send(message)
-        asyncio.ensure_future(send)
+        # some JSON-RPC servers complain when receiving str(uuid.uuid4()). Let's pick something simpler.
+        data["id"] = random.randint(1, sys.maxsize)
+    return json.dumps(data)
 
 
-rpc = RPC()
+# class RPC:
+#     def __init__(self, url: Optional[str] = None) -> None:
+
+#         self._loop = asyncio.get_event_loop()
+#         self.registrator = Registrator(self._loop)
+
+#     def register(self, name: str, func):
+#         self.registrator._set_rpc(name, func)
+
+#     def handle_message(self, message):
+#         self.registrator.dispatch(message)
 
 
 def _auto_rpc(func: Callable, method_name: str) -> Callable:
