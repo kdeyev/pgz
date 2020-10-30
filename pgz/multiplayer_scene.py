@@ -255,11 +255,14 @@ class MultiplayerClient(Scene):
             # not connected yet
             return
 
-        if event.type in [pygame.MOUSEMOTION, pygame.KEYDOWN, pygame.KEYUP]:
-            # print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
+        # if event.type in [pygame.MOUSEMOTION, pygame.KEYDOWN, pygame.KEYUP]:
+        # print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
+        try:
             message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
-            asyncio.ensure_future(self._send_message(message))
-            # self._websocket.send(message)
+        except Exception as e:
+            print(f"handle_event: {e}")
+            return
+        asyncio.ensure_future(self._send_message(message))
 
     async def connect_to_server(self, host: str = "localhost", port: int = 8765):
         websocket = await websockets.connect(f"ws://{host}:{port}")

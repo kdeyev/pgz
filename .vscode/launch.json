@@ -6,6 +6,7 @@
     "configurations": [
 
 
+
     
         {
             "name": "Demo",
@@ -47,5 +48,20 @@
                 "PYTHONPATH": "${workspaceFolder}",
             }
         },
+    ],
+    "compounds": [
+        {
+            "name": "Server and clients",
+            "configurations": [
+                "Demo-Client",
+                "Another Demo-Client",
+                "Demo-Server",
+            ],
+            "presentation": {
+                "hidden": false,
+                // "group": "Multi",
+                // "order": 1,
+            }
+        }   
     ]
 }
