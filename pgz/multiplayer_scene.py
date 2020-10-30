@@ -34,16 +34,19 @@ class MultiplayerClientHeadlessScene:
     def update(self, dt):
         self.map.update(dt)
 
+    def broadcast_property_change(self, uuid, prop, value):
+        message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
+        self.broadcast(message)
+
     def create_actor(self, cls_name, *args, **kwargs):
         uuid = str(uuid4())
         actor = self.actor_factory[cls_name](uuid, self.remove_actor, *args, **kwargs)
         self.map.add_sprite(actor)
-        # a = {"cls_name": cls_name, "args": args, "kwargs": kwargs}
 
         message = serialize_json_rpc("create_actor_on_client", (uuid, actor.image_name))
         self.broadcast(message)
 
-        return actor
+        return MultiplayerActorStub(actor, self.broadcast_property_change)
 
     def remove_actor(self, actor):
         uuid = str(uuid4())
@@ -136,6 +139,11 @@ class MultiplayerClient(Scene):
         def remove_actor_on_client(uuid):
             actor = self.actors[uuid]
             self.map.remove_actor(actor)
+
+        @self.rpc.register
+        def on_actor_prop_change(uuid, prop, value):
+            actor = self.actors[uuid]
+            setattr(actor, prop, value)
 
     async def _send_message(self, message):
         await self._websocket.send(message)

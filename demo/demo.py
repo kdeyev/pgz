@@ -91,6 +91,7 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         # super().on_enter(previous_scene)
 
         self.ship = self.create_actor("Ship")
+        self.ship.x = 600
         # put the ship in the center of the map
         # self.ship.position = self.map.get_center()
         # self.ship.x += 600
