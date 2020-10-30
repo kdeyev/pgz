@@ -12,7 +12,8 @@ from .scene import EventDispatcher, Scene
 
 
 class MultiplayerActor(Actor):
-    DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
+    # DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
+    SEND = Actor.DELEGATED_ATTRIBUTES + ["angle", "image_name"]
 
     def __init__(self, image_name, uuid, deleter):
         super().__init__(image_name)
@@ -22,7 +23,7 @@ class MultiplayerActor(Actor):
         self._on_prop_change = None
 
     def __setattr__(self, attr, value):
-        if attr in self.__class__.DELEGATED_ATTRIBUTES and hasattr(self, "_on_prop_change") and self._on_prop_change:
+        if attr in self.__class__.SEND and hasattr(self, "_on_prop_change") and self._on_prop_change:
             if getattr(self, attr) != value:
                 self._on_prop_change(self.uuid, attr, value)
 
@@ -30,7 +31,7 @@ class MultiplayerActor(Actor):
 
     def get_state_message(self):
         state = {}
-        for attr in self.__class__.DELEGATED_ATTRIBUTES:
+        for attr in self.__class__.SEND:
             try:
                 value = getattr(self, attr)
             except Exception as e:
@@ -242,9 +243,9 @@ class MultiplayerClient(Scene):
 
         @self.rpc.register
         def on_actor_prop_change(uuid, prop, value):
-            print(f"MultiplayerClient.on_actor_prop_change {self.uuid}: {uuid} {prop}: {value}")
+            # print(f"MultiplayerClient.on_actor_prop_change {self.uuid}: {uuid} {prop}: {value}")
             actor = self.actors[uuid]
-            setattr(actor, prop, value)
+            actor.__setattr__(prop, value)
 
     async def _send_message(self, message):
         await self._websocket.send(message)
@@ -255,7 +256,7 @@ class MultiplayerClient(Scene):
             return
 
         if event.type in [pygame.MOUSEMOTION, pygame.KEYDOWN, pygame.KEYUP]:
-            print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
+            # print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
             message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
             asyncio.ensure_future(self._send_message(message))
             # self._websocket.send(message)
