@@ -5,6 +5,7 @@ import pygame
 
 from .clock import clock as global_clock
 from .keyboard import keyboard
+from .multiplayer_scene import MultiplayerClient
 
 
 class Application:
@@ -135,7 +136,8 @@ class Application:
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
 
-        await self._scene.connect_to_server()
+        if isinstance(self._scene, MultiplayerClient):
+            await self._scene.connect_to_server()
 
         # self.need_redraw = True
         while True:

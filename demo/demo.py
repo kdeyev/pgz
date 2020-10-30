@@ -1,5 +1,3 @@
-import uuid
-
 import pygame
 
 import pgz
@@ -7,30 +5,30 @@ import pgz
 pgz.set_resource_root("demo/resources")
 
 
-class Ship(pgz.MultiplayerActor):
-    def __init__(self, uuid, deleter):
-        super().__init__("ship", uuid, deleter)
+class Ship(pgz.Actor):
+    def __init__(self):
+        super().__init__("ship")
 
         self.speed = 200
         self.velocity = [0, 0]
         self._old_pos = self.pos
 
     def update(self, dt):
-        # from pgz import keyboard
+        from pgz import keyboard
 
         self._old_pos = self.pos[:]
 
         # pressed = pygame.key.get_pressed()
-        if self.keyboard.up:
+        if keyboard.up:
             self.velocity[1] = -self.speed
-        elif self.keyboard.down:
+        elif keyboard.down:
             self.velocity[1] = self.speed
         else:
             self.velocity[1] = 0
 
-        if self.keyboard.left:
+        if keyboard.left:
             self.velocity[0] = -self.speed
-        elif self.keyboard.right:
+        elif keyboard.right:
             self.velocity[0] = self.speed
         else:
             self.velocity[0] = 0
@@ -45,10 +43,11 @@ class Ship(pgz.MultiplayerActor):
         # self.rect.topleft = self._position
 
 
-class CannonBall(pgz.MultiplayerActor):
-    def __init__(self, uuid, deleter, pos, target):
-        super().__init__("cannonball", uuid, deleter)
+class CannonBall(pgz.Actor):
+    def __init__(self, pos, target, deleter):
+        super().__init__("cannonball")
 
+        self.deleter = deleter
         self.pos = pos
         self.target = target
         self.speed = 400.0
@@ -81,33 +80,29 @@ class CannonBall(pgz.MultiplayerActor):
         # self.rect.topleft = self._position
 
 
-class GameScene(pgz.MultiplayerClientHeadlessScene):
-    def __init__(self):
-        super().__init__()
+class Game(pgz.Scene):
+    def __init__(self, map):
+        self.map = map
 
-        self.actor_factory = {"Ship": Ship, "CannonBall": CannonBall}
-
-    def on_enter(self, previous_scene):
-        # super().on_enter(previous_scene)
-
-        self.ship = self.create_actor("Ship")
-        self.ship.x = 600
+        self.ship = Ship()
         # put the ship in the center of the map
-        # self.ship.position = self.map.get_center()
-        # self.ship.x += 600
-        # self.ship.y += 400
+        self.ship.position = self.map.get_center()
+        self.ship.x += 600
+        self.ship.y += 400
 
-    # def draw(self, surface):
+        # add our ship to the group
+        self.map.add_sprite(self.ship)
 
-    #     # center the map/screen on our Ship
-    #     self.map.set_center(self.ship.pos)
+    def draw(self, surface):
 
-    #     self.map.draw(surface)
+        # center the map/screen on our Ship
+        self.map.set_center(self.ship.pos)
+
+        self.map.draw(surface)
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
-        # self.map.update(dt)
-        super().update(dt)
+        self.map.update(dt)
 
         if self.map.collide(self.ship):
             self.ship.move_back(dt)
@@ -125,9 +120,8 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
 
         pgz.sounds.arrr.play()
 
-        ball = self.create_actor("CannonBall", self.ship.pos, pos)
-        ball.x = 600
-        # self.map.add_sprite(ball)
+        ball = CannonBall(self.ship.pos, pos, self.map.remove_sprite)
+        self.map.add_sprite(ball)
 
         # pgz.global_clock.schedule_interval(self.boom, 1)
 
@@ -145,24 +139,25 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
             self.map.set_size((event.w, event.h))
 
 
-# class Menu(pgz.MenuScene):
-#     def __init__(self):
-#         super().__init__()
-#         import pygame_menu
+class Menu(pgz.MenuScene):
+    def __init__(self):
+        super().__init__()
+        import pygame_menu
 
-#         self.menu = pygame_menu.Menu(300, 400, "Welcome", theme=pygame_menu.themes.THEME_BLUE)
+        self.menu = pygame_menu.Menu(300, 400, "Welcome", theme=pygame_menu.themes.THEME_BLUE)
 
-#         self.menu.add_text_input("Name :", default="John Doe")
-#         # self.menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
-#         self.menu.add_button("Play", self.start_the_game)
-#         self.menu.add_button("Quit", pygame_menu.events.EXIT)
+        self.menu.add_text_input("Name :", default="John Doe")
+        # self.menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
+        self.menu.add_button("Play", self.start_the_game)
+        self.menu.add_button("Quit", pygame_menu.events.EXIT)
 
-#     def start_the_game(self):
-#         map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
-#         self.application.change_scene(GameScene(map))
+    def start_the_game(self):
+        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
+        self.application.change_scene(Game(map))
 
 
 if __name__ == "__main__":
+
     app = pgz.Application(
         title="My First EzPyGame Application!",
         resolution=(1280, 720),
@@ -170,15 +165,10 @@ if __name__ == "__main__":
     )
 
     try:
-
-        server_map = pgz.ScrollMap((1280, 720), "default.tmx", ["Islands"])
-        # Supposed to have it's onw map
-        scene_server = pgz.MultiplayerSceneServer(server_map, GameScene)
-
         map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
-        # game = Game(map)
-        menu = pgz.MultiplayerClient(map)
-        app.run(menu, scene_server)
+        game = Game(map)
+        menu = Menu()
+        app.run(menu)
 
     except Exception:
         # pygame.quit()
