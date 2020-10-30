@@ -18,9 +18,11 @@ class Keyboard:
 
     """
 
-    # The current key state. This may as well be a class attribute - there's
-    # only one keyboard.
-    _pressed = set()
+    def __init__(self) -> None:
+
+        # The current key state. This may as well be a class attribute - there's
+        # only one keyboard.
+        self._pressed = set()
 
     def __getattr__(self, kname):
         # return is a reserved word, so alias enter to return
