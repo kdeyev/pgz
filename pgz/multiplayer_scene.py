@@ -108,17 +108,23 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
 
         return actor
 
-    def remove_actor(self, actor):
+    def _remove_actor(self, actor):
+        uuid = actor.uuid
         self.map.remove_sprite(actor)
+        message = serialize_json_rpc("remove_actor_on_client", (uuid,))
+        self.broadcast(message)
+
+    def remove_actor(self, actor):
+        self._remove_actor(actor)
 
         uuid = actor.uuid
         del self.actors[uuid]
-        message = serialize_json_rpc("remove_actor_on_client", (uuid))
-        self.broadcast(message)
 
     def remove_all_actors(self):
         for actor in self.actors.values():
-            self.remove_actor(actor)
+            self._remove_actor(actor)
+
+        self.actors = {}
 
 
 class MultiplayerSceneServer:
@@ -135,10 +141,13 @@ class MultiplayerSceneServer:
 
     async def _broadcast(self, message):
         if self.clients:  # asyncio.wait doesn't accept an empty list
-            await asyncio.wait([client.send(message) for client in self.clients])
+            try:
+                await asyncio.wait([client.send(message) for client in self.clients])
+            except Exception as e:
+                print(f"MultiplayerSceneServer._broadcast: {e}")
 
     # def remove_actor(self, actor):
-    #     self.map.remove_actor(actor)
+    #     self.map.remove_sprite(actor)
 
     async def _send_handshake(self, websocket, uuid):
         actors = []
@@ -228,7 +237,8 @@ class MultiplayerClient(Scene):
         @self.rpc.register
         def remove_actor_on_client(uuid):
             actor = self.actors[uuid]
-            self.map.remove_actor(actor)
+            del self.actors[uuid]
+            self.map.remove_sprite(actor)
 
         @self.rpc.register
         def on_actor_prop_change(uuid, prop, value):

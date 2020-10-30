@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
     
         {
             "name": "Demo",
@@ -28,6 +29,16 @@
         },
         {
             "name": "Demo-Client",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo/demo-client.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            }
+        },
+        {
+            "name": "Another Demo-Client",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/demo/demo-client.py",
