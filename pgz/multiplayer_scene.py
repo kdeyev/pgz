@@ -7,9 +7,27 @@ import websockets
 
 from .actor import Actor
 from .keyboard import Keyboard
-from .multiplayer_actor import MultiplayerActor, MultiplayerActorStub
 from .rpc import Registrator, serialize_json_rpc
 from .scene import EventDispatcher, Scene
+
+
+class MultiplayerActor(Actor):
+    DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
+
+    def __init__(self, image_name, uuid, deleter):
+        super().__init__(image_name)
+        self.uuid = uuid
+        self.deleter = deleter
+        self.keyboard = None
+        self._on_prop_change = None
+
+    def __setattr__(self, attr, value):
+        if attr in self.__class__.DELEGATED_ATTRIBUTES and hasattr(self, "_on_prop_change") and self._on_prop_change:
+            if getattr(self, attr) != value:
+                print(attr, value)
+                self._on_prop_change(self.uuid, attr, value)
+
+        super().__setattr__(attr, value)
 
 
 class MultiplayerClientHeadlessScene(EventDispatcher):
@@ -51,12 +69,13 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         uuid = str(uuid4())
         actor = self.actor_factory[cls_name](uuid, self.remove_actor, *args, **kwargs)
         actor.keyboard = self.keyboard
+        actor._on_prop_change = self.broadcast_property_change
         self.map.add_sprite(actor)
 
         message = serialize_json_rpc("create_actor_on_client", (uuid, actor.image_name))
         self.broadcast(message)
 
-        return MultiplayerActorStub(actor, self.broadcast_property_change)
+        return actor
 
     def remove_actor(self, actor):
         uuid = str(uuid4())
