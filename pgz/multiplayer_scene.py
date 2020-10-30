@@ -6,23 +6,32 @@ import pygame
 import websockets
 
 from .actor import Actor
+from .keyboard import Keyboard
 from .multiplayer_actor import MultiplayerActor, MultiplayerActorStub
 from .rpc import Registrator, serialize_json_rpc
-from .scene import Scene
+from .scene import EventDispatcher, Scene
 
 
-class MultiplayerClientHeadlessScene:
+class MultiplayerClientHeadlessScene(EventDispatcher):
     def __init__(self):
         super().__init__()
         self.map = None
         self.broadcast = None
         self.actor_factory = {}
         self.rpc = Registrator()
+        self.keyboard = Keyboard()
+
+        self.load_handlers()
 
         @self.rpc.register
         def handle_client_event(event_type, attributes):
             event = pygame.event.Event(event_type, **attributes)
-            self.handle_event(event)
+            if event.type == pygame.KEYDOWN:
+                self.keyboard._press(event.key)
+            elif event.type == pygame.KEYUP:
+                self.keyboard._release(event.key)
+
+            self.dispatch_event(event)
 
     def handle_message(self, message):
         self.rpc.dispatch(message)
@@ -41,6 +50,7 @@ class MultiplayerClientHeadlessScene:
     def create_actor(self, cls_name, *args, **kwargs):
         uuid = str(uuid4())
         actor = self.actor_factory[cls_name](uuid, self.remove_actor, *args, **kwargs)
+        actor.keyboard = self.keyboard
         self.map.add_sprite(actor)
 
         message = serialize_json_rpc("create_actor_on_client", (uuid, actor.image_name))
@@ -149,7 +159,7 @@ class MultiplayerClient(Scene):
         await self._websocket.send(message)
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEMOTION:
+        if event.type in [pygame.MOUSEMOTION, pygame.KEYDOWN, pygame.KEYUP]:
             message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
             asyncio.ensure_future(self._send_message(message))
             # self._websocket.send(message)

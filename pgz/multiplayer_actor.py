@@ -1,4 +1,5 @@
 from .actor import Actor
+from .keyboard import Keyboard
 
 
 class MultiplayerActor(Actor):
@@ -6,6 +7,11 @@ class MultiplayerActor(Actor):
         super().__init__(image_name)
         self.uuid = uuid
         self.deleter = deleter
+        self.keyboard = None
+
+    # def __setattr__(self, name, value):
+    #     super().setattr(self.actor, name, value)
+    #     getattr(self, "on_prop_change")(self.actor.uuid, name, value)
 
 
 class MultiplayerActorStub:

@@ -16,21 +16,21 @@ class Ship(pgz.MultiplayerActor):
         self._old_pos = self.pos
 
     def update(self, dt):
-        from pgz import keyboard
+        # from pgz import keyboard
 
         self._old_pos = self.pos[:]
 
         # pressed = pygame.key.get_pressed()
-        if keyboard.up:
+        if self.keyboard.up:
             self.velocity[1] = -self.speed
-        elif keyboard.down:
+        elif self.keyboard.down:
             self.velocity[1] = self.speed
         else:
             self.velocity[1] = 0
 
-        if keyboard.left:
+        if self.keyboard.left:
             self.velocity[0] = -self.speed
-        elif keyboard.right:
+        elif self.keyboard.right:
             self.velocity[0] = self.speed
         else:
             self.velocity[0] = 0
@@ -107,6 +107,7 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
         # self.map.update(dt)
+        super().update(dt)
 
         if self.map.collide(self.ship):
             self.ship.move_back(dt)

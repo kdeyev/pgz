@@ -4,5 +4,5 @@ from .loaders import set_root as set_resource_root  # noqa
 from .loaders import sounds  # noqa; noqa
 from .menu_scene import MenuScene  # noqa
 from .multiplayer_scene import MultiplayerActor, MultiplayerActorStub, MultiplayerClient, MultiplayerClientHeadlessScene, MultiplayerSceneServer  # noqa
-from .scene import Scene  # noqa
+from .scene import EventDispatcher, Scene  # noqa
 from .scroll_map import ScrollMap  # noqa
