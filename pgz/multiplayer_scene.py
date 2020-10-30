@@ -35,6 +35,14 @@ class MultiplayerActor(Actor):
                 value = getattr(self, attr)
             except Exception as e:
                 print(f"MultiplayerActor.get_state_message: {e}")
+                continue
+
+            try:
+                json.dumps({attr: value})
+            except Exception as e:
+                print(f"MultiplayerActor.get_state_message: {e}")
+                continue
+
             state[attr] = value
         return state
 
