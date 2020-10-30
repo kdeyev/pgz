@@ -24,7 +24,6 @@ class MultiplayerActor(Actor):
     def __setattr__(self, attr, value):
         if attr in self.__class__.DELEGATED_ATTRIBUTES and hasattr(self, "_on_prop_change") and self._on_prop_change:
             if getattr(self, attr) != value:
-                print(attr, value)
                 self._on_prop_change(self.uuid, attr, value)
 
         super().__setattr__(attr, value)

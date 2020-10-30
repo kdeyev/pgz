@@ -2,7 +2,6 @@ import asyncio
 import sys
 
 import pygame
-from websockets import server
 
 from .clock import clock as global_clock
 from .keyboard import keyboard
@@ -101,18 +100,15 @@ class Application:
 
     def update(self, dt):
         self.active_scene.update(dt)
-        self.server.update(dt)
 
     def handle_event(self, event):
         self.active_scene.dispatch_event(event)
 
-    def run(self, scene=None, server=None):
+    def run(self, scene=None):
         """Execute the application.
 
         :param scene.Scene|None scene: scene to start the execution from
         """
-        self.server = server
-
         if scene is None:
             if self.active_scene is None:
                 raise ValueError("No scene provided")
@@ -139,7 +135,6 @@ class Application:
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
 
-        self.server.start_server()
         await self._scene.connect_to_server()
 
         # self.need_redraw = True
