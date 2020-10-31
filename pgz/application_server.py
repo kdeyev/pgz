@@ -57,7 +57,7 @@ class Server:
 
     async def mainloop(self):
         clock = pygame.time.Clock()
-        fps_calc = FPSCalc(100)
+        fps_calc = FPSCalc()
 
         self.server.start_server()
         while True:

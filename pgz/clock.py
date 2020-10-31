@@ -189,7 +189,7 @@ class Clock:
 
 
 class FPSCalc:
-    def __init__(self, size) -> None:
+    def __init__(self, size=100) -> None:
         self.vals = []
         self.size = size
         self.counter = 0

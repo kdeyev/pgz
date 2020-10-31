@@ -136,7 +136,7 @@ class Application:
     async def mainloop(self):
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
-        fps_calc = FPSCalc(100)
+        fps_calc = FPSCalc()
 
         if isinstance(self._scene, MultiplayerClient):
             await self._scene.connect_to_server()
