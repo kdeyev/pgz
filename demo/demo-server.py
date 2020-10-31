@@ -1,4 +1,4 @@
-import uuid
+import random
 
 import pygame
 
@@ -9,7 +9,7 @@ pgz.set_resource_root("demo/resources")
 
 class Ship(pgz.MultiplayerActor):
     def __init__(self, uuid, deleter):
-        super().__init__("ship", uuid, deleter)
+        super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]), uuid, deleter)
 
         self.speed = 200
         self.velocity = [0, 0]

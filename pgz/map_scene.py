@@ -13,7 +13,7 @@ class MapScene(Scene):
 
     def dispatch_event(self, event):
         # transfrom mouse positions
-        if event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEWHEEL]:
+        if event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             view_pos = event.pos
             scene_pos = self.map.transform(view_pos)
             event.scene_pos = scene_pos
