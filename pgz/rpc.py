@@ -38,6 +38,20 @@ def serialize_json_rpc(method_name, args=None, kwargs=None, is_notification=True
     return data
 
 
+def serialize_json_array_from_queue(queue):
+    json_messages = []
+    try:
+        # Run until exception
+        while True:
+            json_messages.append(queue.get_nowait())
+    except asyncio.QueueEmpty as e:
+        pass
+
+    # create one json array
+    message = json.dumps(json_messages)
+    return message
+
+
 # class RPC:
 #     def __init__(self, url: Optional[str] = None) -> None:
 

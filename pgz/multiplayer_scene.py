@@ -9,7 +9,7 @@ import websockets
 from .actor import Actor
 from .keyboard import Keyboard
 from .map_scene import MapScene
-from .rpc import Registrator, serialize_json_rpc
+from .rpc import Registrator, serialize_json_array_from_queue, serialize_json_rpc
 from .scene import EventDispatcher
 
 
@@ -150,16 +150,8 @@ class MultiplayerSceneServer:
             try:
                 # There are messages in the queue
                 if not self.broadcast_message_queue.empty():
-                    json_messages = []
-                    try:
-                        # Run until exception
-                        while True:
-                            json_messages.append(self.broadcast_message_queue.get_nowait())
-                    except asyncio.QueueEmpty as e:
-                        pass
-
                     # create one json array
-                    message = json.dumps(json_messages)
+                    message = serialize_json_array_from_queue(self.broadcast_message_queue)
                     # send broadcast
                     await asyncio.wait([client.send(message) for client in self.clients])
             except Exception as e:
@@ -275,16 +267,8 @@ class MultiplayerClient(MapScene):
 
     async def _flush_messages(self):
         if not self.event_message_queue.empty():
-            json_messages = []
-            try:
-                # Run until exception
-                while True:
-                    json_messages.append(self.event_message_queue.get_nowait())
-            except asyncio.QueueEmpty as e:
-                pass
-
             # create one json array
-            message = json.dumps(json_messages)
+            message = serialize_json_array_from_queue(self.event_message_queue)
             # send message
             await self._websocket.send(message)
 
@@ -292,8 +276,7 @@ class MultiplayerClient(MapScene):
         if not self._websocket:
             # not connected yet
             return
-        # if event.type in [pygame.MOUSEMOTION, pygame.KEYDOWN, pygame.KEYUP]:
-        # print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
+
         try:
             json_message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
         except Exception as e:
