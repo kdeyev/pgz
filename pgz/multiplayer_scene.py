@@ -96,8 +96,8 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.map.update(dt)
 
     def broadcast_property_change(self, uuid, prop, value):
-        message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
-        self.broadcast(message)
+        json_message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
+        self.broadcast(json_message)
 
     def create_actor(self, cls_name, central_actor=False, *args, **kwargs):
         uuid = f"{cls_name}-{str(uuid4())}"
@@ -108,16 +108,16 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.actors[uuid] = actor
         self.map.add_sprite(actor)
 
-        message = serialize_json_rpc("create_actor_on_client", (uuid, self.client_uuid, actor.image_name, central_actor))
-        self.broadcast(message)
+        json_message = serialize_json_rpc("create_actor_on_client", (uuid, self.client_uuid, actor.image_name, central_actor))
+        self.broadcast(json_message)
 
         return actor
 
     def _remove_actor(self, actor):
         uuid = actor.uuid
         self.map.remove_sprite(actor)
-        message = serialize_json_rpc("remove_actor_on_client", (uuid,))
-        self.broadcast(message)
+        json_message = serialize_json_rpc("remove_actor_on_client", (uuid,))
+        self.broadcast(json_message)
 
     def remove_actor(self, actor):
         self._remove_actor(actor)
@@ -137,17 +137,31 @@ class MultiplayerSceneServer:
         super().__init__()
         self.map = map
         self.clients = {}
+        self.broadcast_message_queue = asyncio.Queue()
 
         assert issubclass(HeadlessSceneClass, MultiplayerClientHeadlessScene)
         self.HeadlessSceneClass = HeadlessSceneClass
 
-    def broadcast(self, message):
-        asyncio.ensure_future(self._broadcast(message))
+    def broadcast(self, json_message):
+        self.broadcast_message_queue.put_nowait(json_message)
 
-    async def _broadcast(self, message):
+    async def _flush_broadcast(self):
         if self.clients:  # asyncio.wait doesn't accept an empty list
             try:
-                await asyncio.wait([client.send(message) for client in self.clients])
+                # There are messages in the queue
+                if not self.broadcast_message_queue.empty():
+                    json_messages = []
+                    try:
+                        # Run until exception
+                        while True:
+                            json_messages.append(self.broadcast_message_queue.get_nowait())
+                    except asyncio.QueueEmpty as e:
+                        pass
+
+                    # create one json array
+                    message = json.dumps(json_messages)
+                    # send broadcast
+                    await asyncio.wait([client.send(message) for client in self.clients])
             except Exception as e:
                 print(f"MultiplayerSceneServer._broadcast: {e}")
 
@@ -206,9 +220,10 @@ class MultiplayerSceneServer:
     def start_server(self, host: str = "localhost", port: int = 8765):
         asyncio.ensure_future(websockets.serve(self._serve_client, host, port))
 
-    def update(self, dt):
+    async def update(self, dt):
         for scenes in self.clients.values():
             scenes.update(dt)
+        await self._flush_broadcast()
 
 
 class MultiplayerClient(MapScene):
@@ -259,7 +274,8 @@ class MultiplayerClient(MapScene):
         # if event.type in [pygame.MOUSEMOTION, pygame.KEYDOWN, pygame.KEYUP]:
         # print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
         try:
-            message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
+            json_message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
+            message = json.dumps(json_message)
         except Exception as e:
             print(f"handle_event: {e}")
             return
@@ -300,7 +316,7 @@ class MultiplayerClient(MapScene):
         self._websocket = websocket
         async for message in self._websocket:
             try:
-                message = json.loads(message)
-                self.rpc.dispatch(message)
+                json_messages = json.loads(message)
+                self.rpc.dispatch(json_messages)
             except Exception as e:
                 print(f"_handle_messages: {e}")

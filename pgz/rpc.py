@@ -34,7 +34,8 @@ def serialize_json_rpc(method_name, args=None, kwargs=None, is_notification=True
 
         # some JSON-RPC servers complain when receiving str(uuid.uuid4()). Let's pick something simpler.
         data["id"] = random.randint(1, sys.maxsize)
-    return json.dumps(data)
+    # return json.dumps(data)
+    return data
 
 
 # class RPC:

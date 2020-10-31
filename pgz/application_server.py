@@ -33,9 +33,9 @@ class Server:
     def resolution(self, value):
         self._screen = pygame.display.set_mode(value)
 
-    def update(self, dt):
+    async def update(self, dt):
         if self.server:
-            self.server.update(dt)
+            await self.server.update(dt)
 
     def run(self, server):
         self.server = server
@@ -45,11 +45,10 @@ class Server:
         finally:
             loop.close()
 
-    @asyncio.coroutine
-    def run_as_coroutine(self):
+    async def run_as_coroutine(self):
         self.running = True
         try:
-            yield from self.mainloop()
+            await self.mainloop()
         finally:
             pygame.display.quit()
             pygame.mixer.quit()
@@ -78,4 +77,4 @@ class Server:
 
             global_clock.tick(dt)
 
-            self.update(dt)
+            await self.update(dt)
