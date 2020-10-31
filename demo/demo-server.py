@@ -123,7 +123,7 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
 
         # pgz.sounds.arrr.play()
 
-        ball = self.create_actor("CannonBall", self.ship.pos, pos)
+        ball = self.create_actor("CannonBall", pos=self.ship.pos, target=pos)
 
         # pgz.global_clock.schedule_interval(self.boom, 1)
 
