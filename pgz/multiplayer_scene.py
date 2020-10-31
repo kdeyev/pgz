@@ -234,6 +234,7 @@ class MultiplayerClient(MapScene):
         self.uuid = None
         self._websocket = None
         self.rpc = Registrator()
+        self.event_message_queue = asyncio.Queue()
 
     def on_exit(self, next_scene):
         super().on_exit(next_scene)
@@ -264,8 +265,28 @@ class MultiplayerClient(MapScene):
             actor = self.actors[uuid]
             actor.__setattr__(prop, value)
 
-    async def _send_message(self, message):
-        await self._websocket.send(message)
+    def update(self, dt):
+        asyncio.ensure_future(self._flush_messages())
+        super().update(dt)
+
+    def _send_message(self, json_message):
+        self.event_message_queue.put_nowait(json_message)
+        # await self._websocket.send(message)
+
+    async def _flush_messages(self):
+        if not self.event_message_queue.empty():
+            json_messages = []
+            try:
+                # Run until exception
+                while True:
+                    json_messages.append(self.event_message_queue.get_nowait())
+            except asyncio.QueueEmpty as e:
+                pass
+
+            # create one json array
+            message = json.dumps(json_messages)
+            # send message
+            await self._websocket.send(message)
 
     def handle_event(self, event):
         if not self._websocket:
@@ -275,11 +296,10 @@ class MultiplayerClient(MapScene):
         # print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
         try:
             json_message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
-            message = json.dumps(json_message)
         except Exception as e:
             print(f"handle_event: {e}")
             return
-        asyncio.ensure_future(self._send_message(message))
+        self._send_message(json_message)
 
     async def connect_to_server(self, host: str = "localhost", port: int = 8765, attempts=10):
         websocket = None
