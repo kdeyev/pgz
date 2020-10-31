@@ -113,7 +113,6 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
             self.ship.move_back(dt)
 
     def on_mouse_move(self, pos):
-        pos = self.map.transform(pos)
         angle = self.ship.angle_to(pos) + 90
         self.ship.angle = angle
 
@@ -121,12 +120,10 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         print("boom")
 
     def on_mouse_down(self, pos, button):
-        pos = self.map.transform(pos)
 
-        pgz.sounds.arrr.play()
+        # pgz.sounds.arrr.play()
 
         ball = self.create_actor("CannonBall", self.ship.pos, pos)
-        ball.x = 600
         # self.map.add_sprite(ball)
 
         # pgz.global_clock.schedule_interval(self.boom, 1)

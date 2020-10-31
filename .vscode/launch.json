@@ -7,6 +7,7 @@
 
 
 
+
     
         {
             "name": "Demo",
@@ -59,8 +60,8 @@
             ],
             "presentation": {
                 "hidden": false,
-                // "group": "Multi",
-                // "order": 1,
+                "group": "Multi",
+                "order": 1,
             }
         }   
     ]

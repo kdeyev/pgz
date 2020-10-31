@@ -80,9 +80,9 @@ class CannonBall(pgz.Actor):
         # self.rect.topleft = self._position
 
 
-class Game(pgz.Scene):
+class Game(pgz.MapScene):
     def __init__(self, map):
-        self.map = map
+        super().__init__(map)
 
         self.ship = Ship()
         # put the ship in the center of the map
@@ -108,7 +108,6 @@ class Game(pgz.Scene):
             self.ship.move_back(dt)
 
     def on_mouse_move(self, pos):
-        pos = self.map.transform(pos)
         angle = self.ship.angle_to(pos) + 90
         self.ship.angle = angle
 
@@ -116,8 +115,6 @@ class Game(pgz.Scene):
         print("boom")
 
     def on_mouse_down(self, pos, button):
-        pos = self.map.transform(pos)
-
         pgz.sounds.arrr.play()
 
         ball = CannonBall(self.ship.pos, pos, self.map.remove_sprite)

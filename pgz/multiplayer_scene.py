@@ -1,5 +1,6 @@
 import asyncio
 import json
+from re import T
 from uuid import uuid4
 
 import pygame
@@ -7,8 +8,9 @@ import websockets
 
 from .actor import Actor
 from .keyboard import Keyboard
+from .map_scene import MapScene
 from .rpc import Registrator, serialize_json_rpc
-from .scene import EventDispatcher, Scene
+from .scene import EventDispatcher
 
 
 class MultiplayerActor(Actor):
@@ -210,10 +212,9 @@ class MultiplayerSceneServer:
             scenes.update(dt)
 
 
-class MultiplayerClient(Scene):
+class MultiplayerClient(MapScene):
     def __init__(self, map):
-        super().__init__()
-        self.map = map
+        super().__init__(map)
         self.actors = {}
         self.uuid = None
         self._websocket = None
@@ -254,7 +255,6 @@ class MultiplayerClient(Scene):
         if not self._websocket:
             # not connected yet
             return
-
         # if event.type in [pygame.MOUSEMOTION, pygame.KEYDOWN, pygame.KEYUP]:
         # print(f"MultiplayerClient.handle_event {self.uuid}: {event.__class__.__name__} {event.type} {event.__dict__}")
         try:
@@ -264,10 +264,21 @@ class MultiplayerClient(Scene):
             return
         asyncio.ensure_future(self._send_message(message))
 
-    async def connect_to_server(self, host: str = "localhost", port: int = 8765):
-        websocket = await websockets.connect(f"ws://{host}:{port}")
-        await self._receive_handshake(websocket)
-        asyncio.ensure_future(self._handle_messages(websocket))
+    async def connect_to_server(self, host: str = "localhost", port: int = 8765, attempts=10):
+        websocket = None
+        for attempt in range(attempts):
+            try:
+                websocket = await websockets.connect(f"ws://{host}:{port}")
+                break
+            except OSError as e:
+                print(f"handle_event: {e}")
+                asyncio.sleep(1)
+        if websocket:
+            await self._receive_handshake(websocket)
+            asyncio.ensure_future(self._handle_messages(websocket))
+            return True
+        else:
+            return False
 
     async def _receive_handshake(self, websocket):
         massage = await websocket.recv()
