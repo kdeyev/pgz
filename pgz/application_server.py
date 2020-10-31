@@ -4,6 +4,7 @@ import sys
 import pygame
 from websockets import server
 
+from .clock import FPSCalc
 from .clock import clock as global_clock
 
 
@@ -56,9 +57,12 @@ class Server:
 
     async def mainloop(self):
         clock = pygame.time.Clock()
+        fps_calc = FPSCalc(100)
 
         self.server.start_server()
         while True:
+            dt = clock.tick(self.update_rate) / 1000
+
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
             await asyncio.sleep(0)
             for event in pygame.event.get():
@@ -73,8 +77,9 @@ class Server:
                     if event.key == pygame.K_q and event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
                         sys.exit(0)
 
-            dt = clock.tick(self.update_rate) / 1000
-
             global_clock.tick(dt)
+            fps_calc.push(1.0 / dt)
+            if fps_calc.counter == 100:
+                print(f"Server fps {fps_calc.aver()}")
 
             await self.update(dt)

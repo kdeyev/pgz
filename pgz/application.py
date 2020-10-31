@@ -3,6 +3,7 @@ import sys
 
 import pygame
 
+from .clock import FPSCalc
 from .clock import clock as global_clock
 from .keyboard import keyboard
 from .multiplayer_scene import MultiplayerClient
@@ -135,12 +136,15 @@ class Application:
     async def mainloop(self):
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
+        fps_calc = FPSCalc(100)
 
         if isinstance(self._scene, MultiplayerClient):
             await self._scene.connect_to_server()
 
         # self.need_redraw = True
         while True:
+            dt = clock.tick(self.update_rate) / 1000
+
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
             await asyncio.sleep(0)
             for event in pygame.event.get():
@@ -160,9 +164,10 @@ class Application:
 
                 self.handle_event(event)
 
-            dt = clock.tick(self.update_rate) / 1000
-
             global_clock.tick(dt)
+            fps_calc.push(1.0 / dt)
+            if fps_calc.counter == 100:
+                print(f"Client fps {fps_calc.aver()}")
 
             self.update(dt)
 
