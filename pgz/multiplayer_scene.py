@@ -4,6 +4,7 @@ import time
 from re import T
 from uuid import uuid4
 
+import nest_asyncio
 import pygame
 import websockets
 
@@ -12,6 +13,8 @@ from .keyboard import Keyboard
 from .map_scene import MapScene
 from .rpc import Registrator, serialize_json_array_from_queue, serialize_json_rpc
 from .scene import EventDispatcher
+
+nest_asyncio.apply()
 
 
 class MultiplayerActor(Actor):
@@ -256,20 +259,27 @@ class MultiplayerSceneServer:
 
 
 class MultiplayerClient(MapScene):
-    def __init__(self, map):
+    def __init__(self, map, server_url):
         super().__init__(map)
         self.actors = {}
         self.central_actor = None
         self.uuid = None
         self._websocket = None
+        self.server_url = server_url
         self.rpc = Registrator()
         self.event_message_queue = asyncio.Queue()
 
     def on_exit(self, next_scene):
         super().on_exit(next_scene)
 
+        if self._websocket:
+            asyncio.get_event_loop().run_until_complete(self._websocket.close())
+            self._websocket = None
+
     def on_enter(self, previous_scene):
         super().on_enter(previous_scene)
+
+        asyncio.get_event_loop().run_until_complete(self.connect_to_server())
 
         @self.rpc.register
         def create_actor_on_client(uuid, client_uuid, image_name, central_actor):
@@ -321,11 +331,12 @@ class MultiplayerClient(MapScene):
             return
         self._send_message(json_message)
 
-    async def connect_to_server(self, host: str = "localhost", port: int = 8765, attempts=10):
+    async def connect_to_server(self, attempts=10):
         websocket = None
+
         for attempt in range(attempts):
             try:
-                websocket = await websockets.connect(f"ws://{host}:{port}")
+                websocket = await websockets.connect(self.server_url)
                 break
             except OSError as e:
                 print(f"handle_event: {e}")

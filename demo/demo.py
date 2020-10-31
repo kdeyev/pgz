@@ -156,7 +156,6 @@ if __name__ == "__main__":
 
     try:
         map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
-        game = Game(map)
         menu = Menu()
         app.run(menu)
 

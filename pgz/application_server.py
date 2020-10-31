@@ -40,7 +40,7 @@ class Server:
 
     def run(self, server):
         self.server = server
-        loop = asyncio.SelectorEventLoop()
+        loop = asyncio.get_event_loop()
         try:
             loop.run_until_complete(self.run_as_coroutine())
         finally:

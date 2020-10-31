@@ -117,7 +117,7 @@ class Application:
         else:
             self.change_scene(scene)
 
-        loop = asyncio.SelectorEventLoop()
+        loop = asyncio.get_event_loop()
         try:
             loop.run_until_complete(self.run_as_coroutine())
         finally:
@@ -138,8 +138,8 @@ class Application:
         clock = pygame.time.Clock()
         fps_calc = FPSCalc()
 
-        if isinstance(self._scene, MultiplayerClient):
-            await self._scene.connect_to_server()
+        # if isinstance(self._scene, MultiplayerClient):
+        #     await self._scene.connect_to_server()
 
         # self.need_redraw = True
         while True:
