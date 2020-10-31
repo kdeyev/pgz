@@ -112,7 +112,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
     #         self.update(dt)
 
     def update(self, dt):
-        self.map.update(dt)
+        pass
 
     def broadcast_property_change(self, uuid, prop, value):
         json_message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
@@ -163,6 +163,7 @@ class MultiplayerSceneServer:
         self.HeadlessSceneClass = HeadlessSceneClass
 
     async def update(self, dt):
+        self.map.update(dt)
         for scenes in self.clients.values():
             scenes.update(dt)
         await self._flush_messages()
