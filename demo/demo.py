@@ -91,14 +91,7 @@ class Game(pgz.MapScene):
         self.ship.y += 400
 
         # add our ship to the group
-        self.map.add_sprite(self.ship)
-
-    def draw(self, surface):
-
-        # center the map/screen on our Ship
-        self.map.set_center(self.ship.pos)
-
-        self.map.draw(surface)
+        self.add_actor(self.ship, central_actor=True)
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
@@ -117,8 +110,8 @@ class Game(pgz.MapScene):
     def on_mouse_down(self, pos, button):
         pgz.sounds.arrr.play()
 
-        ball = CannonBall(self.ship.pos, pos, self.map.remove_sprite)
-        self.map.add_sprite(ball)
+        ball = CannonBall(self.ship.pos, pos, self.remove_actor)
+        self.add_actor(ball)
 
         # pgz.global_clock.schedule_interval(self.boom, 1)
 

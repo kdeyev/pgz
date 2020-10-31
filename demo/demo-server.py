@@ -90,7 +90,7 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
     def on_enter(self, previous_scene):
         # super().on_enter(previous_scene)
 
-        self.ship = self.create_actor("Ship")
+        self.ship = self.create_actor("Ship", central_actor=True)
         self.ship.x = 600
         # put the ship in the center of the map
         # self.ship.position = self.map.get_center()
@@ -124,7 +124,6 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         # pgz.sounds.arrr.play()
 
         ball = self.create_actor("CannonBall", self.ship.pos, pos)
-        # self.map.add_sprite(ball)
 
         # pgz.global_clock.schedule_interval(self.boom, 1)
 

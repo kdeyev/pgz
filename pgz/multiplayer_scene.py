@@ -20,6 +20,7 @@ class MultiplayerActor(Actor):
     def __init__(self, image_name, uuid, deleter):
         super().__init__(image_name)
         self.uuid = uuid
+        self.client_uuid = None
         self.deleter = deleter
         self.keyboard = None
         self._on_prop_change = None
@@ -98,15 +99,16 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
         self.broadcast(message)
 
-    def create_actor(self, cls_name, *args, **kwargs):
+    def create_actor(self, cls_name, central_actor=False, *args, **kwargs):
         uuid = f"{cls_name}-{str(uuid4())}"
         actor = self.actor_factory[cls_name](uuid, self.remove_actor, *args, **kwargs)
+        self.client_uuid = self.uuid
         actor.keyboard = self.keyboard
         actor._on_prop_change = self.broadcast_property_change
         self.actors[uuid] = actor
         self.map.add_sprite(actor)
 
-        message = serialize_json_rpc("create_actor_on_client", (uuid, actor.image_name))
+        message = serialize_json_rpc("create_actor_on_client", (uuid, self.client_uuid, actor.image_name, central_actor))
         self.broadcast(message)
 
         return actor
@@ -148,9 +150,6 @@ class MultiplayerSceneServer:
                 await asyncio.wait([client.send(message) for client in self.clients])
             except Exception as e:
                 print(f"MultiplayerSceneServer._broadcast: {e}")
-
-    # def remove_actor(self, actor):
-    #     self.map.remove_sprite(actor)
 
     async def _send_handshake(self, websocket, uuid):
         actors = []
@@ -216,13 +215,10 @@ class MultiplayerClient(MapScene):
     def __init__(self, map):
         super().__init__(map)
         self.actors = {}
+        self.central_actor = None
         self.uuid = None
         self._websocket = None
         self.rpc = Registrator()
-
-    def draw(self, surface):
-        self.map.draw(surface)
-        super().draw(surface)
 
     def on_exit(self, next_scene):
         super().on_exit(next_scene)
@@ -231,16 +227,21 @@ class MultiplayerClient(MapScene):
         super().on_enter(previous_scene)
 
         @self.rpc.register
-        def create_actor_on_client(uuid, image_name):
+        def create_actor_on_client(uuid, client_uuid, image_name, central_actor):
             actor = Actor(image_name)
             self.actors[uuid] = actor
-            self.map.add_sprite(actor)
+
+            if client_uuid != self.uuid:
+                # Foreign actor cannot be central
+                central_actor = False
+
+            self.add_actor(actor, central_actor)
 
         @self.rpc.register
         def remove_actor_on_client(uuid):
             actor = self.actors[uuid]
             del self.actors[uuid]
-            self.map.remove_sprite(actor)
+            self.remove_actor(actor)
 
         @self.rpc.register
         def on_actor_prop_change(uuid, prop, value):
@@ -293,7 +294,7 @@ class MultiplayerClient(MapScene):
                 setattr(actor, attr, value)
 
             self.actors[uuid] = actor
-            self.map.add_sprite(actor)
+            self.add_actor(actor)
 
     async def _handle_messages(self, websocket):
         self._websocket = websocket
