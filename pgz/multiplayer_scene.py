@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 from re import T
 from uuid import uuid4
 
@@ -96,6 +97,20 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
     def handle_event(self, event):
         pass
 
+    def start_update_loop(self, update_rate):
+        self.update_loop_task = asyncio.ensure_future(self._update_loop(update_rate))
+
+    def stop_update_loop(self):
+        self.update_loop_task.cancel()
+
+    async def _update_loop(self, update_rate):
+        current_time = time.time()
+        while True:
+            last_time, current_time = current_time, time.time()
+            dt = 1 / update_rate - (current_time - last_time)
+            await asyncio.sleep(dt)  # tick
+            self.update(dt)
+
     def update(self, dt):
         self.map.update(dt)
 
@@ -141,21 +156,22 @@ class MultiplayerSceneServer:
         super().__init__()
         self.map = map
         self.clients = {}
-        self.broadcast_message_queue = asyncio.Queue()
+        self._message_queue = asyncio.Queue()
+        self.update_rate = 20
 
         assert issubclass(HeadlessSceneClass, MultiplayerClientHeadlessScene)
         self.HeadlessSceneClass = HeadlessSceneClass
 
     def broadcast(self, json_message):
-        self.broadcast_message_queue.put_nowait(json_message)
+        self._message_queue.put_nowait(json_message)
 
-    async def _flush_broadcast(self):
+    async def _flush_messages(self):
         if self.clients:  # asyncio.wait doesn't accept an empty list
             try:
                 # There are messages in the queue
-                if not self.broadcast_message_queue.empty():
+                if not self._message_queue.empty():
                     # create one json array
-                    message = serialize_json_array_from_queue(self.broadcast_message_queue)
+                    message = serialize_json_array_from_queue(self._message_queue)
                     # send broadcast
                     await asyncio.wait([client.send(message) for client in self.clients])
             except Exception as e:
@@ -181,6 +197,8 @@ class MultiplayerSceneServer:
 
         await self._send_handshake(websocket, uuid)
 
+        scene.start_update_loop(update_rate=self.update_rate)
+
         self.clients[websocket] = scene
         scene.on_enter(None)
 
@@ -191,6 +209,7 @@ class MultiplayerSceneServer:
         del self.clients[websocket]
 
         scene.on_exit(None)
+        scene.stop_update_loop()
         scene.remove_all_actors()
         # await notify_users()
 
@@ -214,12 +233,20 @@ class MultiplayerSceneServer:
             await self._unregister_client(websocket)
 
     def start_server(self, host: str = "localhost", port: int = 8765):
-        asyncio.ensure_future(websockets.serve(self._serve_client, host, port))
+        self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))
+        self._flush_messages_task = asyncio.ensure_future(self._flush_messages_loop())
 
-    async def update(self, dt):
-        for scenes in self.clients.values():
-            scenes.update(dt)
-        await self._flush_broadcast()
+    def stop_server(self):
+        self._server_task.cancel()
+        self._flush_messages_task.cancel()
+
+    async def _flush_messages_loop(self):
+        current_time = time.time()
+        while True:
+            last_time, current_time = current_time, time.time()
+            dt = 1 / self.update_rate - (current_time - last_time)
+            await asyncio.sleep(dt)  # tick
+            await self._flush_messages()
 
 
 class MultiplayerClient(MapScene):
