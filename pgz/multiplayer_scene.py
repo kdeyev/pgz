@@ -66,12 +66,16 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
 
         @self.rpc.register
         def handle_client_event(event_type, attributes):
+            # Deserialize event
             event = pygame.event.Event(event_type, **attributes)
+
+            # Update local keyboard helper
             if event.type == pygame.KEYDOWN:
                 self.keyboard._press(event.key)
             elif event.type == pygame.KEYUP:
                 self.keyboard._release(event.key)
 
+            # Dispatch events thru EventDispatcher
             try:
                 self.dispatch_event(event)
             except Exception as e:
