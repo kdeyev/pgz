@@ -345,7 +345,7 @@ class MultiplayerClient(MapScene):
                 asyncio.sleep(1)
         if websocket:
             await self._receive_handshake(websocket)
-            asyncio.ensure_future(self._handle_messages(websocket))
+            asyncio.ensure_future(self._handle_messages())
             return True
         else:
             return False
@@ -364,9 +364,9 @@ class MultiplayerClient(MapScene):
 
             self.actors[uuid] = actor
             self.add_actor(actor)
-
-    async def _handle_messages(self, websocket):
         self._websocket = websocket
+
+    async def _handle_messages(self):
         async for message in self._websocket:
             try:
                 json_messages = json.loads(message)
