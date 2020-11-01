@@ -21,11 +21,12 @@ class MultiplayerActor(Actor):
     # DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
     SEND = Actor.DELEGATED_ATTRIBUTES + ["angle", "image_name"]
 
-    def __init__(self, image_name, uuid, deleter):
+    def __init__(self, image_name):
         super().__init__(image_name)
-        self.uuid = uuid
+        self.uuid = f"{self.__class__.__name__}-{str(uuid4())}"
+
         self.client_uuid = None
-        self.deleter = deleter
+        self.deleter = None
         self.keyboard = None
         self._on_prop_change = None
 
@@ -61,7 +62,6 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.uuid = None
         self.map = None
         self.broadcast = None
-        self.actor_factory = {}
         self.actors = {}
         self.rpc = Registrator()
         self.keyboard = Keyboard()
@@ -121,16 +121,15 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         json_message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
         self.broadcast(json_message)
 
-    def create_actor(self, cls_name, central_actor=False, *args, **kwargs):
-        uuid = f"{cls_name}-{str(uuid4())}"
-        actor = self.actor_factory[cls_name](uuid, self.remove_actor, *args, **kwargs)
-        self.client_uuid = self.uuid
+    def add_actor(self, actor, central_actor=False):
+        actor.client_uuid = self.uuid
+        actor.deleter = self.remove_actor
         actor.keyboard = self.keyboard
         actor._on_prop_change = self.broadcast_property_change
-        self.actors[uuid] = actor
+        self.actors[actor.uuid] = actor
         self.map.add_sprite(actor)
 
-        json_message = serialize_json_rpc("create_actor_on_client", (uuid, self.client_uuid, actor.image_name, central_actor))
+        json_message = serialize_json_rpc("add_actor_on_client", (actor.uuid, self.uuid, actor.image_name, central_actor))
         self.broadcast(json_message)
 
         return actor
@@ -284,7 +283,7 @@ class MultiplayerClient(MapScene):
             raise Exception("Cannot connect")
 
         @self.rpc.register
-        def create_actor_on_client(uuid, client_uuid, image_name, central_actor):
+        def add_actor_on_client(uuid, client_uuid, image_name, central_actor):
             actor = Actor(image_name)
             self.actors[uuid] = actor
 
@@ -326,6 +325,18 @@ class MultiplayerClient(MapScene):
             await self._websocket.send(message)
 
     def handle_event(self, event):
+
+        # this will be handled if the window is resized
+        if event.type == pygame.VIDEORESIZE:
+            self.map.set_size((event.w, event.h))
+            return
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_EQUALS:
+                self.map.change_zoom(0.25)
+            elif event.key == pygame.K_MINUS:
+                self.map.change_zoom(-0.25)
+
         if not self._websocket:
             # not connected yet
             return
@@ -377,3 +388,9 @@ class MultiplayerClient(MapScene):
                 self.rpc.dispatch(json_messages)
             except Exception as e:
                 print(f"_handle_messages: {e}")
+
+    # def on_key_down(self, key):
+    #     if key == pygame.K_EQUALS:
+    #         self.map.change_zoom(0.25)
+    #     elif key == pygame.K_MINUS:
+    #         self.map.change_zoom(-0.25)

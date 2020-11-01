@@ -12,8 +12,8 @@ pgz.set_resource_root("demo/resources")
 
 
 class Ship(pgz.MultiplayerActor):
-    def __init__(self, uuid, deleter):
-        super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]), uuid, deleter)
+    def __init__(self):
+        super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]))
 
         self.speed = 200
         self.velocity = [0, 0]
@@ -73,8 +73,8 @@ class Ship(pgz.MultiplayerActor):
 
 
 class CannonBall(pgz.MultiplayerActor):
-    def __init__(self, uuid, deleter, pos, target):
-        super().__init__("cannonball", uuid, deleter)
+    def __init__(self, pos, target):
+        super().__init__("cannonball")
 
         self.pos = pos
         self.target = target
@@ -111,18 +111,15 @@ class CannonBall(pgz.MultiplayerActor):
 class GameScene(pgz.MultiplayerClientHeadlessScene):
     def __init__(self):
         super().__init__()
-        self.fps_calc = FPSCalc()
-        self.actor_factory = {"Ship": Ship, "CannonBall": CannonBall}
 
     def on_enter(self, previous_scene):
         # super().on_enter(previous_scene)
 
-        self.ship = self.create_actor("Ship", central_actor=True)
-        self.ship.x = 600
+        self.ship = Ship()
+        self.ship = self.add_actor(self.ship, central_actor=True)
+
         # put the ship in the center of the map
-        # self.ship.position = self.map.get_center()
-        # self.ship.x += 600
-        # self.ship.y += 400
+        self.ship.pos = self.map.get_center()
 
     # def draw(self, surface):
 
@@ -139,10 +136,6 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         if self.map.collide(self.ship):
             self.ship.move_back(dt)
 
-        self.fps_calc.push(1.0 / dt)
-        if self.fps_calc.counter == 100:
-            print(f"Scene {self.uuid} fps {self.fps_calc.aver()}")
-
     def on_mouse_move(self, pos):
         angle = self.ship.angle_to(pos) + 90
         self.ship.angle = angle
@@ -154,22 +147,8 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
 
         # pgz.sounds.arrr.play()
 
-        ball = self.create_actor("CannonBall", pos=self.ship.pos, target=pos)
-
-        # pgz.global_clock.schedule_interval(self.boom, 1)
-
-    def on_key_down(self, key):
-        if key == pygame.K_EQUALS:
-            self.map.change_zoom(0.25)
-        elif key == pygame.K_MINUS:
-            self.map.change_zoom(-0.25)
-
-    def handle_event(self, event):
-        """Handle pygame input events"""
-
-        # this will be handled if the window is resized
-        if event.type == pygame.VIDEORESIZE:
-            self.map.set_size((event.w, event.h))
+        ball = CannonBall(pos=self.ship.pos, target=pos)
+        self.add_actor(ball)
 
 
 class ServerScene(pgz.Scene):
@@ -193,6 +172,10 @@ class ServerScene(pgz.Scene):
         super().update(dt)
         if self.server:
             self.server.update(dt)
+
+    # def draw(self, screen):
+    #     super().draw(screen)
+    #     self.screen.draw.text(self.server_url, pos=(300, 0))
 
 
 class Menu(pgz.MenuScene):
