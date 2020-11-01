@@ -185,7 +185,7 @@ if __name__ == "__main__":
         scene_server = pgz.MultiplayerSceneServer(server_map, GameScene)
 
         map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
-        menu = pgz.MultiplayerClient(map)
+        menu = pgz.MultiplayerClient(map, "ws://localhost:8765")
 
         app.run(scene_server)
 
