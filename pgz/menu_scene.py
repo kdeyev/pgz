@@ -24,7 +24,7 @@ class MenuScene(Scene):
         self._menu = menu
 
     def draw(self, surface):
-        self.menu.mainloop(surface)
+        self.menu.mainloop(surface, disable_loop=True)
 
     def on_exit(self, next_scene):
         self.menu.disable()
