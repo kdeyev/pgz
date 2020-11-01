@@ -280,6 +280,8 @@ class MultiplayerClient(MapScene):
         super().on_enter(previous_scene)
 
         asyncio.get_event_loop().run_until_complete(self.connect_to_server())
+        if not self._websocket:
+            raise Exception("Cannot connect")
 
         @self.rpc.register
         def create_actor_on_client(uuid, client_uuid, image_name, central_actor):
