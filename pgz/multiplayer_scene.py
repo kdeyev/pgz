@@ -165,11 +165,11 @@ class MultiplayerSceneServer:
         assert issubclass(HeadlessSceneClass, MultiplayerClientHeadlessScene)
         self.HeadlessSceneClass = HeadlessSceneClass
 
-    async def update(self, dt):
+    def update(self, dt):
         self.map.update(dt)
         for scenes in self.clients.values():
             scenes.update(dt)
-        await self._flush_messages()
+        asyncio.ensure_future(self._flush_messages())
 
     def broadcast(self, json_message):
         self._message_queue.put_nowait(json_message)

@@ -3,6 +3,7 @@ import random
 import time
 
 import pygame
+import pygame_menu
 
 import pgz
 from pgz.clock import FPSCalc
@@ -171,8 +172,70 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
             self.map.set_size((event.w, event.h))
 
 
+class DummyScene(pgz.Scene):
+    def __init__(self, menu=None):
+        super().__init__()
+
+    def draw(self, surface):
+        pass
+        # self.menu.mainloop(surface, disable_loop=True)
+
+    def on_enter(self, previous_scene):
+        super().on_enter(previous_scene=previous_scene)
+        map = pgz.ScrollMap((1280, 720), "default.tmx", ["Islands"])
+        # Supposed to have it's onw map
+        self.server = pgz.MultiplayerSceneServer(map, GameScene)
+        self.server.start_server()
+        pass
+        # self.menu.disable()
+
+    def handle_event(self, event):
+        pass
+        # self.menu.update([event])
+
+    def update(self, dt):
+        super().update(dt)
+        if self.server:
+            self.server.update(dt)
+
+
+class Menu(pgz.MenuScene):
+    def __init__(
+        self,
+    ):
+        super().__init__()
+
+        self.server = None
+
+        self.menu = pygame_menu.Menu(300, 400, "Server", theme=pygame_menu.themes.THEME_BLUE)
+        self.build_menu()
+
+    def start_the_game(self):
+        data = self.menu.get_input_data()
+        port = data["port"]
+
+        game = DummyScene()
+        self.application.change_scene(game)
+
+    # def stop_the_game(self):
+    #     self.server.stop_server()
+    #     self.server = None
+
+    #     self.build_menu()
+
+    def build_menu(self):
+        self.menu.clear()
+        if not self.server:
+            self.port_widget = self.menu.add_text_input("Port :", textinput_id="port", default="8765", valid_chars=[str(i) for i in range(9)])
+            self.menu.add_button("Start", self.start_the_game)
+        else:
+            self.menu.add_button("Stop", self.stop_the_game)
+
+        self.menu.add_button("Quit", pygame_menu.events.EXIT)
+
+
 if __name__ == "__main__":
-    app = pgz.Server(
+    app = pgz.Application(
         title="My First EzPyGame Application!",
         resolution=(1280, 720),
         update_rate=60,
@@ -180,14 +243,8 @@ if __name__ == "__main__":
 
     try:
 
-        server_map = pgz.ScrollMap((1280, 720), "default.tmx", ["Islands"])
-        # Supposed to have it's onw map
-        scene_server = pgz.MultiplayerSceneServer(server_map, GameScene)
-
-        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
-        menu = pgz.MultiplayerClient(map, "ws://localhost:8765")
-
-        app.run(scene_server)
+        menu = Menu()
+        app.run(menu)
 
     except Exception:
         # pygame.quit()

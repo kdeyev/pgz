@@ -117,17 +117,15 @@ class Application:
         else:
             self.change_scene(scene)
 
-        loop = asyncio.get_event_loop()
         try:
-            loop.run_until_complete(self.run_as_coroutine())
+            asyncio.get_event_loop().run_until_complete(self.run_as_coroutine())
         finally:
-            loop.close()
+            asyncio.get_event_loop().close()
 
-    @asyncio.coroutine
-    def run_as_coroutine(self):
+    async def run_as_coroutine(self):
         self.running = True
         try:
-            yield from self.mainloop()
+            await self.mainloop()
         finally:
             pygame.display.quit()
             pygame.mixer.quit()
@@ -137,9 +135,6 @@ class Application:
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
         fps_calc = FPSCalc()
-
-        # if isinstance(self._scene, MultiplayerClient):
-        #     await self._scene.connect_to_server()
 
         # self.need_redraw = True
         while True:
