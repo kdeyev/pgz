@@ -8,6 +8,7 @@ pyscroll = "*"
 pygame-menu = "*"
 websockets = "*"
 nest-asyncio = "*"
+numpy = "*"
 
 [dev-packages]
 pre-commit = "*"

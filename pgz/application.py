@@ -7,6 +7,7 @@ from .clock import FPSCalc
 from .clock import clock as global_clock
 from .keyboard import keyboard
 from .multiplayer_scene import MultiplayerClient
+from .screen import Screen
 
 
 class Application:
@@ -67,12 +68,21 @@ class Application:
         pygame.display.set_caption(value)
 
     @property
+    def screen(self):
+        return self._pg_screen
+
+    @property
+    def clock(self):
+        return global_clock
+
+    @property
     def resolution(self):
         return self._screen.get_size()
 
     @resolution.setter
     def resolution(self, value):
         self._screen = pygame.display.set_mode(value)
+        self._pg_screen = Screen(self._screen)
 
     @property
     def active_scene(self):
@@ -136,8 +146,11 @@ class Application:
         clock = pygame.time.Clock()
         fps_calc = FPSCalc()
 
+        fps = 0
         # self.need_redraw = True
         while True:
+            self._pg_screen.clear()
+
             dt = clock.tick(self.update_rate) / 1000
 
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
@@ -162,12 +175,16 @@ class Application:
             global_clock.tick(dt)
             fps_calc.push(1.0 / dt)
             if fps_calc.counter == 100:
-                print(f"Client fps {fps_calc.aver()}")
+                fps = fps_calc.aver()
+                print(f"fps {fps}")
 
             self.update(dt)
 
             # screen_change = self.reinit_screen()
             # if screen_change or update or self._clock.fired or self.need_redraw:
             self.draw()
+
+            self._pg_screen.draw.text(f"FPS: {fps}", pos=(0, 0))
+
             pygame.display.update()
             # self.need_redraw = False

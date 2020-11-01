@@ -191,10 +191,13 @@ class Scene(EventDispatcher):
         """The host application that's currently running the scene."""
         return self._application
 
-    # @property
-    # def clock(self):
-    #     """The host application that's currently running the scene."""
-    #     return self._application.clock
+    @property
+    def screen(self):
+        return self._application.screen
+
+    @property
+    def clock(self):
+        return self._application.clock
 
     def draw(self, screen):
         """Override this with the scene drawing.

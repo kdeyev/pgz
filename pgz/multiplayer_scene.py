@@ -310,6 +310,10 @@ class MultiplayerClient(MapScene):
         asyncio.ensure_future(self._flush_messages())
         super().update(dt)
 
+    def draw(self, screen):
+        super().draw(screen)
+        self.screen.draw.text(self.server_url, pos=(300, 0))
+
     def _send_message(self, json_message):
         self.event_message_queue.put_nowait(json_message)
         # await self._websocket.send(message)

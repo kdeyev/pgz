@@ -1,6 +1,7 @@
 import uuid
 
 import pygame
+import pygame_menu
 
 import pgz
 
@@ -10,7 +11,6 @@ pgz.set_resource_root("demo/resources")
 class Menu(pgz.MenuScene):
     def __init__(self):
         super().__init__()
-        import pygame_menu
 
         self.menu = pygame_menu.Menu(300, 400, "Welcome", theme=pygame_menu.themes.THEME_BLUE)
 
