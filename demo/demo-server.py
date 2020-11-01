@@ -172,26 +172,22 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
             self.map.set_size((event.w, event.h))
 
 
-class DummyScene(pgz.Scene):
-    def __init__(self, menu=None):
+class ServerScene(pgz.Scene):
+    def __init__(self, port):
         super().__init__()
-
-    def draw(self, surface):
-        pass
-        # self.menu.mainloop(surface, disable_loop=True)
+        self.port = port
 
     def on_enter(self, previous_scene):
         super().on_enter(previous_scene=previous_scene)
         map = pgz.ScrollMap((1280, 720), "default.tmx", ["Islands"])
-        # Supposed to have it's onw map
-        self.server = pgz.MultiplayerSceneServer(map, GameScene)
-        self.server.start_server()
-        pass
-        # self.menu.disable()
 
-    def handle_event(self, event):
-        pass
-        # self.menu.update([event])
+        # Build and start game server
+        self.server = pgz.MultiplayerSceneServer(map, GameScene)
+        self.server.start_server(port=self.port)
+
+    def on_exit(self, next_scene):
+        self.server.stop_server()
+        self.server = None
 
     def update(self, dt):
         super().update(dt)
@@ -214,14 +210,8 @@ class Menu(pgz.MenuScene):
         data = self.menu.get_input_data()
         port = data["port"]
 
-        game = DummyScene()
+        game = ServerScene(port)
         self.application.change_scene(game)
-
-    # def stop_the_game(self):
-    #     self.server.stop_server()
-    #     self.server = None
-
-    #     self.build_menu()
 
     def build_menu(self):
         self.menu.clear()
