@@ -1,20 +1,50 @@
 import asyncio
 import json
 import time
-from re import T
+from typing import Tuple
+
+# from re import T
 from uuid import uuid4
 
 import nest_asyncio
 import pygame
 import websockets
 
+# import jsonrpc_base
 from .actor import Actor
+from .jsonrpc_client import Server
 from .keyboard import Keyboard
 from .map_scene import MapScene
 from .rpc import Registrator, serialize_json_array_from_queue, serialize_json_rpc
 from .scene import EventDispatcher
 
 nest_asyncio.apply()
+
+
+class RPCScreen(Server):
+    def __init__(self, size):
+        super().__init__()
+        self._size = size
+        self._prev_messages = []
+        self._messages = []
+
+    # def __request(self, method_name, args=None, kwargs=None):
+    #     kwargs["_notification"] = Tuple
+    #     super().__request(method_name, args, kwargs)
+
+    def send_message(self, message):
+        json_message = serialize_json_rpc(message.method, message.params)
+        self._messages.append(json_message)
+
+    def _get_messages(self):
+        from deepdiff import DeepDiff
+
+        if DeepDiff(self._messages, self._prev_messages) == {}:
+            self._messages.clear()
+            return False, []
+        self._prev_messages = self._messages[:]
+        self._messages.clear()
+        return True, self._prev_messages[:]
 
 
 class MultiplayerActor(Actor):
@@ -66,6 +96,9 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.rpc = Registrator()
         self.keyboard = Keyboard()
 
+        # TODO
+        self.resolution = (1600, 1200)
+
         self.load_handlers()
 
         @self.rpc.register
@@ -84,6 +117,29 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
                 self.dispatch_event(event)
             except Exception as e:
                 print(f"handle_client_event: {e}")
+
+    @property
+    def screen(self):
+        return self._screen
+
+    @property
+    def resolution(self):
+        return self._screen.surface.get_size()
+
+    @resolution.setter
+    def resolution(self, value):
+        self._screen = RPCScreen(value)
+
+    def redraw(self):
+        # self._screen.clear()
+        self.draw(self._screen)
+        changed, data = self._screen._get_messages()
+        if changed:
+            json_message = serialize_json_rpc("on_screen_redraw", (data,))
+            self.broadcast(json_message)
+
+    def draw(self, screen):
+        screen.draw.text(text="from server", pos=(500, 0))
 
     def handle_message(self, message):
         try:
@@ -168,6 +224,10 @@ class MultiplayerSceneServer:
         self.map.update(dt)
         for scenes in self.clients.values():
             scenes.update(dt)
+
+        # server calls internal redraw
+        for scenes in self.clients.values():
+            scenes.redraw()
         asyncio.ensure_future(self._flush_messages())
 
     def broadcast(self, json_message):
@@ -267,6 +327,7 @@ class MultiplayerClient(MapScene):
         self.server_url = server_url
         self.rpc = Registrator()
         self.event_message_queue = asyncio.Queue()
+        self._last_screen_update = []
 
     def on_exit(self, next_scene):
         super().on_exit(next_scene)
@@ -305,13 +366,23 @@ class MultiplayerClient(MapScene):
             actor = self.actors[uuid]
             actor.__setattr__(prop, value)
 
+        @self.rpc.register
+        def on_screen_redraw(data):
+            self._last_screen_update = data
+
     def update(self, dt):
         asyncio.ensure_future(self._flush_messages())
         super().update(dt)
 
     def draw(self, screen):
         super().draw(screen)
+        self._draw_latest_updates()
         self.screen.draw.text(self.server_url, pos=(300, 0))
+
+    def _draw_latest_updates(self):
+        for update in self._last_screen_update:
+            if update["method"] == "draw.text":
+                self.screen.draw.text(**update["params"])
 
     def _send_message(self, json_message):
         self.event_message_queue.put_nowait(json_message)

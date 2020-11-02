@@ -121,12 +121,8 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         # put the ship in the center of the map
         self.ship.pos = self.map.get_center()
 
-    # def draw(self, surface):
-
-    #     # center the map/screen on our Ship
-    #     self.map.set_center(self.ship.pos)
-
-    #     self.map.draw(surface)
+    def draw(self, screen):
+        self.screen.draw.text(text=f"from server {self.ship.x}", pos=(500, 0))
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
@@ -140,13 +136,8 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         angle = self.ship.angle_to(pos) + 90
         self.ship.angle = angle
 
-    def boom(self):
-        print("boom")
-
     def on_mouse_down(self, pos, button):
-
         # pgz.sounds.arrr.play()
-
         ball = CannonBall(pos=self.ship.pos, target=pos)
         self.add_actor(ball)
 

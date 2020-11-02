@@ -10,6 +10,7 @@ websockets = "*"
 nest-asyncio = "*"
 numpy = "*"
 py-json-rpc = "*"
+deepdiff = "*"
 
 [dev-packages]
 pre-commit = "*"
