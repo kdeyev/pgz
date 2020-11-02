@@ -12,39 +12,13 @@ import websockets
 
 # import jsonrpc_base
 from .actor import Actor
-from .jsonrpc_client import Server
 from .keyboard import Keyboard
 from .map_scene import MapScene
 from .rpc import Registrator, serialize_json_array_from_queue, serialize_json_rpc
 from .scene import EventDispatcher
+from .screen_rpc import RPCScreenClient, RPCScreenServer
 
 nest_asyncio.apply()
-
-
-class RPCScreen(Server):
-    def __init__(self, size):
-        super().__init__()
-        self._size = size
-        self._prev_messages = []
-        self._messages = []
-
-    # def __request(self, method_name, args=None, kwargs=None):
-    #     kwargs["_notification"] = Tuple
-    #     super().__request(method_name, args, kwargs)
-
-    def send_message(self, message):
-        json_message = serialize_json_rpc(message.method, message.params)
-        self._messages.append(json_message)
-
-    def _get_messages(self):
-        from deepdiff import DeepDiff
-
-        if DeepDiff(self._messages, self._prev_messages) == {}:
-            self._messages.clear()
-            return False, []
-        self._prev_messages = self._messages[:]
-        self._messages.clear()
-        return True, self._prev_messages[:]
 
 
 class MultiplayerActor(Actor):
@@ -130,7 +104,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
 
     @resolution.setter
     def resolution(self, value):
-        self._screen = RPCScreen(value)
+        self._screen = RPCScreenServer(value)
 
     def redraw(self):
         # self._screen.clear()
@@ -339,7 +313,7 @@ class MultiplayerClient(MapScene):
         self.server_url = server_url
         self.rpc = Registrator()
         self.event_message_queue = asyncio.Queue()
-        self._last_screen_update = []
+        self._screen_client = RPCScreenClient()
 
     def on_exit(self, next_scene):
         super().on_exit(next_scene)
@@ -380,7 +354,7 @@ class MultiplayerClient(MapScene):
 
         @self.rpc.register
         def on_screen_redraw(data):
-            self._last_screen_update = data
+            self._screen_client.set_messages(data)
 
     def update(self, dt):
         asyncio.ensure_future(self._flush_messages())
@@ -388,13 +362,8 @@ class MultiplayerClient(MapScene):
 
     def draw(self, screen):
         super().draw(screen)
-        self._draw_latest_updates()
+        self._screen_client.draw(self.screen)
         self.screen.draw.text(self.server_url, pos=(300, 0))
-
-    def _draw_latest_updates(self):
-        for update in self._last_screen_update:
-            if update["method"] == "draw.text":
-                self.screen.draw.text(**update["params"])
 
     def _send_message(self, json_message):
         self.event_message_queue.put_nowait(json_message)
