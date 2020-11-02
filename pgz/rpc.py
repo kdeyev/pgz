@@ -4,8 +4,7 @@ from functools import wraps
 from typing import Any, Callable, Optional, Tuple
 
 import websockets
-
-from .json_rpc import Registrator
+from json_rpc import Registrator
 
 
 def serialize_json_rpc(method_name, args=None, kwargs=None, is_notification=True):

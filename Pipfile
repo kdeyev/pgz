@@ -9,6 +9,7 @@ pygame-menu = "*"
 websockets = "*"
 nest-asyncio = "*"
 numpy = "*"
+py-json-rpc = "*"
 
 [dev-packages]
 pre-commit = "*"
