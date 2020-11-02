@@ -91,10 +91,12 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         super().__init__()
         self.uuid = None
         self.map = None
-        self.broadcast = None
+        self.broadcast_message = None
         self.actors = {}
         self.rpc = Registrator()
         self.keyboard = Keyboard()
+
+        self.message_queue = asyncio.Queue()
 
         # TODO
         self.resolution = (1600, 1200)
@@ -136,7 +138,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         changed, data = self._screen._get_messages()
         if changed:
             json_message = serialize_json_rpc("on_screen_redraw", (data,))
-            self.broadcast(json_message)
+            self.send_message(json_message)
 
     def draw(self, screen):
         screen.draw.text(text="from server", pos=(500, 0))
@@ -175,7 +177,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
 
     def broadcast_property_change(self, uuid, prop, value):
         json_message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
-        self.broadcast(json_message)
+        self.broadcast_message(json_message)
 
     def add_actor(self, actor, central_actor=False):
         actor.client_uuid = self.uuid
@@ -186,7 +188,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.map.add_sprite(actor)
 
         json_message = serialize_json_rpc("add_actor_on_client", (actor.uuid, self.uuid, actor.image_name, central_actor))
-        self.broadcast(json_message)
+        self.broadcast_message(json_message)
 
         return actor
 
@@ -194,7 +196,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         uuid = actor.uuid
         self.map.remove_sprite(actor)
         json_message = serialize_json_rpc("remove_actor_on_client", (uuid,))
-        self.broadcast(json_message)
+        self.broadcast_message(json_message)
 
     def remove_actor(self, actor):
         self._remove_actor(actor)
@@ -208,13 +210,16 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
 
         self.actors = {}
 
+    def send_message(self, json_message):
+        self.message_queue.put_nowait(json_message)
+
 
 class MultiplayerSceneServer:
     def __init__(self, map, HeadlessSceneClass):
         super().__init__()
         self.map = map
         self.clients = {}
-        self._message_queue = asyncio.Queue()
+
         self.update_rate = 20
 
         assert issubclass(HeadlessSceneClass, MultiplayerClientHeadlessScene)
@@ -230,18 +235,25 @@ class MultiplayerSceneServer:
             scenes.redraw()
         asyncio.ensure_future(self._flush_messages())
 
-    def broadcast(self, json_message):
-        self._message_queue.put_nowait(json_message)
+    def broadcast_message(self, json_message):
+        for scene in self.clients.values():
+            scene.message_queue.put_nowait(json_message)
 
     async def _flush_messages(self):
         if self.clients:  # asyncio.wait doesn't accept an empty list
             try:
-                # There are messages in the queue
-                if not self._message_queue.empty():
-                    # create one json array
-                    message = serialize_json_array_from_queue(self._message_queue)
-                    # send broadcast
-                    await asyncio.wait([client.send(message) for client in self.clients])
+                send_events = []
+                for websocket, scene in self.clients.items():
+                    # There are messages in the queue
+                    if not scene.message_queue.empty():
+                        # create one json array
+                        message = serialize_json_array_from_queue(scene.message_queue)
+                        # send broadcast
+                        send_event = websocket.send(message)
+                        send_events.append(send_event)
+
+                # wait for all events
+                await asyncio.wait(send_events)
             except Exception as e:
                 print(f"MultiplayerSceneServer._broadcast: {e}")
 
@@ -260,7 +272,7 @@ class MultiplayerSceneServer:
 
         scene = self.HeadlessSceneClass()
         scene.map = self.map
-        scene.broadcast = self.broadcast
+        scene.broadcast_message = self.broadcast_message
         scene.uuid = uuid
 
         await self._send_handshake(websocket, uuid)
