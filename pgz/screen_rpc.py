@@ -4,7 +4,7 @@ from deepdiff import DeepDiff
 from .rect import RECT_CLASSES, ZRect
 
 # from .jsonrpc_client import Server
-from .rpc import Registrator, serialize_json_rpc
+from .rpc import SimpleRPC, serialize_json_message
 from .screen import RECT_CLASSES, ZRect, make_color, ptext, round_pos
 
 
@@ -19,19 +19,19 @@ class RPCSurfacePainter:
         start = round_pos(start)
         end = round_pos(end)
 
-        self._massages.append(serialize_json_rpc("draw.line", (make_color(color), start, end, width)))
+        self._massages.append(serialize_json_message("draw.line", (make_color(color), start, end, width)))
         # pygame.draw.line(self._surf, make_color(color), start, end, width)
 
     def circle(self, pos, radius, color, width=1):
         """Draw a circle."""
         pos = round_pos(pos)
-        self._massages.append(serialize_json_rpc("draw.circle", (make_color(color), pos, radius, width)))
+        self._massages.append(serialize_json_message("draw.circle", (make_color(color), pos, radius, width)))
         # pygame.draw.circle(self._surf, make_color(color), pos, radius, width)
 
     def filled_circle(self, pos, radius, color):
         """Draw a filled circle."""
         pos = round_pos(pos)
-        self._massages.append(serialize_json_rpc("draw.circle", (make_color(color), pos, radius, 0)))
+        self._massages.append(serialize_json_message("draw.circle", (make_color(color), pos, radius, 0)))
         # pygame.draw.circle(self._surf, make_color(color), pos, radius, 0)
 
     def polygon(self, points, color):
@@ -41,7 +41,7 @@ class RPCSurfacePainter:
         except TypeError:
             raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw") from None  # noqa
         points = [round_pos(point) for point in points]
-        self._massages.append(serialize_json_rpc("draw.polygon", (make_color(color), points, 1)))
+        self._massages.append(serialize_json_message("draw.polygon", (make_color(color), points, 1)))
         # pygame.draw.polygon(self._surf, make_color(color), points, 1)
 
     def filled_polygon(self, points, color):
@@ -51,33 +51,33 @@ class RPCSurfacePainter:
         except TypeError:
             raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw") from None  # noqa
         points = [round_pos(point) for point in points]
-        self._massages.append(serialize_json_rpc("draw.polygon", (make_color(color), points, 0)))
+        self._massages.append(serialize_json_message("draw.polygon", (make_color(color), points, 0)))
         # pygame.draw.polygon(self._surf, make_color(color), points, 0)
 
     def rect(self, rect, color, width=1):
         """Draw a rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
-        self._massages.append(serialize_json_rpc("draw.rect", (make_color(color), rect, width)))
+        self._massages.append(serialize_json_message("draw.rect", (make_color(color), rect, width)))
         # pygame.draw.rect(self._surf, make_color(color), rect, width)
 
     def filled_rect(self, rect, color):
         """Draw a filled rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
-        self._massages.append(serialize_json_rpc("draw.rect", (make_color(color), rect, 0)))
+        self._massages.append(serialize_json_message("draw.rect", (make_color(color), rect, 0)))
         # pygame.draw.rect(self._surf, make_color(color), rect, 0)
 
     def text(self, *args, **kwargs):
         """Draw text to the screen."""
         # FIXME: expose ptext parameters, for autocompletion and autodoc
-        self._massages.append(serialize_json_rpc("ptext.draw", args=args, kwargs=kwargs))
+        self._massages.append(serialize_json_message("ptext.draw", args=args, kwargs=kwargs))
         # ptext.draw(*args, surf=self._surf, **kwargs)
 
     def textbox(self, *args, **kwargs):
         """Draw text to the screen, wrapped to fit a box"""
         # FIXME: expose ptext parameters, for autocompletion and autodoc
-        self._massages.append(serialize_json_rpc("ptext.drawbox", args=args, kwargs=kwargs))
+        self._massages.append(serialize_json_message("ptext.drawbox", args=args, kwargs=kwargs))
         # ptext.drawbox(*args, surf=self._surf, **kwargs)
 
 
@@ -91,7 +91,7 @@ class RPCScreenServer:
         self.width, self.height = size
 
     # def send_message(self, message):
-    #     json_message = serialize_json_rpc(message.method, message.params)
+    #     json_message = serialize_json_message(message.method, message.params)
     #     self._messages.append(json_message)
 
     def _get_messages(self):
@@ -108,11 +108,11 @@ class RPCScreenServer:
 
     def clear(self):
         """Clear the screen to black."""
-        self._massages.append(serialize_json_rpc("fill", (0, 0, 0)))
+        self._massages.append(serialize_json_message("fill", (0, 0, 0)))
         # self.fill((0, 0, 0))
 
     def fill(self, color, gcolor=None):
-        self._massages.append(serialize_json_rpc("fill", (color, gcolor)))
+        self._massages.append(serialize_json_message("fill", (color, gcolor)))
 
         # """Fill the screen with a colour."""
         # if gcolor:
@@ -127,7 +127,7 @@ class RPCScreenServer:
         #     self.surface.fill(make_color(color))
 
     def blit(self, image, pos):
-        self._massages.append(serialize_json_rpc("blit", (image, pos)))
+        self._massages.append(serialize_json_message("blit", (image, pos)))
         # if isinstance(image, str):
         #     image = loaders.images.load(image)
         # self.surface.blit(image, pos)
@@ -144,14 +144,14 @@ class RPCScreenClient:
     def __init__(self):
         self._messages = []
         self._surf = None
-        self.rpc = Registrator()
+        self.rpc = SimpleRPC()
 
         @self.rpc.register("draw.line")
-        def draw_line(self, start, end, color, width=1):
+        def draw_line(start, end, color, width=1):
             pygame.draw.line(self._surf, make_color(color), start, end, width)
 
         @self.rpc.register("ptext.draw")
-        def ptext_draw(self, *args, **kwargs):
+        def ptext_draw(args, kwargs):
             ptext.draw(*args, surf=self._surf, **kwargs)
 
     def set_messages(self, messages):
@@ -159,5 +159,4 @@ class RPCScreenClient:
 
     def draw(self, screen):
         self._surf = screen
-
         self.rpc.dispatch(self._messages)

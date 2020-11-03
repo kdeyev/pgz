@@ -1,10 +1,55 @@
 import asyncio
 import json
 from functools import wraps
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import websockets
-from json_rpc import Registrator
+
+from .json_rpc import Registrator
+
+
+class SimpleRPC:
+    def __init__(self) -> None:
+        self._functions = {}
+
+    def _set_rpc(self, name, func):
+        self._functions[name] = func
+        return func
+
+    def register(self, target):
+        if isinstance(target, str):
+
+            # call as decorator with argument
+            def decorate(func):
+                return self._set_rpc(target, func)
+
+            return decorate
+
+        else:
+            # call as normal decorator
+            func = target
+            return self._set_rpc(func.__name__, func)
+
+    def __call__(self, request):
+        return self.register(request)
+
+    def dispatch(self, request):
+        if isinstance(request, List):
+            for r in request:
+                self._dispatch(r)
+        else:
+            return self._dispatch(request)
+
+    def _dispatch(self, request):
+        method = request["method"]
+        args = request["args"]
+        kwargs = request["kwargs"]
+        func = self._functions[method]
+        func(*args, **kwargs)
+
+
+def serialize_json_message(method_name, *args, **kwarg):
+    return {"method": method_name, "args": args, "kwargs": kwarg}
 
 
 def serialize_json_rpc(method_name, args=None, kwargs=None, is_notification=True):
