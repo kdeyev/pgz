@@ -173,18 +173,18 @@ class Scene(EventDispatcher):
         my_scene1 = MyScene(title='My Second Awesome Scene')
     """
 
-    title = None
-    resolution = None
-    update_rate = None
+    # title = None
+    # resolution = None
+    # update_rate = None
 
-    def __init__(self, title=None, resolution=None, update_rate=None):
-        self._application = None
-        if title is not None:
-            self.title = title
-        if resolution is not None:
-            self.resolution = resolution
-        if update_rate is not None:
-            self.update_rate = update_rate
+    # def __init__(self, title=None, resolution=None, update_rate=None):
+    #     self._application = None
+    #     if title is not None:
+    #         self.title = title
+    #     if resolution is not None:
+    #         self.resolution = resolution
+    #     if update_rate is not None:
+    #         self.update_rate = update_rate
 
     @property
     def application(self):
@@ -193,11 +193,15 @@ class Scene(EventDispatcher):
 
     @property
     def screen(self):
-        return self._application.screen
+        return self.application.screen
+
+    @property
+    def resolution(self):
+        return self.application.resolution
 
     @property
     def clock(self):
-        return self._application.clock
+        return self.application.clock
 
     def draw(self, screen):
         """Override this with the scene drawing.
@@ -233,10 +237,10 @@ class Scene(EventDispatcher):
 
         :param Scene|None previous_scene: previous scene to run
         """
-        for attr in ("title", "resolution", "update_rate"):
-            value = getattr(self, attr)
-            if value is not None:
-                setattr(self.application, attr.lower(), value)
+        # for attr in ("title", "resolution", "update_rate"):
+        #     value = getattr(self, attr)
+        #     if value is not None:
+        #         setattr(self.application, attr.lower(), value)
 
         self.load_handlers()
 

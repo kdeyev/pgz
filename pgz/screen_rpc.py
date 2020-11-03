@@ -94,7 +94,7 @@ class RPCScreenServer:
     #     json_message = serialize_json_message(message.method, message.params)
     #     self._messages.append(json_message)
 
-    def _get_messages(self):
+    def get_messages(self):
         if DeepDiff(self._messages, self._prev_messages) == {}:
             self._messages.clear()
             return False, []

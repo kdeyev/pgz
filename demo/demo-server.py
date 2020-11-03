@@ -123,7 +123,9 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         self.ship.pos = self.map.get_center()
 
     def draw(self, screen):
-        self.screen.draw.text(text=f"from server {self.ship.x}", pos=(500, 0))
+        self.client_data
+        self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
+        self.screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
         self.draw_health((1000, 10), 15)
 
     def draw_health(self, pos, value):

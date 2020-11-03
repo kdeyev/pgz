@@ -72,8 +72,8 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
 
         self.message_queue = asyncio.Queue()
 
-        # TODO
-        self.resolution = (1600, 1200)
+        self.resolution = (1, 1)
+        self._client_data = {}
 
         self.load_handlers()
 
@@ -87,12 +87,18 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
                 self.keyboard._press(event.key)
             elif event.type == pygame.KEYUP:
                 self.keyboard._release(event.key)
+            if event.type == pygame.VIDEORESIZE:
+                self.resolution = (event.w, event.h)
 
             # Dispatch events thru EventDispatcher
             try:
                 self.dispatch_event(event)
             except Exception as e:
                 print(f"handle_client_event: {e}")
+
+    def recv_handshake(self, massage):
+        self.resolution = massage["resolution"]
+        self._client_data = massage["client_data"]
 
     @property
     def screen(self):
@@ -106,16 +112,20 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
     def resolution(self, value):
         self._screen = RPCScreenServer(value)
 
+    @property
+    def client_data(self):
+        return self._client_data
+
     def redraw(self):
         # self._screen.clear()
         self.draw(self._screen)
-        changed, data = self._screen._get_messages()
+        changed, data = self._screen.get_messages()
         if changed:
             json_message = serialize_json_message("on_screen_redraw", data)
             self.send_message(json_message)
 
     def draw(self, screen):
-        screen.draw.text(text="from server", pos=(500, 0))
+        pass
 
     def handle_message(self, message):
         try:
@@ -232,13 +242,18 @@ class MultiplayerSceneServer:
             except Exception as e:
                 print(f"MultiplayerSceneServer._broadcast: {e}")
 
-    async def _send_handshake(self, websocket, uuid):
+    async def _recv_handshake(self, websocket, scene):
+        massage = await websocket.recv()
+        massage = json.loads(massage)
+        scene.recv_handshake(massage)
+
+    async def _send_handshake(self, websocket, scene):
         actors = []
         for scene in self.clients.values():
             actors += scene.actors.values()
 
         actors_states = {actor.uuid: actor.serialize_state() for actor in actors}
-        massage = {"uuid": uuid, "actors_states": actors_states}
+        massage = {"uuid": scene.uuid, "actors_states": actors_states, "screen_state": scene.screen.get_messages()}
         massage = json.dumps(massage)
         await websocket.send(massage)
 
@@ -250,7 +265,8 @@ class MultiplayerSceneServer:
         scene.broadcast_message = self.broadcast_message
         scene.uuid = uuid
 
-        await self._send_handshake(websocket, uuid)
+        await self._recv_handshake(websocket, scene)
+        await self._send_handshake(websocket, scene)
 
         # scene.start_update_loop(update_rate=self.update_rate)
 
@@ -305,7 +321,7 @@ class MultiplayerSceneServer:
 
 
 class MultiplayerClient(MapScene):
-    def __init__(self, map, server_url):
+    def __init__(self, map, server_url, client_data={}):
         super().__init__(map)
         self.actors = {}
         self.central_actor = None
@@ -315,6 +331,7 @@ class MultiplayerClient(MapScene):
         self.rpc = SimpleRPC()
         self.event_message_queue = asyncio.Queue()
         self._screen_client = RPCScreenClient()
+        self._client_data = client_data
 
     def on_exit(self, next_scene):
         super().on_exit(next_scene)
@@ -412,13 +429,20 @@ class MultiplayerClient(MapScene):
                 print(f"handle_event: {e}")
                 asyncio.sleep(1)
         if websocket:
-            await self._receive_handshake(websocket)
+            await self._send_handshake(websocket)
+            await self._recv_handshake(websocket)
+            self._websocket = websocket
             asyncio.ensure_future(self._handle_messages())
             return True
         else:
             return False
 
-    async def _receive_handshake(self, websocket):
+    async def _send_handshake(self, websocket):
+        massage = {"resolution": list(self.resolution), "client_data": self._client_data}
+        massage = json.dumps(massage)
+        await websocket.send(massage)
+
+    async def _recv_handshake(self, websocket):
         massage = await websocket.recv()
         massage = json.loads(massage)
 
@@ -432,7 +456,6 @@ class MultiplayerClient(MapScene):
 
             self.actors[uuid] = actor
             self.add_actor(actor)
-        self._websocket = websocket
 
     async def _handle_messages(self):
         async for message in self._websocket:
