@@ -41,19 +41,19 @@ class MultiplayerActor(Actor):
 
         super().__setattr__(attr, value)
 
-    def get_state_message(self):
+    def serialize_state(self):
         state = {}
         for attr in self.__class__.SEND:
             try:
                 value = getattr(self, attr)
             except Exception as e:
-                print(f"MultiplayerActor.get_state_message: {e}")
+                print(f"MultiplayerActor.serialize_state: {e}")
                 continue
 
             try:
                 json.dumps({attr: value})
             except Exception as e:
-                print(f"MultiplayerActor.get_state_message: {e}")
+                print(f"MultiplayerActor.serialize_state: {e}")
                 continue
 
             state[attr] = value
@@ -236,7 +236,7 @@ class MultiplayerSceneServer:
         for scene in self.clients.values():
             actors += scene.actors.values()
 
-        actors_states = {actor.uuid: actor.get_state_message() for actor in actors}
+        actors_states = {actor.uuid: actor.serialize_state() for actor in actors}
         massage = {"uuid": uuid, "actors_states": actors_states}
         massage = json.dumps(massage)
         await websocket.send(massage)
