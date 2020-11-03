@@ -7,6 +7,7 @@ import pygame_menu
 
 import pgz
 from pgz.clock import FPSCalc
+from pgz.rect import ZRect
 
 pgz.set_resource_root("demo/resources")
 
@@ -123,6 +124,28 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
 
     def draw(self, screen):
         self.screen.draw.text(text=f"from server {self.ship.x}", pos=(500, 0))
+        self.draw_health((1000, 10), 15)
+
+    def draw_health(self, pos, value):
+        w = 100
+        h = 20
+        pad = 3
+        GREY = (100, 100, 100)
+        RED = (255, 0, 0)
+        color = RED
+
+        # if value > 100:
+        #     player_shield_color = pygame.GREEN
+        #     player_shield = 100
+        # elif value > 75:
+        #     player_shield_color = pygame.GREEN
+        # elif value > 50:
+        #     player_shield_color = pygame.YELLOW
+        # else:
+        #     player_shield_color = pygame.RED
+
+        self.screen.draw.rect(ZRect(pos[0] - pad, pos[1] - pad, w + 2 * pad, h + 2 * pad), GREY, 3)
+        self.screen.draw.filled_rect(ZRect(pos[0], pos[1], w * value / 100.0, h), color)
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""

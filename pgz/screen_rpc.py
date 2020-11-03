@@ -58,14 +58,14 @@ class RPCSurfacePainter:
         """Draw a rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
-        self._massages.append(serialize_json_message("draw.rect", (make_color(color), rect, width)))
+        self._massages.append(serialize_json_message("draw.rect", make_color(color), (rect.x, rect.y, rect.w, rect.h), width))
         # pygame.draw.rect(self._surf, make_color(color), rect, width)
 
     def filled_rect(self, rect, color):
         """Draw a filled rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
-        self._massages.append(serialize_json_message("draw.rect", (make_color(color), rect, 0)))
+        self._massages.append(serialize_json_message("draw.rect", make_color(color), (rect.x, rect.y, rect.w, rect.h), 0))
         # pygame.draw.rect(self._surf, make_color(color), rect, 0)
 
     def text(self, *args, **kwargs):
@@ -148,11 +148,15 @@ class RPCScreenClient:
 
         @self.rpc.register("draw.line")
         def draw_line(start, end, color, width=1):
-            pygame.draw.line(self._surf, make_color(color), start, end, width)
+            pygame.draw.line(self._surf, color, start, end, width)
 
         @self.rpc.register("ptext.draw")
         def ptext_draw(args, kwargs):
             ptext.draw(*args, surf=self._surf, **kwargs)
+
+        @self.rpc.register("draw.rect")
+        def draw_rect(color, rect, width=1):
+            pygame.draw.rect(self._surf.surface, color, ZRect(rect), width)
 
     def set_messages(self, messages):
         self._messages = messages

@@ -227,7 +227,8 @@ class MultiplayerSceneServer:
                         send_events.append(send_event)
 
                 # wait for all events
-                await asyncio.wait(send_events)
+                if send_events:
+                    await asyncio.wait(send_events)
             except Exception as e:
                 print(f"MultiplayerSceneServer._broadcast: {e}")
 
