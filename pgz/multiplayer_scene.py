@@ -14,7 +14,7 @@ import websockets
 from .actor import Actor
 from .keyboard import Keyboard
 from .map_scene import MapScene
-from .rpc import Registrator, serialize_json_array_from_queue, serialize_json_rpc
+from .rpc import SimpleRPC, serialize_json_array_from_queue, serialize_json_message
 from .scene import EventDispatcher
 from .screen_rpc import RPCScreenClient, RPCScreenServer
 
@@ -67,7 +67,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.map = None
         self.broadcast_message = None
         self.actors = {}
-        self.rpc = Registrator()
+        self.rpc = SimpleRPC()
         self.keyboard = Keyboard()
 
         self.message_queue = asyncio.Queue()
@@ -111,7 +111,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.draw(self._screen)
         changed, data = self._screen._get_messages()
         if changed:
-            json_message = serialize_json_rpc("on_screen_redraw", (data,))
+            json_message = serialize_json_message("on_screen_redraw", data)
             self.send_message(json_message)
 
     def draw(self, screen):
@@ -150,7 +150,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         pass
 
     def broadcast_property_change(self, uuid, prop, value):
-        json_message = serialize_json_rpc("on_actor_prop_change", (uuid, prop, value))
+        json_message = serialize_json_message("on_actor_prop_change", uuid, prop, value)
         self.broadcast_message(json_message)
 
     def add_actor(self, actor, central_actor=False):
@@ -161,7 +161,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self.actors[actor.uuid] = actor
         self.map.add_sprite(actor)
 
-        json_message = serialize_json_rpc("add_actor_on_client", (actor.uuid, self.uuid, actor.image_name, central_actor))
+        json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.uuid, actor.image_name, central_actor)
         self.broadcast_message(json_message)
 
         return actor
@@ -169,7 +169,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
     def _remove_actor(self, actor):
         uuid = actor.uuid
         self.map.remove_sprite(actor)
-        json_message = serialize_json_rpc("remove_actor_on_client", (uuid,))
+        json_message = serialize_json_message("remove_actor_on_client", uuid)
         self.broadcast_message(json_message)
 
     def remove_actor(self, actor):
@@ -312,7 +312,7 @@ class MultiplayerClient(MapScene):
         self.uuid = None
         self._websocket = None
         self.server_url = server_url
-        self.rpc = Registrator()
+        self.rpc = SimpleRPC()
         self.event_message_queue = asyncio.Queue()
         self._screen_client = RPCScreenClient()
 
@@ -395,7 +395,7 @@ class MultiplayerClient(MapScene):
             return
 
         try:
-            json_message = serialize_json_rpc("handle_client_event", (event.type, event.__dict__))
+            json_message = serialize_json_message("handle_client_event", event.type, event.__dict__)
         except Exception as e:
             print(f"handle_event: {e}")
             return

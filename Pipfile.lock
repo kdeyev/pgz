@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "034c382cae86879bf62f611d197f4fe011f088acfcb43aa36d2510118aed68e5"
+            "sha256": "00fa4708e645dd2f0a76388bb2f75dd87b579532b63e67b240f9e78bf5d67a48"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -78,13 +78,6 @@
             ],
             "markers": "python_version >= '3.5'",
             "version": "==4.0.2"
-        },
-        "py-json-rpc": {
-            "hashes": [
-                "sha256:bb4e7f6e12b88ed97e1e236bb0bc62606f3f8808589e2405363f6c9c2bada1a2"
-            ],
-            "index": "pypi",
-            "version": "==0.0.6"
         },
         "pygame": {
             "hashes": [
