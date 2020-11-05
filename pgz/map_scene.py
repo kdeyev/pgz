@@ -26,6 +26,7 @@ class MapScene(Scene):
         self.map.draw(surface)
 
     def add_actor(self, actor, central_actor=False):
+
         if central_actor:
             self.central_actor = actor
         # add our ship to the group

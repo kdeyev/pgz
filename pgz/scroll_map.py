@@ -1,5 +1,3 @@
-import os
-
 import pygame
 import pyscroll
 import pyscroll.data
@@ -36,21 +34,21 @@ def extract_collision_objects_from_tile_layers(tmx_data, collision_layer_names):
 
 
 class ScrollMap(object):
-    """This class is a basic game.
-    This class will load data, create a pyscroll group, a hero object.
-    It also reads input and moves the Hero around the map.
-    Finally, it uses a pyscroll group to render the map and Hero.
+    """
+    This class provides functionality:
+    - create and manage a pyscroll group
+    - load a collision layers
+    - manage sprites added to the map
+    - allows to detect collisions with loaded collision layers
+    - render the map and the sprites on top
     """
 
     def __init__(self, screen_size, tmx, collision_layers):
-        # load data from pytmx
-        tmx_data = tmx
-
         # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls = extract_collision_objects_from_tile_layers(tmx_data, collision_layers)
+        self.walls = extract_collision_objects_from_tile_layers(tmx, collision_layers)
 
         # create new data source for pyscroll
-        map_data = pyscroll.data.TiledMapData(tmx_data)
+        map_data = pyscroll.data.TiledMapData(tmx)
 
         # create new renderer (camera)
         self.map_layer = pyscroll.BufferedRenderer(map_data, screen_size, clamp_camera=False, tall_sprites=1)
