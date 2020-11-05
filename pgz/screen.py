@@ -1,10 +1,11 @@
 import numpy as np
 import pygame
 import pygame.draw
+from pgzero import ptext
+from pgzero.rect import RECT_CLASSES, ZRect
 from pygame import surface
 
-from . import loaders, ptext
-from .rect import RECT_CLASSES, ZRect
+from . import loaders
 
 
 def round_pos(pos):

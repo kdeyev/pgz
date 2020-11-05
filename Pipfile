@@ -10,6 +10,7 @@ websockets = "*"
 nest-asyncio = "*"
 numpy = "*"
 deepdiff = "*"
+pgzero = "*"
 
 [dev-packages]
 pre-commit = "*"

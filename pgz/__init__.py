@@ -1,3 +1,5 @@
+from pgzero.rect import ZRect  # noqa
+
 from .actor import Actor  # noqa
 from .application import Application, FPSCalc, global_clock, keyboard  # noqa
 from .loaders import set_root as set_resource_root  # noqa

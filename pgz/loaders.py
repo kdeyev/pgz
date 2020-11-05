@@ -4,8 +4,7 @@ import sys
 
 import pygame.image
 import pygame.mixer
-
-from . import ptext
+from pgzero import ptext
 
 # Root directory for loaders
 # This is modified by calling set_root(), which is called by the game runner.

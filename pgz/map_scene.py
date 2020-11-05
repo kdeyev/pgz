@@ -1,6 +1,5 @@
 import pygame
-
-from pgz import actor
+from pgzero import actor
 
 from .scene import EventDispatcher, Scene
 

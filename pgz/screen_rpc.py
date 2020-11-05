@@ -1,7 +1,6 @@
 import pygame
 from deepdiff import DeepDiff
-
-from .rect import RECT_CLASSES, ZRect
+from pgzero.rect import RECT_CLASSES, ZRect
 
 # from .jsonrpc_client import Server
 from .rpc import SimpleRPC, serialize_json_message

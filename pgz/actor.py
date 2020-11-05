@@ -1,8 +1,9 @@
 from math import atan2, cos, degrees, radians, sin, sqrt
 
 import pygame
+from pgzero import rect, spellcheck
 
-from . import loaders, rect, spellcheck
+from . import loaders
 
 ANCHORS = {
     "x": {
