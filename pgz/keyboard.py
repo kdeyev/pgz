@@ -1,7 +1,7 @@
 import re
 from warnings import warn
 
-from .constants import Keys
+from pgzero.constants import keys
 
 DEPRECATED_KEY_RE = re.compile(r"[A-Z]")
 PREFIX_RE = re.compile(r"^K_(?!\d$)")
@@ -32,7 +32,7 @@ class Keyboard:
             warn("Uppercase keyboard attributes (eg. keyboard.%s) are " "deprecated." % kname, DeprecationWarning, 2)
             kname = PREFIX_RE.sub("", kname)
         try:
-            key = Keys[kname.upper()]
+            key = keys[kname.upper()]
         except AttributeError:
             raise AttributeError('The key "%s" does not exist' % key)
         return key.value in self._pressed
@@ -46,7 +46,7 @@ class Keyboard:
         self._pressed.discard(key)
 
     def __getitem__(self, k):
-        if isinstance(k, Keys):
+        if isinstance(k, keys):
             return k.value in self._pressed
         else:
             warn("String lookup in keyboard (eg. keyboard[%r]) is " "deprecated." % k, DeprecationWarning, 2)

@@ -1,8 +1,7 @@
 import operator
 
 import pygame
-
-from .constants import MUSIC_END, Keys, MouseButton
+from pgzero.constants import MUSIC_END, keys, mouse
 
 
 class EventDispatcher:
@@ -17,9 +16,9 @@ class EventDispatcher:
     }
 
     def map_buttons(val):
-        return {c for c, pressed in zip(MouseButton, val) if pressed}
+        return {c for c, pressed in zip(mouse, val) if pressed}
 
-    EVENT_PARAM_MAPPERS = {"buttons": map_buttons, "button": MouseButton, "key": Keys}
+    EVENT_PARAM_MAPPERS = {"buttons": map_buttons, "button": mouse, "key": keys}
 
     def load_handlers(self):
         # from .spellcheck import spellcheck
