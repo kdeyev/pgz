@@ -6,6 +6,11 @@ pygame = "*"
 pytmx = "*"
 pyscroll = "*"
 pygame-menu = "*"
+websockets = "*"
+nest-asyncio = "*"
+numpy = "*"
+deepdiff = "*"
+pgzero = "*"
 
 [dev-packages]
 pre-commit = "*"

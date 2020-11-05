@@ -4,6 +4,11 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+
+
+
+    
         {
             "name": "Demo",
             "type": "python",
@@ -13,6 +18,51 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
             }
-        }
+        },
+        {
+            "name": "Demo-Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo/demo-server.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            }
+        },
+        {
+            "name": "Demo-Client",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo/demo-client.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            }
+        },
+        {
+            "name": "Another Demo-Client",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo/demo-client.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            }
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Server and clients",
+            "configurations": [
+                "Demo-Client",
+                "Another Demo-Client",
+                "Demo-Server",
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Multi",
+                "order": 1,
+            }
+        }   
     ]
 }

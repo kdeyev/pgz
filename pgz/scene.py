@@ -1,12 +1,13 @@
-import operator
-
-import pygame
-
-from .constants import MUSIC_END, Keys, MouseButton
+from .event_dispatcher import EventDispatcher
 
 
-class Scene:
-    """An isolated scene which can be ran by an application.
+class Scene(EventDispatcher):
+    """
+    The idea and the original code was taken from EzPyGame:
+    https://github.com/Mahi/EzPyGame
+
+
+    An isolated scene which can be ran by an application.
 
     Create your own scene by subclassing and overriding any methods.
     The hosting :class:`.Application` instance is accessible
@@ -90,108 +91,65 @@ class Scene:
         my_scene0 = MyScene()
         my_scene0.resolution = (1280, 720)
         my_scene1 = MyScene(title='My Second Awesome Scene')
+
+
+    Shotcuts for simpler event handlingL
+
+    def on_mouse_up(self, pos, button):
+        # Override this for easier events handling.
+        pass
+
+    def on_mouse_down(self, pos, button):
+        # Override this for easier events handling.
+        pass
+
+    def on_mouse_move(self, pos):
+        # Override this for easier events handling.
+        pass
+
+    def on_key_down(self, key):
+        # Override this for easier events handling.
+        pass
+
+    def on_key_up(self, key):
+        # Override this for easier events handling.
+        pass
     """
 
-    title = None
-    resolution = None
-    update_rate = None
+    # title = None
+    # resolution = None
+    # update_rate = None
 
-    EVENT_HANDLERS = {
-        pygame.MOUSEBUTTONDOWN: "on_mouse_down",
-        pygame.MOUSEBUTTONUP: "on_mouse_up",
-        pygame.MOUSEMOTION: "on_mouse_move",
-        pygame.KEYDOWN: "on_key_down",
-        pygame.KEYUP: "on_key_up",
-        MUSIC_END: "on_music_end",
-    }
-
-    def map_buttons(val):
-        return {c for c, pressed in zip(MouseButton, val) if pressed}
-
-    EVENT_PARAM_MAPPERS = {"buttons": map_buttons, "button": MouseButton, "key": Keys}
-
-    def load_handlers(self):
-        # from .spellcheck import spellcheck
-
-        # spellcheck(vars(self.mod))
-        self.handlers = {}
-        for type, name in self.EVENT_HANDLERS.items():
-            handler = getattr(self, name, None)
-            if callable(handler):
-                self.handlers[type] = self.prepare_handler(handler)
-
-    def prepare_handler(self, handler):
-        """Adapt a pgzero game's raw handler function to take a Pygame Event.
-
-        Returns a one-argument function of the form ``handler(event)``.
-        This will ensure that the correct arguments are passed to the raw
-        handler based on its argument spec.
-
-        The wrapped handler will also map certain parameter values using
-        callables from EVENT_PARAM_MAPPERS; this ensures that the value of
-        'button' inside the handler is a real instance of constants.mouse,
-        which means (among other things) that it will print as a symbolic value
-        rather than a naive integer.
-
-        """
-        code = handler.__code__
-        param_names = code.co_varnames[: code.co_argcount]
-
-        def make_getter(mapper, getter):
-            if mapper:
-                return lambda event: mapper(getter(event))
-            return getter
-
-        param_handlers = []
-        for name in param_names[1:]:
-            getter = operator.attrgetter(name)
-            mapper = self.EVENT_PARAM_MAPPERS.get(name)
-            param_handlers.append((name, make_getter(mapper, getter)))
-
-        def prep_args(event):
-            return {name: get(event) for name, get in param_handlers}
-
-        def new_handler(event):
-            try:
-                prepped = prep_args(event)
-            except ValueError:
-                # If we couldn't construct the keys/mouse objects representing
-                # the button that was pressed, then skip the event handler.
-                #
-                # This happens because Pygame can generate key codes that it
-                # does not have constants for.
-                return
-            else:
-                return handler(**prepped)
-
-        return new_handler
-
-    def dispatch_event(self, event):
-        handler = self.handlers.get(event.type)
-        if handler:
-            handler(event)
-            return True
-        else:
-            self.handle_event(event)
-
-    def __init__(self, title=None, resolution=None, update_rate=None):
-        self._application = None
-        if title is not None:
-            self.title = title
-        if resolution is not None:
-            self.resolution = resolution
-        if update_rate is not None:
-            self.update_rate = update_rate
+    # def __init__(self, title=None, resolution=None, update_rate=None):
+    #     self._application = None
+    #     if title is not None:
+    #         self.title = title
+    #     if resolution is not None:
+    #         self.resolution = resolution
+    #     if update_rate is not None:
+    #         self.update_rate = update_rate
 
     @property
     def application(self):
         """The host application that's currently running the scene."""
         return self._application
 
-    # @property
-    # def clock(self):
-    #     """The host application that's currently running the scene."""
-    #     return self._application.clock
+    @property
+    def screen(self):
+        """Screen of the application.
+        If it's required - it's possible to do a private screen of the scene with it's own resolution.
+        """
+        return self.application.screen
+
+    @property
+    def resolution(self):
+        """Current screen resolution."""
+        return self.application.resolution
+
+    @property
+    def clock(self):
+        """Clock object. Actually returns the global clock object."""
+        return self.application.clock
 
     def draw(self, screen):
         """Override this with the scene drawing.
@@ -227,11 +185,12 @@ class Scene:
 
         :param Scene|None previous_scene: previous scene to run
         """
-        for attr in ("title", "resolution", "update_rate"):
-            value = getattr(self, attr)
-            if value is not None:
-                setattr(self.application, attr.lower(), value)
+        # for attr in ("title", "resolution", "update_rate"):
+        #     value = getattr(self, attr)
+        #     if value is not None:
+        #         setattr(self.application, attr.lower(), value)
 
+        # Set event dispatcher
         self.load_handlers()
 
     def on_exit(self, next_scene):

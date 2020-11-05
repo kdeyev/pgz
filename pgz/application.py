@@ -2,13 +2,19 @@ import asyncio
 import sys
 
 import pygame
+from pgzero.clock import clock as global_clock
+from pgzero.screen import Screen
 
-from .clock import clock as global_clock
+from .fps_calc import FPSCalc
 from .keyboard import keyboard
 
 
 class Application:
-    """A simple wrapper around :mod:`pygame` for running games easily.
+    """
+    The idea and the original code was taken from EzPyGame:
+    https://github.com/Mahi/EzPyGame
+
+    A simple wrapper around :mod:`pygame` for running games easily.
 
     Also makes scene management seamless together with
     the :class:`.Scene` class.
@@ -25,14 +31,14 @@ class Application:
 
     .. code-block:: python
 
-        class Menu(ezpygame.Scene):
+        class Menu(pgz.Scene):
             ...
 
-        class Game(ezpygame.Scene):
+        class Game(pgz.Scene):
             ...
 
-        app = ezpygame.Application(
-            title='My First EzPyGame Application',
+        app = pgz.Application(
+            title='My First Application',
             resolution=(1280, 720),
             update_rate=60,
         )
@@ -52,10 +58,6 @@ class Application:
         self.title = title
         self.resolution = resolution
 
-    # @property
-    # def clock(self):
-    #     return self._clock
-
     @property
     def title(self):
         return pygame.display.get_caption()
@@ -65,12 +67,21 @@ class Application:
         pygame.display.set_caption(value)
 
     @property
+    def screen(self):
+        return self._pg_screen
+
+    @property
+    def clock(self):
+        return global_clock
+
+    @property
     def resolution(self):
         return self._screen.get_size()
 
     @resolution.setter
     def resolution(self, value):
         self._screen = pygame.display.set_mode(value)
+        self._pg_screen = Screen(self._screen)
 
     @property
     def active_scene(self):
@@ -115,31 +126,34 @@ class Application:
         else:
             self.change_scene(scene)
 
-        loop = asyncio.SelectorEventLoop()
         try:
-            loop.run_until_complete(self.run_as_coroutine())
+            asyncio.get_event_loop().run_until_complete(self.run_as_coroutine())
         finally:
-            loop.close()
+            asyncio.get_event_loop().close()
 
-    @asyncio.coroutine
-    def run_as_coroutine(self):
+    async def run_as_coroutine(self):
         self.running = True
         try:
-            yield from self.mainloop()
+            await self.mainloop()
         finally:
             pygame.display.quit()
             pygame.mixer.quit()
             self.running = False
 
-    @asyncio.coroutine
-    def mainloop(self):
+    async def mainloop(self):
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
+        fps_calc = FPSCalc()
 
+        fps = 0
         # self.need_redraw = True
         while True:
+            self._pg_screen.clear()
+
+            dt = clock.tick(self.update_rate) / 1000
+
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
-            yield from asyncio.sleep(0)
+            await asyncio.sleep(0)
             for event in pygame.event.get():
 
                 if event.type == pygame.VIDEORESIZE:
@@ -157,14 +171,19 @@ class Application:
 
                 self.handle_event(event)
 
-            dt = clock.tick(self.update_rate) / 1000
-
             global_clock.tick(dt)
+            fps_calc.push(1.0 / dt)
+            if fps_calc.counter == 100:
+                fps = fps_calc.aver()
+                print(f"fps {fps}")
 
             self.update(dt)
 
             # screen_change = self.reinit_screen()
             # if screen_change or update or self._clock.fired or self.need_redraw:
             self.draw()
+
+            self._pg_screen.draw.text(f"FPS: {fps}", pos=(0, 0))
+
             pygame.display.update()
             # self.need_redraw = False

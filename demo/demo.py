@@ -80,9 +80,9 @@ class CannonBall(pgz.Actor):
         # self.rect.topleft = self._position
 
 
-class Game(pgz.Scene):
+class Game(pgz.MapScene):
     def __init__(self, map):
-        self.map = map
+        super().__init__(map)
 
         self.ship = Ship()
         # put the ship in the center of the map
@@ -91,14 +91,7 @@ class Game(pgz.Scene):
         self.ship.y += 400
 
         # add our ship to the group
-        self.map.add_sprite(self.ship)
-
-    def draw(self, surface):
-
-        # center the map/screen on our Ship
-        self.map.set_center(self.ship.pos)
-
-        self.map.draw(surface)
+        self.add_actor(self.ship, central_actor=True)
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
@@ -108,7 +101,6 @@ class Game(pgz.Scene):
             self.ship.move_back(dt)
 
     def on_mouse_move(self, pos):
-        pos = self.map.transform(pos)
         angle = self.ship.angle_to(pos) + 90
         self.ship.angle = angle
 
@@ -116,12 +108,10 @@ class Game(pgz.Scene):
         print("boom")
 
     def on_mouse_down(self, pos, button):
-        pos = self.map.transform(pos)
-
         pgz.sounds.arrr.play()
 
-        ball = CannonBall(self.ship.pos, pos, self.map.remove_sprite)
-        self.map.add_sprite(ball)
+        ball = CannonBall(self.ship.pos, pos, self.remove_actor)
+        self.add_actor(ball)
 
         # pgz.global_clock.schedule_interval(self.boom, 1)
 
@@ -152,21 +142,22 @@ class Menu(pgz.MenuScene):
         self.menu.add_button("Quit", pygame_menu.events.EXIT)
 
     def start_the_game(self):
-        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
+        tmx = pgz.maps.default
+        map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
         self.application.change_scene(Game(map))
 
 
 if __name__ == "__main__":
 
     app = pgz.Application(
-        title="My First EzPyGame Application!",
+        title="pgz Standalone Demo",
         resolution=(1280, 720),
         update_rate=60,
     )
 
     try:
-        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
-        game = Game(map)
+        tmx = pgz.maps.default
+        map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
         menu = Menu()
         app.run(menu)
 
