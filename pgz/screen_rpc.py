@@ -1,10 +1,10 @@
 import pygame
 from deepdiff import DeepDiff
 from pgzero.rect import RECT_CLASSES, ZRect
+from pgzero.screen import make_color, ptext, round_pos
 
 # from .jsonrpc_client import Server
 from .rpc import SimpleRPC, serialize_json_message
-from .screen import RECT_CLASSES, ZRect, make_color, ptext, round_pos
 
 
 class RPCSurfacePainter:

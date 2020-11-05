@@ -3,11 +3,10 @@ import sys
 
 import pygame
 from pgzero.clock import clock as global_clock
+from pgzero.screen import Screen
 
 from .fps_calc import FPSCalc
 from .keyboard import keyboard
-from .multiplayer_scene import MultiplayerClient
-from .screen import Screen
 
 
 class Application:
