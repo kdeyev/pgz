@@ -1,7 +1,8 @@
 import asyncio
 import json
 import time
-from typing import Any, Callable, Dict, Tuple
+from re import A
+from typing import Any, Callable, Dict, Optional, Tuple
 
 # from re import T
 from uuid import uuid4
@@ -28,9 +29,9 @@ class MultiplayerActor(Actor):
     # DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
     SEND = Actor.DELEGATED_ATTRIBUTES + ["angle", "image"]
 
-    def __init__(self, image):
+    def __init__(self, image: str) -> None:
         super().__init__(image)
-        self.uuid = f"{self.__class__.__name__}-{str(uuid4())}"
+        self.uuid: UUID = f"{self.__class__.__name__}-{str(uuid4())}"
 
         self.client_uuid = None
         self.deleter = None
@@ -436,8 +437,8 @@ class MultiplayerSceneServer:
 class MultiplayerClient(MapScene):
     def __init__(self, map, server_url, client_data={}):
         super().__init__(map)
-        self._actors = {}
-        self.central_actor = None
+        self._actors: Dict[str, Actor] = {}
+        self.central_actor: Optional[Actor] = None
         self.client_uuid = None
         self._websocket = None
         self.server_url = server_url
@@ -511,14 +512,14 @@ class MultiplayerClient(MapScene):
 
         # this will be handled if the window is resized
         if event.type == pygame.VIDEORESIZE:
-            self._map.set_size((event.w, event.h))
+            self.map.set_size((event.w, event.h))
             return
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_EQUALS:
-                self._map.change_zoom(0.25)
+                self.map.change_zoom(0.25)
             elif event.key == pygame.K_MINUS:
-                self._map.change_zoom(-0.25)
+                self.map.change_zoom(-0.25)
 
         if not self._websocket:
             # not connected yet
@@ -552,8 +553,7 @@ class MultiplayerClient(MapScene):
 
     async def _send_handshake(self, websocket):
         massage = {"resolution": list(self.resolution), "client_data": self._client_data}
-        massage = json.dumps(massage)
-        await websocket.send(massage)
+        await websocket.send(json.dumps(massage))
 
     async def _recv_handshake(self, websocket):
         massage = await websocket.recv()
@@ -561,6 +561,8 @@ class MultiplayerClient(MapScene):
 
         self.client_uuid = massage["uuid"]
         actors_states = massage["actors_states"]
+        uuid: UUID
+        state: JSON
         for uuid, state in actors_states.items():
             image = state["image"]
             actor = Actor(image)
@@ -570,10 +572,11 @@ class MultiplayerClient(MapScene):
             self._actors[uuid] = actor
             self.add_actor(actor)
 
-    async def _handle_messages(self):
+    async def _handle_messages(self) -> None:
+        message: str
         async for message in self._websocket:
             try:
-                json_messages = json.loads(message)
+                json_messages: JSON = json.loads(message)
                 self._rpc.dispatch(json_messages)
             except Exception as e:
                 print(f"_handle_messages: {e}")

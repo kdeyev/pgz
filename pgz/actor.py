@@ -1,18 +1,21 @@
 import pgzero.actor
 import pygame
+from pygame.surface import Surface
+
+from .rect import ZRect
 
 
-class Sprite(pygame.sprite.Sprite):
-    def __init__(self, actor) -> None:
+class SpriteDelegate(pygame.sprite.Sprite):
+    def __init__(self, actor: "Actor") -> None:
         super().__init__()
         self._actor = actor
 
     @property
-    def rect(self):
+    def rect(self) -> ZRect:
         return self._actor.rect
 
     @property
-    def image(self):
+    def image(self) -> Surface:
         return self._actor.sprite
 
     def update(self, *args, **kwargs) -> None:
@@ -22,19 +25,19 @@ class Sprite(pygame.sprite.Sprite):
 class Actor(pgzero.actor.Actor):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._sprite = Sprite(self)
+        self._sprite: SpriteDelegate = SpriteDelegate(self)
 
     @property
-    def rect(self):
+    def rect(self) -> ZRect:
         return self._rect
 
     @property
-    def sprite(self):
+    def sprite(self) -> Surface:
         return self._surf
 
     @property
-    def sprite_delegate(self):
+    def sprite_delegate(self) -> SpriteDelegate:
         return self._sprite
 
-    def draw(self, screen):
+    def draw(self, screen: Surface):
         screen.blit(self.sprite, self.topleft)

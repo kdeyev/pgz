@@ -32,7 +32,7 @@ class EventDispatcher:
 
     EVENT_PARAM_MAPPERS = {"buttons": map_buttons, "button": mouse, "key": keys}
 
-    def load_handlers(self):
+    def load_handlers(self) -> None:
         # from .spellcheck import spellcheck
 
         # spellcheck(vars(self.mod))

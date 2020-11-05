@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import pygame
 import pyscroll
 import pyscroll.data
@@ -80,19 +82,19 @@ class ScrollMap(object):
     def add_sprite(self, sprite):
         self.group.add(sprite)
 
-    def remove_sprite(self, sprite):
+    def remove_sprite(self, sprite: pygame.Surface):
         sprite.remove(self.group)
 
-    def set_center(self, point):
+    def set_center(self, point: Tuple[int, int]):
         self.group.center(point)
 
-    def get_center(self):
+    def get_center(self) -> Tuple[int, int]:
         return self.map_layer.map_rect.center
 
-    def change_zoom(self, change):
+    def change_zoom(self, change: float) -> None:
         value = self.map_layer.zoom + change
         if value > 0:
             self.map_layer.zoom = value
 
-    def set_size(self, size):
+    def set_size(self, size: Tuple[int, int]):
         self.map_layer.set_size(size)

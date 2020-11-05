@@ -113,8 +113,6 @@ class Game(pgz.MapScene):
         ball = CannonBall(self.ship.pos, pos, self.remove_actor)
         self.add_actor(ball)
 
-        # pgz.global_clock.schedule_interval(self.boom, 1)
-
     def on_key_down(self, key):
         if key == pygame.K_EQUALS:
             self.map.change_zoom(0.25)
@@ -156,8 +154,6 @@ if __name__ == "__main__":
     )
 
     try:
-        tmx = pgz.maps.default
-        map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
         menu = Menu()
         app.run(menu)
 
