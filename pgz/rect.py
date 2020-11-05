@@ -1,0 +1,1 @@
+from pgzero.rect import ZRect  # noqa

@@ -1,0 +1,1 @@
+from pgzero.screen import Screen  # noqa
