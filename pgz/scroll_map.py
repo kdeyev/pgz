@@ -42,22 +42,14 @@ class ScrollMap(object):
     Finally, it uses a pyscroll group to render the map and Hero.
     """
 
-    _subpath = "maps"
-
-    def __init__(self, screen_size, filename, collision_layers):
+    def __init__(self, screen_size, tmx, collision_layers):
         from .loaders import get_root
-
-        maps = os.path.join(get_root(), self._subpath)
-        filename = os.path.join(maps, filename)
-        filename = os.path.abspath(filename)
-
-        self.filename = filename
 
         # true while running
         self.running = False
 
         # load data from pytmx
-        tmx_data = load_pygame(self.filename)
+        tmx_data = tmx
 
         # setup level geometry with simple pygame rects, loaded from pytmx
         self.walls = extract_collision_objects_from_tile_layers(tmx_data, collision_layers)

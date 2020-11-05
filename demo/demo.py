@@ -142,7 +142,8 @@ class Menu(pgz.MenuScene):
         self.menu.add_button("Quit", pygame_menu.events.EXIT)
 
     def start_the_game(self):
-        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
+        tmx = pgz.maps.default
+        map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
         self.application.change_scene(Game(map))
 
 
@@ -155,7 +156,8 @@ if __name__ == "__main__":
     )
 
     try:
-        map = pgz.ScrollMap(app.resolution, "default.tmx", ["Islands"])
+        tmx = pgz.maps.default
+        map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
         menu = Menu()
         app.run(menu)
 

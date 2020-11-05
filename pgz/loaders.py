@@ -222,9 +222,20 @@ class FontLoader(ResourceLoader):
         return pygame.font.Font(path, fontsize or ptext.DEFAULT_FONT_SIZE)
 
 
+class MapLoader(ResourceLoader):
+    EXTNS = ["tmx"]
+    TYPE = "map"
+
+    def _load(self, path):
+        from pytmx.util_pygame import load_pygame
+
+        return load_pygame(path)
+
+
 images = ImageLoader("images")
 sounds = SoundLoader("sounds")
 fonts = FontLoader("fonts")
+maps = MapLoader("maps")
 
 
 def getfont(fontname=None, fontsize=None, sysfontname=None, bold=None, italic=None, underline=None):

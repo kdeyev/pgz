@@ -174,7 +174,9 @@ class ServerScene(pgz.Scene):
 
     def on_enter(self, previous_scene):
         super().on_enter(previous_scene=previous_scene)
-        map = pgz.ScrollMap((1280, 720), "default.tmx", ["Islands"])
+
+        tmx = pgz.maps.default
+        map = pgz.ScrollMap((1280, 720), tmx, ["Islands"])
 
         # Build and start game server
         self.server = pgz.MultiplayerSceneServer(map, GameScene)
