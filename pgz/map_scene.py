@@ -29,9 +29,9 @@ class MapScene(Scene):
         if central_actor:
             self.central_actor = actor
         # add our ship to the group
-        self.map.add_sprite(actor)
+        self.map.add_sprite(actor.sprite_delegate)
 
     def remove_actor(self, actor):
         if actor == self.central_actor:
             self.central_actor = None
-        self.map.remove_sprite(actor)
+        self.map.remove_sprite(actor.sprite_delegate)

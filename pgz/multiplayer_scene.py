@@ -26,10 +26,10 @@ JSON = Dict[str, Any]
 
 class MultiplayerActor(Actor):
     # DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
-    SEND = Actor.DELEGATED_ATTRIBUTES + ["angle", "image_name"]
+    SEND = Actor.DELEGATED_ATTRIBUTES + ["angle", "image"]
 
-    def __init__(self, image_name):
-        super().__init__(image_name)
+    def __init__(self, image):
+        super().__init__(image)
         self.uuid = f"{self.__class__.__name__}-{str(uuid4())}"
 
         self.client_uuid = None
@@ -165,7 +165,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         Remove an actor from the scene and send message to clients.
         """
         uuid = actor.uuid
-        self._map.remove_sprite(actor)
+        self._map.remove_sprite(actor.sprite_delegate)
         json_message = serialize_json_message("remove_actor_on_client", uuid)
         self._broadcast_message(json_message)
 
@@ -291,9 +291,9 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         actor.keyboard = self.keyboard
         actor._on_prop_change = self._broadcast_property_change
         self._actors[actor.uuid] = actor
-        self._map.add_sprite(actor)
+        self._map.add_sprite(actor.sprite_delegate)
 
-        json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.client_uuid, actor.image_name, central_actor)
+        json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.client_uuid, actor.image, central_actor)
         self._broadcast_message(json_message)
 
         return actor
@@ -461,8 +461,8 @@ class MultiplayerClient(MapScene):
             raise Exception("Cannot connect")
 
         @self._rpc.register
-        def add_actor_on_client(uuid, client_uuid, image_name, central_actor):
-            actor = Actor(image_name)
+        def add_actor_on_client(uuid, client_uuid, image, central_actor):
+            actor = Actor(image)
             self._actors[uuid] = actor
 
             if client_uuid != self.client_uuid:
@@ -562,8 +562,8 @@ class MultiplayerClient(MapScene):
         self.client_uuid = massage["uuid"]
         actors_states = massage["actors_states"]
         for uuid, state in actors_states.items():
-            image_name = state["image_name"]
-            actor = Actor(image_name)
+            image = state["image"]
+            actor = Actor(image)
             for attr, value in state.items():
                 setattr(actor, attr, value)
 

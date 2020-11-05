@@ -88,7 +88,7 @@ class CannonBall(pgz.MultiplayerActor):
         if self.explosion_phases == 0:
             self.deleter(self)
         else:
-            self.image_name = f"explosion{self.explosion_phases}"
+            self.image = f"explosion{self.explosion_phases}"
             self.explosion_phases -= 1
             pgz.global_clock.schedule(self.decrement_explosion_phases, 0.1)
 
