@@ -87,7 +87,12 @@ class EventDispatcher:
 
 
 class Scene(EventDispatcher):
-    """An isolated scene which can be ran by an application.
+    """
+    The idea and the original code was taken from EzPyGame:
+    https://github.com/Mahi/EzPyGame
+
+
+    An isolated scene which can be ran by an application.
 
     Create your own scene by subclassing and overriding any methods.
     The hosting :class:`.Application` instance is accessible
