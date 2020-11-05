@@ -2,9 +2,9 @@ import asyncio
 import sys
 
 import pygame
+from pgzero.clock import clock as global_clock
 
-from .clock import FPSCalc
-from .clock import clock as global_clock
+from .fps_calc import FPSCalc
 from .keyboard import keyboard
 from .multiplayer_scene import MultiplayerClient
 from .screen import Screen

@@ -7,7 +7,7 @@ import pygame_menu
 
 import pgz
 from pgz import ZRect
-from pgz.clock import FPSCalc
+from pgz.fps_calc import FPSCalc
 
 pgz.set_resource_root("demo/resources")
 
