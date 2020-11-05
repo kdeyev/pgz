@@ -16,3 +16,7 @@ not yet
 ## Quick start
 
 not yet
+
+## Demo 
+
+![Alt Text](img/demo.gif)
