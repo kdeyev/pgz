@@ -43,11 +43,6 @@ class ScrollMap(object):
     """
 
     def __init__(self, screen_size, tmx, collision_layers):
-        from .loaders import get_root
-
-        # true while running
-        self.running = False
-
         # load data from pytmx
         tmx_data = tmx
 
