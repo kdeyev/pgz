@@ -227,7 +227,7 @@ class Menu(pgz.MenuScene):
 
 if __name__ == "__main__":
     app = pgz.Application(
-        title="My First EzPyGame Application!",
+        title="pgz Server Demo",
         resolution=(1280, 720),
         update_rate=60,
     )

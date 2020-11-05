@@ -10,7 +10,11 @@ from .keyboard import keyboard
 
 
 class Application:
-    """A simple wrapper around :mod:`pygame` for running games easily.
+    """
+    The idea and the original code was taken from EzPyGame:
+    https://github.com/Mahi/EzPyGame
+
+    A simple wrapper around :mod:`pygame` for running games easily.
 
     Also makes scene management seamless together with
     the :class:`.Scene` class.
@@ -27,14 +31,14 @@ class Application:
 
     .. code-block:: python
 
-        class Menu(ezpygame.Scene):
+        class Menu(pgz.Scene):
             ...
 
-        class Game(ezpygame.Scene):
+        class Game(pgz.Scene):
             ...
 
-        app = ezpygame.Application(
-            title='My First EzPyGame Application',
+        app = pgz.Application(
+            title='My First Application',
             resolution=(1280, 720),
             update_rate=60,
         )
@@ -53,10 +57,6 @@ class Application:
         # Trigger property setters
         self.title = title
         self.resolution = resolution
-
-    # @property
-    # def clock(self):
-    #     return self._clock
 
     @property
     def title(self):

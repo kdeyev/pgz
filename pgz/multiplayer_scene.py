@@ -68,7 +68,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         super().__init__()
 
         # The scene UUID is used for communication
-        self._uuid = None
+        self._client_uuid = None
         # Map object, supposed to be headless: don't add sprites directly to there
         self._map = None
         # Callback for sending broadcast messages: Message will be received by all clients
@@ -111,12 +111,12 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
             except Exception as e:
                 print(f"handle_client_event: {e}")
 
-    def init_scene_(self, uuid: UUID, map, _broadcast_message: Callable[[JSON], None]):
+    def init_scene_(self, client_uuid: UUID, map, _broadcast_message: Callable[[JSON], None]):
         """
         Server API:
         Scene initialization by the server
         """
-        self._uuid = uuid
+        self._client_uuid = client_uuid
         self._map = map
         self._broadcast_message = _broadcast_message
 
@@ -205,11 +205,11 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         return self._map
 
     @property
-    def uuid(self) -> str:
+    def client_uuid(self) -> str:
         """
         Get client UUID.
         """
-        return self._uuid
+        return self._client_uuid
 
     @property
     def resolution(self):
@@ -286,14 +286,14 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         If central_actor is True, client's camera will track the actor position. You can have only one central actor on the scene.
         """
 
-        actor.client_uuid = self.uuid
+        actor.client_uuid = self.client_uuid
         actor.deleter = self.remove_actor
         actor.keyboard = self.keyboard
         actor._on_prop_change = self._broadcast_property_change
         self._actors[actor.uuid] = actor
         self._map.add_sprite(actor)
 
-        json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.uuid, actor.image_name, central_actor)
+        json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.client_uuid, actor.image_name, central_actor)
         self._broadcast_message(json_message)
 
         return actor
@@ -362,21 +362,21 @@ class MultiplayerSceneServer:
 
     async def _send_handshake(self, websocket, scene):
         actors = []
-        for scene in self._clients.values():
-            actors += scene.actors_.values()
+        for sc in self._clients.values():
+            actors += sc.actors_.values()
 
         actors_states = {actor.uuid: actor.serialize_state() for actor in actors}
-        massage = {"uuid": scene.uuid, "actors_states": actors_states, "screen_state": scene.screen.get_messages()}
+        massage = {"uuid": scene.client_uuid, "actors_states": actors_states, "screen_state": scene.screen.get_messages()}
         massage = json.dumps(massage)
         await websocket.send(massage)
 
     async def _register_client(self, websocket):
-        uuid = f"{self._HeadlessSceneClass.__name__}-{str(uuid4())}"
+        client_uuid = f"{self._HeadlessSceneClass.__name__}-{str(uuid4())}"
 
         # Create a headless scene
         scene = self._HeadlessSceneClass()
         # Create init the scene
-        scene.init_scene_(uuid, self._map, self._broadcast_message)
+        scene.init_scene_(client_uuid, self._map, self._broadcast_message)
 
         await self._recv_handshake(websocket, scene)
         await self._send_handshake(websocket, scene)
@@ -438,7 +438,7 @@ class MultiplayerClient(MapScene):
         super().__init__(map)
         self._actors = {}
         self.central_actor = None
-        self.uuid = None
+        self.client_uuid = None
         self._websocket = None
         self.server_url = server_url
         self._rpc = SimpleRPC()
@@ -465,7 +465,7 @@ class MultiplayerClient(MapScene):
             actor = Actor(image_name)
             self._actors[uuid] = actor
 
-            if client_uuid != self.uuid:
+            if client_uuid != self.client_uuid:
                 # Foreign actor cannot be central
                 central_actor = False
 
@@ -479,7 +479,7 @@ class MultiplayerClient(MapScene):
 
         @self._rpc.register
         def on_actor_prop_change(uuid, prop, value):
-            # print(f"MultiplayerClient.on_actor_prop_change {self.uuid}: {uuid} {prop}: {value}")
+            # print(f"MultiplayerClient.on_actor_prop_change {self.client_uuid}: {uuid} {prop}: {value}")
             actor = self._actors[uuid]
             actor.__setattr__(prop, value)
 
@@ -559,7 +559,7 @@ class MultiplayerClient(MapScene):
         massage = await websocket.recv()
         massage = json.loads(massage)
 
-        self.uuid = massage["uuid"]
+        self.client_uuid = massage["uuid"]
         actors_states = massage["actors_states"]
         for uuid, state in actors_states.items():
             image_name = state["image_name"]
