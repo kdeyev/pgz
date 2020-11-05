@@ -1,18 +1,19 @@
 import asyncio
 import json
-from functools import wraps
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+JSON = Dict[str, Any]
 
 
 class SimpleRPC:
     def __init__(self) -> None:
-        self._functions = {}
+        self._functions: Dict[str, Callable] = {}
 
     def _set_rpc(self, name, func):
         self._functions[name] = func
         return func
 
-    def register(self, target):
+    def register(self, target: Callable):
         if isinstance(target, str):
 
             # call as decorator with argument
@@ -29,14 +30,14 @@ class SimpleRPC:
     def __call__(self, request):
         return self.register(request)
 
-    def dispatch(self, request):
+    def dispatch(self, request: Union[JSON, List[JSON]]):
         if isinstance(request, List):
             for r in request:
                 self._dispatch(r)
         else:
             return self._dispatch(request)
 
-    def _dispatch(self, request):
+    def _dispatch(self, request: JSON):
         method = request["method"]
         args = request["args"]
         kwargs = request["kwargs"]
@@ -44,12 +45,12 @@ class SimpleRPC:
         func(*args, **kwargs)
 
 
-def serialize_json_message(method_name, *args, **kwarg):
+def serialize_json_message(method_name: str, *args, **kwarg) -> JSON:
     return {"method": method_name, "args": args, "kwargs": kwarg}
 
 
-def serialize_json_array_from_queue(queue):
-    json_messages = []
+def serialize_json_array_from_queue(queue) -> str:
+    json_messages: List[JSON] = []
     try:
         # Run until exception
         while True:

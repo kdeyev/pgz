@@ -1,7 +1,7 @@
 import asyncio
 import json
 import time
-from typing import Tuple
+from typing import Any, Callable, Dict, Tuple
 
 # from re import T
 from uuid import uuid4
@@ -19,6 +19,9 @@ from .scene import EventDispatcher
 from .screen_rpc import RPCScreenClient, RPCScreenServer
 
 nest_asyncio.apply()
+
+UUID = str
+JSON = Dict[str, Any]
 
 
 class MultiplayerActor(Actor):
@@ -71,7 +74,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         # Callback for sending broadcast messages: Message will be received by all clients
         self._broadcast_message = None
         # List of the actors belonging to the scene. Different scenes will have different actors. But they are mixed together on the client-side for rendering
-        self._actors = {}
+        self._actors: Dict[str, MultiplayerActor] = {}
         # Simple massages dispatcher
         self._rpc = SimpleRPC()
         # Local keyboard object: convenient class for chenking the current keyboard state. The keyboard state is updated based on event coming from the client
@@ -88,7 +91,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
 
         # Bind event message handler
         @self._rpc.register("handle_client_event")
-        def handle_client_event(event_type, attributes):
+        def handle_client_event(event_type, attributes: JSON):
             # Deserialize event
             event = pygame.event.Event(event_type, **attributes)
 
@@ -108,7 +111,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
             except Exception as e:
                 print(f"handle_client_event: {e}")
 
-    def init_scene_(self, uuid, map, _broadcast_message):
+    def init_scene_(self, uuid: UUID, map, _broadcast_message: Callable[[JSON], None]):
         """
         Server API:
         Scene initialization by the server
@@ -117,7 +120,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self._map = map
         self._broadcast_message = _broadcast_message
 
-    def recv_handshake_(self, massage):
+    def recv_handshake_(self, massage: JSON):
         """
         Server API:
         Handle handshake message called by server
@@ -137,7 +140,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
             json_message = serialize_json_message("on_screen_redraw", data)
             self._send_message(json_message)
 
-    def handle_message_(self, message):
+    def handle_message_(self, message: JSON):
         """
         Server API:
         Handle event message coming from the client
@@ -158,62 +161,131 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         self._actors = {}
 
     def _remove_actor(self, actor):
+        """
+        Remove an actor from the scene and send message to clients.
+        """
         uuid = actor.uuid
         self._map.remove_sprite(actor)
         json_message = serialize_json_message("remove_actor_on_client", uuid)
         self._broadcast_message(json_message)
 
     def _send_message(self, json_message):
+        """
+        Send message to the client fo the scene.
+        """
         self._message_queue.put_nowait(json_message)
 
-    def _broadcast_property_change(self, uuid, prop, value):
+    def _broadcast_property_change(self, uuid: str, prop: str, value: Any):
+        """
+        Send message about actor's property change.
+        """
         json_message = serialize_json_message("on_actor_prop_change", uuid, prop, value)
         self._broadcast_message(json_message)
 
     @property
     def actors_(self):
+        """
+        Server API:
+        Get dictionary of actors
+        """
         return self._actors
 
     @property
     def screen(self):
+        """
+        Get RPCScreenServer screen object, which mimics to the Screen API. Any modification of the object will be reflected on the client screen.
+        """
         return self._screen
 
     @property
     def map(self):
+        """
+        Get ScrollMap object.
+        """
         return self._map
 
     @property
-    def uuid(self):
+    def uuid(self) -> str:
+        """
+        Get client UUID.
+        """
         return self._uuid
 
     @property
     def resolution(self):
+        """
+        Get resolution of the client's screen. Client sends notifications about the client screen size changes.
+        Screen object (self.screen) will be updated according to the notifications.
+        """
         return self._screen.surface.get_size()
 
     @resolution.setter
     def resolution(self, value):
+        """
+        Server API:
+        Modify the client's screen resolution. This method will be called by the server internally
+        Screen object (self.screen) will be updated according to the notifications.
+        """
         self._screen = RPCScreenServer(value)
 
     @property
-    def client_data(self):
+    def client_data(self) -> JSON:
+        """
+        Get data provided by cleint side.
+        """
         return self._client_data
 
     def draw(self, screen):
-        pass
+        """Override this with the scene drawing.
+
+        :param pygame.Surface screen: screen to draw the scene on
+        """
 
     def on_enter(self, previous_scene=None):
-        pass
+        """Override this to initialize upon scene entering.
+
+        The :attr:`application` property is initialized at this point,
+        so you are free to access it through ``self.application``.
+        Stuff like changing resolution etc. should be done here.
+
+        If you override this method and want to use class variables
+        to change the application's settings, you must call
+        ``super().on_enter(previous_scene)`` in the subclass.
+
+        :param Scene|None previous_scene: previous scene to run
+        """
 
     def on_exit(self, next_scene=None):
-        pass
+        """Override this to deinitialize upon scene exiting.
+
+        The :attr:`application` property is still initialized at this
+        point. Feel free to do saving, settings reset, etc. here.
+
+        :param Scene|None next_scene: next scene to run
+        """
 
     def handle_event(self, event):
-        pass
+        """Override this to handle an event in the scene.
+
+        All of :mod:`pygame`'s events are sent here, so filtering
+        should be applied manually in the subclass.
+
+        :param pygame.event.Event event: event to handle
+        """
 
     def update(self, dt):
-        pass
+        """Override this with the scene update tick.
+
+        :param int dt: time in milliseconds since the last update
+        """
 
     def add_actor(self, actor, central_actor=False):
+        """
+        Add actor to the scene and send notifications to the  clients.
+
+        If central_actor is True, client's camera will track the actor position. You can have only one central actor on the scene.
+        """
+
         actor.client_uuid = self.uuid
         actor.deleter = self.remove_actor
         actor.keyboard = self.keyboard
@@ -227,6 +299,10 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         return actor
 
     def remove_actor(self, actor):
+        """
+        Remore actor from the scene and send notifications to the  clients.
+        """
+
         self._remove_actor(actor)
 
         uuid = actor.uuid
