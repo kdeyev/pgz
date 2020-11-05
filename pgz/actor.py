@@ -1,6 +1,5 @@
 import pgzero.actor
 import pygame
-from pygame import sprite
 
 
 class Sprite(pygame.sprite.Sprite):

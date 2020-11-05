@@ -1,7 +1,9 @@
 from .actor import Actor  # noqa
-from .application import Application, FPSCalc, global_clock, keyboard  # noqa
-from .loaders import sounds  # noqa; noqa
-from .loaders import maps
+from .application import Application, FPSCalc  # noqa
+from .clock import Clock, global_clock
+from .keyboard import keyboard  # noqa
+from .loaders import sounds  # noqas; noqas
+from .loaders import images, maps
 from .loaders import set_root as set_resource_root  # noqa
 from .map_scene import MapScene  # noqa
 from .menu_scene import MenuScene  # noqa

@@ -2,9 +2,9 @@ import asyncio
 import sys
 
 import pygame
-from pgzero.clock import clock as global_clock
 from pgzero.screen import Screen
 
+from .clock import global_clock
 from .fps_calc import FPSCalc
 from .keyboard import keyboard
 
@@ -50,7 +50,6 @@ class Application:
         pygame.init()
         self.update_rate = update_rate
         self._scene = None
-        # self._clock = global_clock
 
         self.keyboard = keyboard
 
