@@ -152,7 +152,7 @@ class Application:
         clock = pygame.time.Clock()
         fps_calc = FPSCalc()
 
-        fps = 0
+        fps = 0.0
         # self.need_redraw = True
         while True:
             self._pg_screen.clear()

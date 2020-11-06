@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Set
 from warnings import warn
 
 from pgzero.constants import keys
@@ -23,7 +23,7 @@ class Keyboard:
 
         # The current key state. This may as well be a class attribute - there's
         # only one keyboard.
-        self._pressed = set()
+        self._pressed: Set[Any, Any] = set()
 
     def __getattr__(self, kname: str) -> Any:
         # return is a reserved word, so alias enter to return

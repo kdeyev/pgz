@@ -1,5 +1,5 @@
 import operator
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 import pygame
 from pgzero.constants import MUSIC_END, keys, mouse
@@ -62,7 +62,7 @@ class EventDispatcher:
         def prep_args(event) -> Dict[str, Any]:
             return {name: get(event) for name, get in param_handlers}
 
-        def new_handler(event) -> Callable:
+        def new_handler(event: pygame.event.Event) -> Any:
             try:
                 prepped = prep_args(event)
             except ValueError:
@@ -71,7 +71,7 @@ class EventDispatcher:
                 #
                 # This happens because Pygame can generate key codes that it
                 # does not have constants for.
-                return
+                return None
             else:
                 return handler(**prepped)
 
@@ -83,3 +83,6 @@ class EventDispatcher:
             handler(event)
         else:
             self.handle_event(event)
+
+    def handle_event(self, event: pygame.event.Event) -> None:
+        """Override me"""

@@ -229,7 +229,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         Get resolution of the client's screen. Client sends notifications about the client screen size changes.
         Screen object (self.screen) will be updated according to the notifications.
         """
-        return self.screen.surface.get_size()
+        return self.screen.resolution
 
     @resolution.setter
     def resolution(self, value: Tuple[int, int]) -> None:

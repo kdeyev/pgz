@@ -128,11 +128,15 @@ class RPCScreenServer:
         # else:
         #     self.surface.fill(make_color(color))
 
-    def blit(self, image, pos):
+    def blit(self, image: str, pos: Tuple[float, float]) -> None:
         self._massages.append(serialize_json_message("blit", (image, pos)))
         # if isinstance(image, str):
         #     image = loaders.images.load(image)
         # self.surface.blit(image, pos)
+
+    @property
+    def resolution(self) -> Tuple[int, int]:
+        return self._size
 
     @property
     def draw(self):
@@ -160,7 +164,7 @@ class RPCScreenClient:
         def draw_rect(color, rect, width=1) -> None:
             pygame.draw.rect(self._surf.surface, color, ZRect(rect), width)
 
-    def set_messages(self, messages) -> None:
+    def set_messages(self, messages: List[JSON]) -> None:
         self._messages = messages
 
     def draw(self, screen: Screen) -> None:
