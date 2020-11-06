@@ -23,7 +23,7 @@ class Keyboard:
 
         # The current key state. This may as well be a class attribute - there's
         # only one keyboard.
-        self._pressed: Set[Any, Any] = set()
+        self._pressed: Set[Any] = set()
 
     def __getattr__(self, kname: str) -> Any:
         # return is a reserved word, so alias enter to return

@@ -1,11 +1,13 @@
-from typing import Any
+from typing import Any, Optional, cast
 
 import pgzero.actor
 import pygame
 from pgzero.screen import Screen
-from pygame.surface import Surface
 
 from .rect import ZRect
+
+# from pygame import Rect
+# from pygame.surface import Surface
 
 
 class Actor(pgzero.actor.Actor):
@@ -14,12 +16,12 @@ class Actor(pgzero.actor.Actor):
         self._sprite: SpriteDelegate = SpriteDelegate(self)
 
     @property
-    def rect(self) -> ZRect:
-        return self._rect
+    def rect(self) -> Optional[pygame.rect.Rect]:
+        return cast(pygame.rect.Rect, self._rect)
 
     @property
-    def sprite(self) -> pygame.sprite.Sprite:
-        return self._surf
+    def sprite(self) -> pygame.surface.Surface:
+        return cast(pygame.surface.Surface, self._surf)
 
     @property
     def sprite_delegate(self) -> "SpriteDelegate":
@@ -35,11 +37,11 @@ class SpriteDelegate(pygame.sprite.Sprite):
         self._actor = actor
 
     @property
-    def rect(self) -> ZRect:
+    def rect(self) -> Optional[pygame.rect.Rect]:  # type: ignore
         return self._actor.rect
 
     @property
-    def image(self) -> pygame.sprite.Sprite:
+    def image(self) -> Optional[pygame.surface.Surface]:  # type: ignore
         return self._actor.sprite
 
     def update(self, *args: Any, **kwargs: Any) -> None:

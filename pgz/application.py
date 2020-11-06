@@ -63,8 +63,8 @@ class Application:
         self.resolution = resolution
 
     @property
-    def title(self) -> Tuple[str, str]:
-        return pygame.display.get_caption()
+    def title(self) -> str:
+        return pygame.display.get_caption()[0]
 
     @title.setter
     def title(self, value: str) -> None:

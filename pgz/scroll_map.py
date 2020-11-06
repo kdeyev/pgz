@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pygame
 import pyscroll
@@ -37,6 +37,27 @@ def extract_collision_objects_from_tile_layers(tmx_data: TiledMap, collision_lay
     return collison_objects
 
 
+class CollisionDetector(object):
+    def __init__(self) -> None:
+        self._groups: Dict[str, pygame.sprite.Group] = {}
+
+    def add_sprite(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> None:
+        if group_name not in self._groups:
+            self._groups[group_name] = pygame.sprite.Group()
+        self._groups[group_name].add(sprite)
+
+    def remove_sprite(self, sprite: pygame.sprite.Sprite) -> None:
+        for group in self._groups.values():
+            group.remove(sprite)
+
+    def collide_group(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> Optional[pygame.sprite.Sprite]:
+        if group_name not in self._groups:
+            return None
+
+        collision = pygame.sprite.spritecollideany(sprite, self._groups[group_name])
+        return collision
+
+
 class ScrollMap(object):
     """
     This class provides functionality:
@@ -60,48 +81,48 @@ class ScrollMap(object):
         # layers begin with 0, so the layers are 0, 1, and 2.
         # since we want the sprite to be on top of layer 1, we set the default
         # layer for sprites as 2
-        self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
+        self._map_group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
 
-        self.walls: List[pygame.Rect] = []
+        self._map_collision_obj: List[pygame.Rect] = []
 
         self.add_collision_layers(collision_layers)
 
     def add_collision_layers(self, collision_layers: List[str]) -> None:
         # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls += extract_collision_objects_from_tile_layers(self._tmx, collision_layers)
+        self._map_collision_obj += extract_collision_objects_from_tile_layers(self._tmx, collision_layers)
 
     def view(self) -> Any:
-        return self.group.view
+        return self._map_group.view
 
     def transform(self, pos: Tuple[int, int]) -> Tuple[int, int]:
-        return (pos[0] + self.group.view.left, pos[1] + self.group.view.top)
+        return (pos[0] + self._map_group.view.left, pos[1] + self._map_group.view.top)
 
     def draw(self, surface: Surface) -> None:
         # draw the map and all sprites
-        self.group.draw(surface)
+        self._map_group.draw(surface)
 
     def update(self, dt: float) -> None:
         """Tasks that occur over time should be handled here"""
-        self.group.update(dt)
+        self._map_group.update(dt)
 
     def collide(self, sprite: pygame.sprite.Sprite) -> bool:
         if not sprite.rect:
             return False
-        return bool(sprite.rect.collidelist(self.walls) > -1)
+        return bool(sprite.rect.collidelist(self._map_collision_obj) > -1)
 
     def add_sprite(self, sprite: pygame.sprite.Sprite) -> None:
-        self.group.add(sprite)
+        self._map_group.add(sprite)
 
     def remove_sprite(self, sprite: pygame.sprite.Sprite) -> None:
-        sprite.remove(self.group)
+        sprite.remove(self._map_group)
 
     def set_center(self, point: Tuple[int, int]) -> None:
-        self.group.center(point)
+        self._map_group.center(point)
 
     def get_center(self) -> Tuple[int, int]:
         if not self.map_layer.map_rect:
             raise Exception("Map was not configured properly")
-        return self.map_layer.map_rect.center
+        return self.map_layer.map_rect.center  # type: ignore
 
     def change_zoom(self, change: float) -> None:
         value = self.map_layer.zoom + change

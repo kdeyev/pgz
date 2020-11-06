@@ -415,7 +415,7 @@ class MultiplayerSceneServer:
         except Exception as e:
             print(f"_handle_client_message: {e}")
 
-    async def _serve_client(self, websocket: websockets.WebSocketClientProtocol, path: str) -> Coroutine[None, None, None]:
+    async def _serve_client(self, websocket: websockets.WebSocketClientProtocol, path: str) -> None:
         # register(websocket) sends user_event() to websocket
         await self._register_client(websocket)
         try:
@@ -428,7 +428,7 @@ class MultiplayerSceneServer:
             await self._unregister_client(websocket)
 
     def start_server(self, host: str = "localhost", port: int = 8765) -> None:
-        self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))
+        self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
         # self._flush_messages_task = asyncio.ensure_future(self._flush_messages_loop())
 
     def stop_server(self) -> None:
@@ -584,7 +584,7 @@ class MultiplayerClient(MapScene):
 
     async def _handle_messages(self) -> None:
         message: str
-        async for message in self._websocket:
+        async for message in self._websocket:  # type: ignore
             try:
                 json_messages: JSON = json.loads(message)
                 self._rpc.dispatch(json_messages)

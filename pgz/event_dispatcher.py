@@ -1,5 +1,5 @@
 import operator
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Set
 
 import pygame
 from pgzero.constants import MUSIC_END, keys, mouse
@@ -28,10 +28,10 @@ class EventDispatcher:
         MUSIC_END: "on_music_end",
     }
 
-    def map_buttons(val) -> Dict[str, Any]:
-        return {c for c, pressed in zip(mouse, val) if pressed}
+    def map_buttons(val) -> Set[Any]:
+        return {c for c, pressed in zip(mouse, val) if pressed}  # type: ignore
 
-    EVENT_PARAM_MAPPERS = {"buttons": map_buttons, "button": mouse, "key": keys}
+    EVENT_PARAM_MAPPERS: Dict[str, Callable] = {"buttons": map_buttons, "button": mouse, "key": keys}
 
     def load_handlers(self) -> None:
         # from .spellcheck import spellcheck
@@ -48,9 +48,10 @@ class EventDispatcher:
         code = handler.__code__
         param_names = code.co_varnames[: code.co_argcount]
 
-        def make_getter(mapper, getter):
+        def make_getter(mapper: Optional[Callable], getter: Callable) -> Callable:
             if mapper:
-                return lambda event: mapper(getter(event))
+                event: pygame.event.Event
+                return lambda event: mapper(getter(event))  # type: ignore
             return getter
 
         param_handlers = []
@@ -59,7 +60,7 @@ class EventDispatcher:
             mapper = self.EVENT_PARAM_MAPPERS.get(name)
             param_handlers.append((name, make_getter(mapper, getter)))
 
-        def prep_args(event) -> Dict[str, Any]:
+        def prep_args(event: pygame.event.Event) -> Dict[str, Any]:
             return {name: get(event) for name, get in param_handlers}
 
         def new_handler(event: pygame.event.Event) -> Any:

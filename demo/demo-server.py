@@ -15,7 +15,7 @@ pgz.set_resource_root("demo/resources")
 
 
 class Ship(pgz.MultiplayerActor):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]))
 
         self.speed = 200
