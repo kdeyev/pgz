@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 import pygame
 import pyscroll
@@ -70,7 +70,7 @@ class ScrollMap(object):
         # setup level geometry with simple pygame rects, loaded from pytmx
         self.walls += extract_collision_objects_from_tile_layers(self._tmx, collision_layers)
 
-    def view(self):
+    def view(self) -> Any:
         return self.group.view
 
     def transform(self, pos: Tuple[int, int]) -> Tuple[int, int]:
@@ -85,18 +85,22 @@ class ScrollMap(object):
         self.group.update(dt)
 
     def collide(self, sprite: pygame.sprite.Sprite) -> bool:
+        if not sprite.rect:
+            return False
         return bool(sprite.rect.collidelist(self.walls) > -1)
 
-    def add_sprite(self, sprite: pygame.sprite.Sprite):
+    def add_sprite(self, sprite: pygame.sprite.Sprite) -> None:
         self.group.add(sprite)
 
-    def remove_sprite(self, sprite: pygame.sprite.Sprite):
+    def remove_sprite(self, sprite: pygame.sprite.Sprite) -> None:
         sprite.remove(self.group)
 
-    def set_center(self, point: Tuple[int, int]):
+    def set_center(self, point: Tuple[int, int]) -> None:
         self.group.center(point)
 
     def get_center(self) -> Tuple[int, int]:
+        if not self.map_layer.map_rect:
+            raise Exception("Map was not configured properly")
         return self.map_layer.map_rect.center
 
     def change_zoom(self, change: float) -> None:

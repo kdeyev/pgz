@@ -1,9 +1,11 @@
 import math
 import random
 import time
+from typing import Optional
 
 import pygame
 import pygame_menu
+from pgzero.screen import Screen
 
 import pgz
 from pgz import ZRect
@@ -117,12 +119,12 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         # super().on_enter(previous_scene)
 
         self.ship = Ship()
-        self.ship = self.add_actor(self.ship, central_actor=True)
+        self.add_actor(self.ship, central_actor=True)
 
         # put the ship in the center of the map
         self.ship.pos = self.map.get_center()
 
-    def draw(self, screen):
+    def draw(self, screen: Screen):
         self.client_data
         self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
         self.screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
@@ -182,7 +184,7 @@ class ServerScene(pgz.Scene):
         self.server = pgz.MultiplayerSceneServer(map, GameScene)
         self.server.start_server(port=self.port)
 
-    def on_exit(self, next_scene):
+    def on_exit(self, next_scene: Optional[pgz.Scene]):
         self.server.stop_server()
         self.server = None
 

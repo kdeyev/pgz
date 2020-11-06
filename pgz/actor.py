@@ -2,6 +2,7 @@ from typing import Any
 
 import pgzero.actor
 import pygame
+from pgzero.screen import Screen
 from pygame.surface import Surface
 
 from .rect import ZRect
@@ -24,7 +25,7 @@ class Actor(pgzero.actor.Actor):
     def sprite_delegate(self) -> "SpriteDelegate":
         return self._sprite
 
-    def draw(self, screen: Surface) -> None:
+    def draw(self, screen: Screen) -> None:
         screen.blit(self.sprite, self.topleft)
 
 
@@ -38,7 +39,7 @@ class SpriteDelegate(pygame.sprite.Sprite):
         return self._actor.rect
 
     @property
-    def image(self) -> Surface:
+    def image(self) -> pygame.sprite.Sprite:
         return self._actor.sprite
 
     def update(self, *args: Any, **kwargs: Any) -> None:

@@ -1,4 +1,5 @@
 import operator
+from typing import Any, Callable, Dict
 
 import pygame
 from pgzero.constants import MUSIC_END, keys, mouse
@@ -27,7 +28,7 @@ class EventDispatcher:
         MUSIC_END: "on_music_end",
     }
 
-    def map_buttons(val):
+    def map_buttons(val) -> Dict[str, Any]:
         return {c for c, pressed in zip(mouse, val) if pressed}
 
     EVENT_PARAM_MAPPERS = {"buttons": map_buttons, "button": mouse, "key": keys}
@@ -42,7 +43,7 @@ class EventDispatcher:
             if callable(handler):
                 self.handlers[type] = self.prepare_handler(handler)
 
-    def prepare_handler(self, handler):
+    def prepare_handler(self, handler: Callable) -> Callable:
 
         code = handler.__code__
         param_names = code.co_varnames[: code.co_argcount]
@@ -58,10 +59,10 @@ class EventDispatcher:
             mapper = self.EVENT_PARAM_MAPPERS.get(name)
             param_handlers.append((name, make_getter(mapper, getter)))
 
-        def prep_args(event):
+        def prep_args(event) -> Dict[str, Any]:
             return {name: get(event) for name, get in param_handlers}
 
-        def new_handler(event):
+        def new_handler(event) -> Callable:
             try:
                 prepped = prep_args(event)
             except ValueError:
@@ -76,10 +77,9 @@ class EventDispatcher:
 
         return new_handler
 
-    def dispatch_event(self, event):
+    def dispatch_event(self, event: pygame.event.Event) -> None:
         handler = self.handlers.get(event.type)
         if handler:
             handler(event)
-            return True
         else:
             self.handle_event(event)

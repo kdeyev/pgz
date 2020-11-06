@@ -1,13 +1,15 @@
 import asyncio
 import sys
-from typing import Optional
+from typing import Optional, Tuple
 
+import pgzero
 import pygame
 from pgzero.screen import Screen
 
+#
 from pgz.scene import Scene
 
-from .clock import global_clock
+from .clock import Clock, global_clock
 from .fps_calc import FPSCalc
 from .keyboard import keyboard
 
@@ -49,7 +51,7 @@ class Application:
         app.run(main_menu)
     """
 
-    def __init__(self, title=None, resolution=None, update_rate=None):
+    def __init__(self, title: str, resolution: Tuple[int, int], update_rate: Optional[int] = None):
         pygame.init()
         self.update_rate = update_rate
         self._scene = None
@@ -61,36 +63,36 @@ class Application:
         self.resolution = resolution
 
     @property
-    def title(self):
+    def title(self) -> Tuple[str, str]:
         return pygame.display.get_caption()
 
     @title.setter
-    def title(self, value):
+    def title(self, value: str) -> None:
         pygame.display.set_caption(value)
 
     @property
-    def screen(self):
+    def screen(self) -> Screen:
         return self._pg_screen
 
     @property
-    def clock(self):
+    def clock(self) -> pgzero.clock.Clock:
         return global_clock
 
     @property
-    def resolution(self):
+    def resolution(self) -> Tuple[int, int]:
         return self._screen.get_size()
 
     @resolution.setter
-    def resolution(self, value):
+    def resolution(self, value: Tuple[int, int]) -> None:
         self._screen = pygame.display.set_mode(value)
         self._pg_screen = Screen(self._screen)
 
     @property
-    def active_scene(self):
+    def active_scene(self) -> Optional[Scene]:
         """The currently active scene. Can be ``None``."""
         return self._scene
 
-    def change_scene(self, scene):
+    def change_scene(self, scene: Optional[Scene]) -> None:
         """Change the currently active scene.
 
         This will invoke :meth:`.Scene.on_exit` and
@@ -109,13 +111,16 @@ class Application:
             self.active_scene.on_enter(previous_scene=old_scene)
 
     def draw(self) -> None:
-        self.active_scene.draw(self._screen)
+        if self.active_scene:
+            self.active_scene.draw(self._screen)
 
     def update(self, dt: float) -> None:
-        self.active_scene.update(dt)
+        if self.active_scene:
+            self.active_scene.update(dt)
 
     def handle_event(self, event: pygame.event.Event) -> None:
-        self.active_scene.dispatch_event(event)
+        if self.active_scene:
+            self.active_scene.dispatch_event(event)
 
     def run(self, scene: Optional[Scene] = None) -> None:
         """Execute the application.
@@ -133,7 +138,7 @@ class Application:
         finally:
             asyncio.get_event_loop().close()
 
-    async def run_as_coroutine(self):
+    async def run_as_coroutine(self) -> None:
         self.running = True
         try:
             await self.mainloop()
@@ -142,7 +147,7 @@ class Application:
             pygame.mixer.quit()
             self.running = False
 
-    async def mainloop(self):
+    async def mainloop(self) -> None:
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
         fps_calc = FPSCalc()

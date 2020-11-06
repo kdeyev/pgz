@@ -1,6 +1,7 @@
 from typing import Optional
 
 import pygame
+from pgzero.screen import Screen
 
 from .actor import Actor
 from .scene import EventDispatcher, Scene
@@ -18,11 +19,11 @@ class MapScene(Scene):
         if event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
             view_pos = event.pos
             scene_pos = self._map.transform(view_pos)
-            event.scene_pos = scene_pos
-            event.pos = scene_pos
+            event.scene_pos = scene_pos  # type: ignore
+            event.pos = scene_pos  # type: ignore
         super().dispatch_event(event)
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: Screen) -> None:
         if self.central_actor:
             # center the map/screen on our Ship
             self._map.set_center(self.central_actor.pos)

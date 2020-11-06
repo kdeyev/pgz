@@ -1,10 +1,14 @@
+from typing import Optional
+
+import pygame
 import pygame_menu
+from pgzero.screen import Screen
 
 from .scene import Scene
 
 
 class MenuScene(Scene):
-    def __init__(self, menu=None):
+    def __init__(self, menu: Optional[pygame_menu.Menu] = None):
         super().__init__()
         self.menu = menu
         if not self.menu:
@@ -16,19 +20,19 @@ class MenuScene(Scene):
         # self.menu.add_button("Quit", pygame_menu.events.EXIT)
 
     @property
-    def menu(self):
+    def menu(self) -> pygame_menu.Menu:
         return self._menu
 
     @menu.setter
-    def menu(self, menu):
+    def menu(self, menu: pygame_menu.Menu) -> None:
         self._menu = menu
 
-    def draw(self, surface):
+    def draw(self, surface: Screen) -> None:
         # TODO: may be need to remove disable_loop
         self.menu.mainloop(surface, disable_loop=True)
 
-    def on_exit(self, next_scene):
+    def on_exit(self, next_scene: Optional[Scene]) -> None:
         self.menu.disable()
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
         self.menu.update([event])

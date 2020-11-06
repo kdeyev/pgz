@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import pygame
 from pygame import Surface
@@ -6,6 +6,9 @@ from pygame import Surface
 from .clock import Clock
 from .event_dispatcher import EventDispatcher
 from .screen import Screen
+
+if TYPE_CHECKING:
+    from .application import Application
 
 
 class Scene(EventDispatcher):
@@ -137,11 +140,13 @@ class Scene(EventDispatcher):
     #         self.update_rate = update_rate
 
     def __init__(self) -> None:
-        self._application = None
+        self._application: Optional["Application"] = None
 
     @property
     def application(self) -> "Application":
         """The host application that's currently running the scene."""
+        if not self._application:
+            raise Exception("Scene was not initalized properly")
         return self._application
 
     @property
@@ -161,7 +166,7 @@ class Scene(EventDispatcher):
         """Clock object. Actually returns the global clock object."""
         return self.application.clock
 
-    def draw(self, screen: Surface) -> None:
+    def draw(self, screen: Screen) -> None:
         """Override this with the scene drawing.
 
         :param pygame.Surface screen: screen to draw the scene on
@@ -182,7 +187,7 @@ class Scene(EventDispatcher):
         :param pygame.event.Event event: event to handle
         """
 
-    def on_enter(self, previous_scene: "Scene") -> None:
+    def on_enter(self, previous_scene: Optional["Scene"]) -> None:
         """Override this to initialize upon scene entering.
 
         The :attr:`application` property is initialized at this point,
@@ -203,7 +208,7 @@ class Scene(EventDispatcher):
         # Set event dispatcher
         self.load_handlers()
 
-    def on_exit(self, next_scene: "Scene") -> None:
+    def on_exit(self, next_scene: Optional["Scene"]) -> None:
         """Override this to deinitialize upon scene exiting.
 
         The :attr:`application` property is still initialized at this

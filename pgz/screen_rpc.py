@@ -1,8 +1,11 @@
+from typing import Any, Dict, List, Optional, Tuple
+
 import pygame
 from deepdiff import DeepDiff
 from pgzero.rect import RECT_CLASSES, ZRect
-from pgzero.screen import make_color, ptext, round_pos
+from pgzero.screen import Screen, make_color, ptext, round_pos
 
+JSON = Dict[str, Any]
 # from .jsonrpc_client import Server
 from .rpc import SimpleRPC, serialize_json_message
 
@@ -84,8 +87,8 @@ class RPCScreenServer:
     def __init__(self, size) -> None:
         super().__init__()
         self._size = size
-        self._prev_messages = []
-        self._messages = []
+        self._prev_messages: List[JSON] = []
+        self._messages: List[JSON] = []
 
         self.width, self.height = size
 
@@ -93,7 +96,7 @@ class RPCScreenServer:
     #     json_message = serialize_json_message(message.method, message.params)
     #     self._messages.append(json_message)
 
-    def get_messages(self):
+    def get_messages(self) -> Tuple[bool, List[JSON]]:
         if DeepDiff(self._messages, self._prev_messages) == {}:
             self._messages.clear()
             return False, []
@@ -105,12 +108,12 @@ class RPCScreenServer:
         """Return a Rect representing the bounds of the screen."""
         return ZRect((0, 0), (self.width, self.height))
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear the screen to black."""
         self._massages.append(serialize_json_message("fill", (0, 0, 0)))
         # self.fill((0, 0, 0))
 
-    def fill(self, color, gcolor=None):
+    def fill(self, color, gcolor=None) -> None:
         self._massages.append(serialize_json_message("fill", (color, gcolor)))
 
         # """Fill the screen with a colour."""
@@ -142,7 +145,7 @@ class RPCScreenServer:
 class RPCScreenClient:
     def __init__(self) -> None:
         self._messages = []
-        self._surf = None
+        self._surf: Optional[Screen] = None
         self.rpc = SimpleRPC()
 
         @self.rpc.register("draw.line")
@@ -160,6 +163,6 @@ class RPCScreenClient:
     def set_messages(self, messages) -> None:
         self._messages = messages
 
-    def draw(self, screen: pygame.Surface) -> None:
+    def draw(self, screen: Screen) -> None:
         self._surf = screen
         self.rpc.dispatch(self._messages)

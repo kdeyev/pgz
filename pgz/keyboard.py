@@ -1,4 +1,5 @@
 import re
+from typing import Any
 from warnings import warn
 
 from pgzero.constants import keys
@@ -24,7 +25,7 @@ class Keyboard:
         # only one keyboard.
         self._pressed = set()
 
-    def __getattr__(self, kname):
+    def __getattr__(self, kname: str) -> Any:
         # return is a reserved word, so alias enter to return
         if kname == "enter":
             kname = "return"
@@ -37,22 +38,22 @@ class Keyboard:
             raise AttributeError('The key "%s" does not exist' % key)
         return key.value in self._pressed
 
-    def _press(self, key):
+    def _press(self, key: str) -> None:
         """Called by Game to mark the key as pressed."""
         self._pressed.add(key)
 
-    def _release(self, key):
+    def _release(self, key: str) -> None:
         """Called by Game to mark the key as released."""
         self._pressed.discard(key)
 
-    def __getitem__(self, k):
+    def __getitem__(self, k: str) -> Any:
         if isinstance(k, keys):
             return k.value in self._pressed
         else:
             warn("String lookup in keyboard (eg. keyboard[%r]) is " "deprecated." % k, DeprecationWarning, 2)
             return getattr(self, k)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Keyboard pressed={}>".format(self._pressed)
 
 
