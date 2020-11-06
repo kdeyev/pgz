@@ -10,9 +10,6 @@ from uuid import uuid4
 import nest_asyncio
 import pygame
 import websockets
-from pgzero.screen import Screen
-
-from pgz.scroll_map import ScrollMap
 
 # import jsonrpc_base
 from .actor import Actor
@@ -20,7 +17,9 @@ from .keyboard import Keyboard
 from .map_scene import MapScene
 from .rpc import SimpleRPC, serialize_json_array_from_queue, serialize_json_message
 from .scene import EventDispatcher, Scene
+from .screen import Screen
 from .screen_rpc import RPCScreenClient, RPCScreenServer
+from .scroll_map import ScrollMap
 
 nest_asyncio.apply()
 

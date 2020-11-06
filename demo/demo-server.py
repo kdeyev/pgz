@@ -5,10 +5,9 @@ from typing import Optional
 
 import pygame
 import pygame_menu
-from pgzero.screen import Screen
 
 import pgz
-from pgz import ZRect
+from pgz import Screen, ZRect
 from pgz.fps_calc import FPSCalc
 
 pgz.set_resource_root("demo/resources")

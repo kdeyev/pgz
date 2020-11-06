@@ -3,10 +3,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import pygame
 import pyscroll
 import pyscroll.data
-from pygame import Surface
 from pyscroll.group import PyscrollGroup
 from pytmx import TiledMap
-from pytmx.util_pygame import load_pygame
 
 
 def extract_collision_objects_from_object_layers(tmx_data: TiledMap) -> List[pygame.Rect]:
@@ -97,7 +95,7 @@ class ScrollMap(object):
     def transform(self, pos: Tuple[int, int]) -> Tuple[int, int]:
         return (pos[0] + self._map_group.view.left, pos[1] + self._map_group.view.top)
 
-    def draw(self, surface: Surface) -> None:
+    def draw(self, surface: pygame.surface.Surface) -> None:
         # draw the map and all sprites
         self._map_group.draw(surface)
 

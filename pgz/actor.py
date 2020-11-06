@@ -2,12 +2,9 @@ from typing import Any, Optional, cast
 
 import pgzero.actor
 import pygame
-from pgzero.screen import Screen
 
 from .rect import ZRect
-
-# from pygame import Rect
-# from pygame.surface import Surface
+from .screen import Screen
 
 
 class Actor(pgzero.actor.Actor):

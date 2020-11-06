@@ -1,10 +1,10 @@
 from typing import Optional
 
 import pygame
-from pgzero.screen import Screen
 
 from .actor import Actor
 from .scene import EventDispatcher, Scene
+from .screen import Screen
 from .scroll_map import ScrollMap
 
 

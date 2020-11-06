@@ -2,9 +2,7 @@ import asyncio
 import sys
 from typing import Optional, Tuple
 
-import pgzero
 import pygame
-from pgzero.screen import Screen
 
 #
 from pgz.scene import Scene
@@ -12,6 +10,7 @@ from pgz.scene import Scene
 from .clock import Clock, global_clock
 from .fps_calc import FPSCalc
 from .keyboard import keyboard
+from .screen import Screen
 
 
 class Application:
@@ -75,7 +74,7 @@ class Application:
         return self._pg_screen
 
     @property
-    def clock(self) -> pgzero.clock.Clock:
+    def clock(self) -> Clock:
         return global_clock
 
     @property

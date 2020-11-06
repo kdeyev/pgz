@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Optional, Tuple
 
 import pygame
-from pygame import Surface
 
 from .clock import Clock
 from .event_dispatcher import EventDispatcher
