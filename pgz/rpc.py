@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 JSON = Dict[str, Any]
 
@@ -9,16 +9,16 @@ class SimpleRPC:
     def __init__(self) -> None:
         self._functions: Dict[str, Callable] = {}
 
-    def _set_rpc(self, name, func):
+    def _set_rpc(self, name: str, func: Callable) -> Callable:
         self._functions[name] = func
         return func
 
-    def register(self, target: Callable):
+    def register(self, target: Union[str, Callable]) -> Callable:
         if isinstance(target, str):
 
             # call as decorator with argument
-            def decorate(func):
-                return self._set_rpc(target, func)
+            def decorate(func: Callable) -> Callable:
+                return self._set_rpc(cast(str, target), func)
 
             return decorate
 
@@ -27,17 +27,17 @@ class SimpleRPC:
             func = target
             return self._set_rpc(func.__name__, func)
 
-    def __call__(self, request):
+    def __call__(self, request: Callable) -> Callable:
         return self.register(request)
 
-    def dispatch(self, request: Union[JSON, List[JSON]]):
+    def dispatch(self, request: Union[JSON, List[JSON]]) -> None:
         if isinstance(request, List):
             for r in request:
                 self._dispatch(r)
         else:
-            return self._dispatch(request)
+            self._dispatch(request)
 
-    def _dispatch(self, request: JSON):
+    def _dispatch(self, request: JSON) -> None:
         method = request["method"]
         args = request["args"]
         kwargs = request["kwargs"]
@@ -45,11 +45,11 @@ class SimpleRPC:
         func(*args, **kwargs)
 
 
-def serialize_json_message(method_name: str, *args, **kwarg) -> JSON:
+def serialize_json_message(method_name: str, *args: Any, **kwarg: Any) -> JSON:
     return {"method": method_name, "args": args, "kwargs": kwarg}
 
 
-def serialize_json_array_from_queue(queue) -> str:
+def serialize_json_array_from_queue(queue: asyncio.Queue) -> str:
     json_messages: List[JSON] = []
     try:
         # Run until exception

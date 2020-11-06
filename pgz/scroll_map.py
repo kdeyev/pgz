@@ -1,13 +1,15 @@
-from typing import Tuple
+from typing import List, Tuple
 
 import pygame
 import pyscroll
 import pyscroll.data
+from pygame import Surface
 from pyscroll.group import PyscrollGroup
+from pytmx import TiledMap
 from pytmx.util_pygame import load_pygame
 
 
-def extract_collision_objects_from_object_layers(tmx_data):
+def extract_collision_objects_from_object_layers(tmx_data: TiledMap) -> List[pygame.Rect]:
     collison_objects = list()
     for object in tmx_data.objects:
         collison_objects.append(pygame.Rect(object.x, object.y, object.width, object.height))
@@ -15,7 +17,7 @@ def extract_collision_objects_from_object_layers(tmx_data):
     return collison_objects
 
 
-def extract_collision_objects_from_tile_layers(tmx_data, collision_layer_names):
+def extract_collision_objects_from_tile_layers(tmx_data: TiledMap, collision_layer_names: List[str]) -> List[pygame.Rect]:
     collison_objects = list()
 
     for layer_name in collision_layer_names:
@@ -45,12 +47,10 @@ class ScrollMap(object):
     - render the map and the sprites on top
     """
 
-    def __init__(self, screen_size, tmx, collision_layers):
-        # setup level geometry with simple pygame rects, loaded from pytmx
-        self.walls = extract_collision_objects_from_tile_layers(tmx, collision_layers)
-
+    def __init__(self, screen_size: Tuple[int, int], tmx: TiledMap, collision_layers: List[str] = []) -> None:
+        self._tmx = tmx
         # create new data source for pyscroll
-        map_data = pyscroll.data.TiledMapData(tmx)
+        map_data = pyscroll.data.TiledMapData(self._tmx)
 
         # create new renderer (camera)
         self.map_layer = pyscroll.BufferedRenderer(map_data, screen_size, clamp_camera=False, tall_sprites=1)
@@ -62,27 +62,35 @@ class ScrollMap(object):
         # layer for sprites as 2
         self.group = PyscrollGroup(map_layer=self.map_layer, default_layer=2)
 
+        self.walls: List[pygame.Rect] = []
+
+        self.add_collision_layers(collision_layers)
+
+    def add_collision_layers(self, collision_layers: List[str]) -> None:
+        # setup level geometry with simple pygame rects, loaded from pytmx
+        self.walls += extract_collision_objects_from_tile_layers(self._tmx, collision_layers)
+
     def view(self):
         return self.group.view
 
-    def transform(self, pos):
+    def transform(self, pos: Tuple[int, int]) -> Tuple[int, int]:
         return (pos[0] + self.group.view.left, pos[1] + self.group.view.top)
 
-    def draw(self, surface):
+    def draw(self, surface: Surface) -> None:
         # draw the map and all sprites
         self.group.draw(surface)
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         """Tasks that occur over time should be handled here"""
         self.group.update(dt)
 
-    def collide(self, sprite):
-        return sprite.rect.collidelist(self.walls) > -1
+    def collide(self, sprite: pygame.sprite.Sprite) -> bool:
+        return bool(sprite.rect.collidelist(self.walls) > -1)
 
-    def add_sprite(self, sprite):
+    def add_sprite(self, sprite: pygame.sprite.Sprite):
         self.group.add(sprite)
 
-    def remove_sprite(self, sprite: pygame.Surface):
+    def remove_sprite(self, sprite: pygame.sprite.Sprite):
         sprite.remove(self.group)
 
     def set_center(self, point: Tuple[int, int]):
@@ -96,5 +104,5 @@ class ScrollMap(object):
         if value > 0:
             self.map_layer.zoom = value
 
-    def set_size(self, size: Tuple[int, int]):
+    def set_size(self, size: Tuple[int, int]) -> None:
         self.map_layer.set_size(size)

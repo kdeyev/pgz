@@ -2,7 +2,7 @@ import asyncio
 import json
 import time
 from re import A
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # from re import T
 from uuid import uuid4
@@ -16,7 +16,7 @@ from .actor import Actor
 from .keyboard import Keyboard
 from .map_scene import MapScene
 from .rpc import SimpleRPC, serialize_json_array_from_queue, serialize_json_message
-from .scene import EventDispatcher
+from .scene import EventDispatcher, Scene
 from .screen_rpc import RPCScreenClient, RPCScreenServer
 
 nest_asyncio.apply()
@@ -33,12 +33,12 @@ class MultiplayerActor(Actor):
         super().__init__(image)
         self.uuid: UUID = f"{self.__class__.__name__}-{str(uuid4())}"
 
-        self.client_uuid = None
+        self.client_uuid: UUID = ""
         self.deleter = None
         self.keyboard = None
         self._on_prop_change = None
 
-    def __setattr__(self, attr, value):
+    def __setattr__(self, attr: str, value: Any) -> None:
         if attr in self.__class__.SEND and hasattr(self, "_on_prop_change") and self._on_prop_change:
             if getattr(self, attr) != value:
                 self._on_prop_change(self.uuid, attr, value)
@@ -454,7 +454,7 @@ class MultiplayerClient(MapScene):
             asyncio.get_event_loop().run_until_complete(self._websocket.close())
             self._websocket = None
 
-    def on_enter(self, previous_scene):
+    def on_enter(self, previous_scene: Scene) -> None:
         super().on_enter(previous_scene)
 
         asyncio.get_event_loop().run_until_complete(self.connect_to_server())
@@ -473,8 +473,8 @@ class MultiplayerClient(MapScene):
             self.add_actor(actor, central_actor)
 
         @self._rpc.register
-        def remove_actor_on_client(uuid):
-            actor = self._actors[uuid]
+        def remove_actor_on_client(uuid: UUID) -> None:
+            actor: Actor = self._actors[uuid]
             del self._actors[uuid]
             self.remove_actor(actor)
 
@@ -485,30 +485,30 @@ class MultiplayerClient(MapScene):
             actor.__setattr__(prop, value)
 
         @self._rpc.register
-        def on_screen_redraw(data):
+        def on_screen_redraw(data: List[JSON]) -> None:
             self._screen_client.set_messages(data)
 
-    def update(self, dt):
+    def update(self, dt: float):
         asyncio.ensure_future(self._flush_messages())
         super().update(dt)
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         super().draw(screen)
         self._screen_client.draw(self.screen)
         self.screen.draw.text(self.server_url, pos=(300, 0))
 
-    def _send_message(self, json_message):
+    def _send_message(self, json_message: JSON) -> None:
         self.event_message_queue.put_nowait(json_message)
         # await self._websocket.send(message)
 
-    async def _flush_messages(self):
+    async def _flush_messages(self) -> None:
         if not self.event_message_queue.empty():
             # create one json array
             message = serialize_json_array_from_queue(self.event_message_queue)
             # send message
             await self._websocket.send(message)
 
-    def handle_event(self, event):
+    def handle_event(self, event) -> None:
 
         # this will be handled if the window is resized
         if event.type == pygame.VIDEORESIZE:
@@ -532,8 +532,8 @@ class MultiplayerClient(MapScene):
             return
         self._send_message(json_message)
 
-    async def connect_to_server(self, attempts=10):
-        websocket = None
+    async def connect_to_server(self, attempts=10) -> bool:
+        websocket: Optional[websockets.WebSocketClientProtocol] = None
 
         for attempt in range(attempts):
             try:
@@ -551,16 +551,16 @@ class MultiplayerClient(MapScene):
         else:
             return False
 
-    async def _send_handshake(self, websocket):
+    async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol) -> None:
         massage = {"resolution": list(self.resolution), "client_data": self._client_data}
         await websocket.send(json.dumps(massage))
 
-    async def _recv_handshake(self, websocket):
-        massage = await websocket.recv()
-        massage = json.loads(massage)
+    async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol) -> None:
+        data = await websocket.recv()
+        massage = json.loads(data)
 
         self.client_uuid = massage["uuid"]
-        actors_states = massage["actors_states"]
+        actors_states: Dict[UUID, JSON] = massage["actors_states"]
         uuid: UUID
         state: JSON
         for uuid, state in actors_states.items():

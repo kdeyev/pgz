@@ -1,8 +1,11 @@
 import asyncio
 import sys
+from typing import Optional
 
 import pygame
 from pgzero.screen import Screen
+
+from pgz.scene import Scene
 
 from .clock import global_clock
 from .fps_calc import FPSCalc
@@ -105,16 +108,16 @@ class Application:
             self.active_scene._application = self
             self.active_scene.on_enter(previous_scene=old_scene)
 
-    def draw(self):
+    def draw(self) -> None:
         self.active_scene.draw(self._screen)
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         self.active_scene.update(dt)
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
         self.active_scene.dispatch_event(event)
 
-    def run(self, scene=None):
+    def run(self, scene: Optional[Scene] = None) -> None:
         """Execute the application.
 
         :param scene.Scene|None scene: scene to start the execution from
@@ -153,6 +156,7 @@ class Application:
 
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
             await asyncio.sleep(0)
+            event: pygame.event.Event
             for event in pygame.event.get():
 
                 if event.type == pygame.VIDEORESIZE:

@@ -1,4 +1,11 @@
+from typing import Tuple
+
+import pygame
+from pygame import Surface
+
+from .clock import Clock
 from .event_dispatcher import EventDispatcher
+from .screen import Screen
 
 
 class Scene(EventDispatcher):
@@ -129,41 +136,44 @@ class Scene(EventDispatcher):
     #     if update_rate is not None:
     #         self.update_rate = update_rate
 
+    def __init__(self) -> None:
+        self._application = None
+
     @property
-    def application(self):
+    def application(self) -> "Application":
         """The host application that's currently running the scene."""
         return self._application
 
     @property
-    def screen(self):
+    def screen(self) -> Screen:
         """Screen of the application.
         If it's required - it's possible to do a private screen of the scene with it's own resolution.
         """
         return self.application.screen
 
     @property
-    def resolution(self):
+    def resolution(self) -> Tuple[int, int]:
         """Current screen resolution."""
         return self.application.resolution
 
     @property
-    def clock(self):
+    def clock(self) -> Clock:
         """Clock object. Actually returns the global clock object."""
         return self.application.clock
 
-    def draw(self, screen):
+    def draw(self, screen: Surface) -> None:
         """Override this with the scene drawing.
 
         :param pygame.Surface screen: screen to draw the scene on
         """
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         """Override this with the scene update tick.
 
         :param int dt: time in milliseconds since the last update
         """
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
         """Override this to handle an event in the scene.
 
         All of :mod:`pygame`'s events are sent here, so filtering
@@ -172,7 +182,7 @@ class Scene(EventDispatcher):
         :param pygame.event.Event event: event to handle
         """
 
-    def on_enter(self, previous_scene):
+    def on_enter(self, previous_scene: "Scene") -> None:
         """Override this to initialize upon scene entering.
 
         The :attr:`application` property is initialized at this point,
@@ -193,7 +203,7 @@ class Scene(EventDispatcher):
         # Set event dispatcher
         self.load_handlers()
 
-    def on_exit(self, next_scene):
+    def on_exit(self, next_scene: "Scene") -> None:
         """Override this to deinitialize upon scene exiting.
 
         The :attr:`application` property is still initialized at this

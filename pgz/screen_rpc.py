@@ -10,10 +10,10 @@ from .rpc import SimpleRPC, serialize_json_message
 class RPCSurfacePainter:
     """Interface to pygame.draw that is bound to a surface."""
 
-    def __init__(self, massages):
+    def __init__(self, massages) -> None:
         self._massages = massages
 
-    def line(self, start, end, color, width=1):
+    def line(self, start, end, color, width=1) -> None:
         """Draw a line from start to end."""
         start = round_pos(start)
         end = round_pos(end)
@@ -21,19 +21,19 @@ class RPCSurfacePainter:
         self._massages.append(serialize_json_message("draw.line", (make_color(color), start, end, width)))
         # pygame.draw.line(self._surf, make_color(color), start, end, width)
 
-    def circle(self, pos, radius, color, width=1):
+    def circle(self, pos, radius, color, width=1) -> None:
         """Draw a circle."""
         pos = round_pos(pos)
         self._massages.append(serialize_json_message("draw.circle", (make_color(color), pos, radius, width)))
         # pygame.draw.circle(self._surf, make_color(color), pos, radius, width)
 
-    def filled_circle(self, pos, radius, color):
+    def filled_circle(self, pos, radius, color) -> None:
         """Draw a filled circle."""
         pos = round_pos(pos)
         self._massages.append(serialize_json_message("draw.circle", (make_color(color), pos, radius, 0)))
         # pygame.draw.circle(self._surf, make_color(color), pos, radius, 0)
 
-    def polygon(self, points, color):
+    def polygon(self, points, color) -> None:
         """Draw a polygon."""
         try:
             iter(points)
@@ -43,7 +43,7 @@ class RPCSurfacePainter:
         self._massages.append(serialize_json_message("draw.polygon", (make_color(color), points, 1)))
         # pygame.draw.polygon(self._surf, make_color(color), points, 1)
 
-    def filled_polygon(self, points, color):
+    def filled_polygon(self, points, color) -> None:
         """Draw a filled polygon."""
         try:
             iter(points)
@@ -53,27 +53,27 @@ class RPCSurfacePainter:
         self._massages.append(serialize_json_message("draw.polygon", (make_color(color), points, 0)))
         # pygame.draw.polygon(self._surf, make_color(color), points, 0)
 
-    def rect(self, rect, color, width=1):
+    def rect(self, rect, color, width=1) -> None:
         """Draw a rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
         self._massages.append(serialize_json_message("draw.rect", make_color(color), (rect.x, rect.y, rect.w, rect.h), width))
         # pygame.draw.rect(self._surf, make_color(color), rect, width)
 
-    def filled_rect(self, rect, color):
+    def filled_rect(self, rect, color) -> None:
         """Draw a filled rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
         self._massages.append(serialize_json_message("draw.rect", make_color(color), (rect.x, rect.y, rect.w, rect.h), 0))
         # pygame.draw.rect(self._surf, make_color(color), rect, 0)
 
-    def text(self, *args, **kwargs):
+    def text(self, *args, **kwargs) -> None:
         """Draw text to the screen."""
         # FIXME: expose ptext parameters, for autocompletion and autodoc
         self._massages.append(serialize_json_message("ptext.draw", args=args, kwargs=kwargs))
         # ptext.draw(*args, surf=self._surf, **kwargs)
 
-    def textbox(self, *args, **kwargs):
+    def textbox(self, *args, **kwargs) -> None:
         """Draw text to the screen, wrapped to fit a box"""
         # FIXME: expose ptext parameters, for autocompletion and autodoc
         self._massages.append(serialize_json_message("ptext.drawbox", args=args, kwargs=kwargs))
@@ -81,7 +81,7 @@ class RPCSurfacePainter:
 
 
 class RPCScreenServer:
-    def __init__(self, size):
+    def __init__(self, size) -> None:
         super().__init__()
         self._size = size
         self._prev_messages = []
@@ -140,26 +140,26 @@ class RPCScreenServer:
 
 
 class RPCScreenClient:
-    def __init__(self):
+    def __init__(self) -> None:
         self._messages = []
         self._surf = None
         self.rpc = SimpleRPC()
 
         @self.rpc.register("draw.line")
-        def draw_line(start, end, color, width=1):
+        def draw_line(start, end, color, width=1) -> None:
             pygame.draw.line(self._surf, color, start, end, width)
 
         @self.rpc.register("ptext.draw")
-        def ptext_draw(args, kwargs):
+        def ptext_draw(args, kwargs) -> None:
             ptext.draw(*args, surf=self._surf, **kwargs)
 
         @self.rpc.register("draw.rect")
-        def draw_rect(color, rect, width=1):
+        def draw_rect(color, rect, width=1) -> None:
             pygame.draw.rect(self._surf.surface, color, ZRect(rect), width)
 
-    def set_messages(self, messages):
+    def set_messages(self, messages) -> None:
         self._messages = messages
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         self._surf = screen
         self.rpc.dispatch(self._messages)
