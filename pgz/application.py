@@ -71,7 +71,7 @@ class Application:
 
     @property
     def screen(self) -> Screen:
-        return self._pg_screen
+        return self._screen
 
     @property
     def clock(self) -> Clock:
@@ -79,12 +79,11 @@ class Application:
 
     @property
     def resolution(self) -> Tuple[int, int]:
-        return self._screen.get_size()
+        return (self._screen.width, self._screen.height)
 
     @resolution.setter
     def resolution(self, value: Tuple[int, int]) -> None:
-        self._screen = pygame.display.set_mode(value)
-        self._pg_screen = Screen(self._screen)
+        self._screen = Screen(pygame.display.set_mode(value))
 
     @property
     def active_scene(self) -> Optional[Scene]:
@@ -154,7 +153,7 @@ class Application:
         fps = 0.0
         # self.need_redraw = True
         while True:
-            self._pg_screen.clear()
+            self._screen.clear()
 
             dt = clock.tick(self.update_rate) / 1000
 
@@ -190,7 +189,7 @@ class Application:
             # if screen_change or update or self._clock.fired or self.need_redraw:
             self.draw()
 
-            self._pg_screen.draw.text(f"FPS: {fps}", pos=(0, 0))
+            self._screen.draw.text(f"FPS: {fps}", pos=(0, 0))
 
             pygame.display.update()
             # self.need_redraw = False

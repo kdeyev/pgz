@@ -27,9 +27,9 @@ class MenuScene(Scene):
     def menu(self, menu: pygame_menu.Menu) -> None:
         self._menu = menu
 
-    def draw(self, surface: Screen) -> None:
+    def draw(self, screen: Screen) -> None:
         # TODO: may be need to remove disable_loop
-        self.menu.mainloop(surface, disable_loop=True)
+        self.menu.mainloop(screen.surface, disable_loop=True)
 
     def on_exit(self, next_scene: Optional[Scene]) -> None:
         self.menu.disable()

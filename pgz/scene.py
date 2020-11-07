@@ -2,9 +2,7 @@ from typing import TYPE_CHECKING, Optional, Tuple
 
 import pygame
 
-from pgz import keyboard
-
-from .clock import Clock
+from .clock import Clock, clock
 from .event_dispatcher import EventDispatcher
 from .keyboard import Keyboard
 from .screen import Screen
@@ -143,35 +141,45 @@ class Scene(EventDispatcher):
 
     def __init__(self) -> None:
         self._application: Optional["Application"] = None
+        self._keyboard = Keyboard()
+        # self._resolution = None
+        # self._screen = None
 
-    @property
-    def application(self) -> "Application":
-        """The host application that's currently running the scene."""
-        if not self._application:
-            raise Exception("Scene was not initalized properly")
-        return self._application
+    # def init_screen(self, resolution, screen):
+    #     self._screen = screen
+    #     self._resolution = resolution
 
-    @property
-    def screen(self) -> Screen:
-        """Screen of the application.
-        If it's required - it's possible to do a private screen of the scene with it's own resolution.
-        """
-        return self.application.screen
+    def change_scene(self, new_scene: Optional["Scene"]):
+        self._application.change_scene(new_scene)
 
-    @property
-    def resolution(self) -> Tuple[int, int]:
-        """Current screen resolution."""
-        return self.application.resolution
+    # @property
+    # def application(self) -> "Application":
+    #     """The host application that's currently running the scene."""
+    #     if not self._application:
+    #         raise Exception("Scene was not initalized properly")
+    #     return self._application
+
+    # @property
+    # def screen(self) -> Screen:
+    #     """Screen of the application.
+    #     If it's required - it's possible to do a private screen of the scene with it's own resolution.
+    #     """
+    #     return self._screen
+
+    # @property
+    # def resolution(self) -> Tuple[int, int]:
+    #     """Current screen resolution."""
+    #     return self._resolution
 
     @property
     def clock(self) -> Clock:
         """Clock object. Actually returns the global clock object."""
-        return self.application.clock
+        return clock
 
     @property
     def keyboard(self) -> Keyboard:
         """Clock object. Actually returns the global clock object."""
-        return self.application.keyboard
+        return self._keyboard
 
     def draw(self, screen: Screen) -> None:
         """Override this with the scene drawing.
@@ -193,6 +201,11 @@ class Scene(EventDispatcher):
 
         :param pygame.event.Event event: event to handle
         """
+
+        if event.type == pygame.KEYDOWN:
+            self._keyboard._press(event.key)
+        elif event.type == pygame.KEYUP:
+            self._keyboard._release(event.key)
 
     def on_enter(self, previous_scene: Optional["Scene"]) -> None:
         """Override this to initialize upon scene entering.
