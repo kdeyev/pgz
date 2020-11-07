@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pygame
 import pyscroll
 import pyscroll.data
+from pgzero.screen import Screen
 from pyscroll.group import PyscrollGroup
 from pytmx import TiledMap
 
@@ -75,9 +76,9 @@ class ScrollMap(object):
     def transform(self, pos: Tuple[int, int]) -> Tuple[int, int]:
         return (pos[0] + self._map_group.view.left, pos[1] + self._map_group.view.top)
 
-    def draw(self, surface: pygame.surface.Surface) -> None:
+    def draw(self, screen: Screen) -> None:
         # draw the map and all sprites
-        self._map_group.draw(surface)
+        self._map_group.draw(screen.surface)
 
     def update(self, dt: float) -> None:
         """Tasks that occur over time should be handled here"""

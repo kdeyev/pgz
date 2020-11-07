@@ -13,16 +13,18 @@ class Actor(pgzero.actor.Actor):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._sprite: SpriteDelegate = SpriteDelegate(self)
-        if "uuid" in kwargs:
-            self.uuid = kwargs["uuid"]
-        else:
-            self.uuid = str(uuid4())
 
-        self.deleter: Callable[[Actor], None] = None
+        self._uuid: str
+        if "uuid" in kwargs:
+            self._uuid = kwargs["uuid"]
+        else:
+            self._uuid = str(uuid4())
+
+        self.deleter: Optional[Callable[[Actor], None]] = None
 
     @property
-    def rect(self) -> str:
-        return self.uuid
+    def uuid(self) -> str:
+        return self._uuid
 
     @property
     def rect(self) -> Optional[pygame.rect.Rect]:

@@ -29,10 +29,13 @@ class CollisionDetector(object):
 
 
 class ActorScene(Scene):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._actors: Dict[str, Actor] = {}
         self._collaider = CollisionDetector()
+
+    def set_collaider(self, collaider: CollisionDetector):
+        self._collaider = collaider
 
     def draw(self, surface: Screen) -> None:
         for actor in self._actors.values():
@@ -57,14 +60,14 @@ class ActorScene(Scene):
         return self._actors[uuid]
 
     def get_actors(self) -> List[Actor]:
-        return self._actors.values()
+        return list(self._actors.values())
 
     def update(self, dt: float) -> None:
         for actor in self._actors.values():
             actor.update(dt)
 
     def collide_group(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> Optional[pygame.sprite.Sprite]:
-        sprite: SpriteDelegate = self._collaider.collide_group(sprite, group_name)
-        if sprite:
-            return sprite.actor
+        sprite_deleg: SpriteDelegate = self._collaider.collide_group(sprite, group_name)
+        if sprite_deleg:
+            return sprite_deleg.actor
         return None

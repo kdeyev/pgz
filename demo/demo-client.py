@@ -28,7 +28,7 @@ class Menu(pgz.MenuScene):
         tmx = pgz.maps.default
         map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
         game = pgz.MultiplayerClient(map, server_url, client_data={"name": data["name"]})
-        self.application.change_scene(game)
+        self.change_scene(game)
 
 
 if __name__ == "__main__":
