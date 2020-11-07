@@ -1,7 +1,9 @@
-from typing import Any, Optional, cast
+from typing import Any, Callable, Optional, cast
+from uuid import uuid4
 
 import pgzero.actor
 import pygame
+from pygame.display import update
 
 from .rect import ZRect
 from .screen import Screen
@@ -11,6 +13,16 @@ class Actor(pgzero.actor.Actor):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._sprite: SpriteDelegate = SpriteDelegate(self)
+        if "uuid" in kwargs:
+            self.uuid = kwargs["uuid"]
+        else:
+            self.uuid = str(uuid4())
+
+        self.deleter: Callable[[Actor], None] = None
+
+    @property
+    def rect(self) -> str:
+        return self.uuid
 
     @property
     def rect(self) -> Optional[pygame.rect.Rect]:
@@ -26,6 +38,9 @@ class Actor(pgzero.actor.Actor):
 
     def draw(self, screen: Screen) -> None:
         screen.blit(self.sprite, self.topleft)
+
+    def update(self, dt: float) -> None:
+        pass
 
 
 class SpriteDelegate(pygame.sprite.Sprite):

@@ -35,27 +35,6 @@ def extract_collision_objects_from_tile_layers(tmx_data: TiledMap, collision_lay
     return collison_objects
 
 
-class CollisionDetector(object):
-    def __init__(self) -> None:
-        self._groups: Dict[str, pygame.sprite.Group] = {}
-
-    def add_sprite(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> None:
-        if group_name not in self._groups:
-            self._groups[group_name] = pygame.sprite.Group()
-        self._groups[group_name].add(sprite)
-
-    def remove_sprite(self, sprite: pygame.sprite.Sprite) -> None:
-        for group in self._groups.values():
-            group.remove(sprite)
-
-    def collide_group(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> Optional[pygame.sprite.Sprite]:
-        if group_name not in self._groups:
-            return None
-
-        collision = pygame.sprite.spritecollideany(sprite, self._groups[group_name])
-        return collision
-
-
 class ScrollMap(object):
     """
     This class provides functionality:
@@ -68,6 +47,7 @@ class ScrollMap(object):
 
     def __init__(self, screen_size: Tuple[int, int], tmx: TiledMap, collision_layers: List[str] = []) -> None:
         self._tmx = tmx
+
         # create new data source for pyscroll
         map_data = pyscroll.data.TiledMapData(self._tmx)
 
@@ -103,12 +83,7 @@ class ScrollMap(object):
         """Tasks that occur over time should be handled here"""
         self._map_group.update(dt)
 
-    def collide(self, sprite: pygame.sprite.Sprite) -> bool:
-        if not sprite.rect:
-            return False
-        return bool(sprite.rect.collidelist(self._map_collision_obj) > -1)
-
-    def add_sprite(self, sprite: pygame.sprite.Sprite) -> None:
+    def add_sprite(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> None:
         self._map_group.add(sprite)
 
     def remove_sprite(self, sprite: pygame.sprite.Sprite) -> None:
@@ -129,3 +104,8 @@ class ScrollMap(object):
 
     def set_size(self, size: Tuple[int, int]) -> None:
         self.map_layer.set_size(size)
+
+    def collide_map(self, sprite: pygame.sprite.Sprite) -> bool:
+        if not sprite.rect:
+            return False
+        return bool(sprite.rect.collidelist(self._map_collision_obj) > -1)

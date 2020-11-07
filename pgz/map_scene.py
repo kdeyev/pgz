@@ -1,15 +1,15 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import pygame
 
 from .actor import Actor
-from .scene import EventDispatcher, Scene
+from .actor_scene import ActorScene
 from .screen import Screen
 from .scroll_map import ScrollMap
 
 
-class MapScene(Scene):
-    def __init__(self, map: ScrollMap):
+class MapScene(ActorScene):
+    def __init__(self, map: Optional[ScrollMap] = None):
         super().__init__()
         self._map = map
         self.central_actor: Optional[Actor] = None
@@ -24,19 +24,24 @@ class MapScene(Scene):
         super().dispatch_event(event)
 
     def draw(self, surface: Screen) -> None:
+        # DO NOT CALL ActorScene.draw !
+
         if self.central_actor:
             # center the map/screen on our Ship
             self._map.set_center(self.central_actor.pos)
 
         self._map.draw(surface)
 
-    def add_actor(self, actor: Actor, central_actor: bool = False) -> None:
+    def add_actor(self, actor: Actor, central_actor: bool = False, group_name: str = "") -> None:
+        super().add_actor(actor, group_name)
+
         if central_actor:
             self.central_actor = actor
         # add our ship to the group
         self._map.add_sprite(actor.sprite_delegate)
 
     def remove_actor(self, actor: Actor) -> None:
+        super().remove_actor(actor)
         if actor == self.central_actor:
             self.central_actor = None
         self._map.remove_sprite(actor.sprite_delegate)
@@ -44,3 +49,20 @@ class MapScene(Scene):
     @property
     def map(self) -> ScrollMap:
         return self._map
+
+    def handle_event(self, event: pygame.event.Event) -> None:
+        super().handle_event(event)
+
+        # this will be handled if the window is resized
+        if event.type == pygame.VIDEORESIZE:
+            self.map.set_size((event.w, event.h))
+            return
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_EQUALS:
+                self.map.change_zoom(0.25)
+            elif event.key == pygame.K_MINUS:
+                self.map.change_zoom(-0.25)
+
+    def collide_map(self, actor: Actor) -> bool:
+        return self.map.collide_map(actor.sprite_delegate)

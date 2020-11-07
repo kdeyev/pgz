@@ -118,7 +118,7 @@ class Game(pgz.MapScene):
         """Tasks that occur over time should be handled here"""
         self.map.update(dt)
 
-        if self.map.collide(self.ship):
+        if self.map.collide_map(self.ship):
             self.ship.move_back(dt)
 
     def on_mouse_move(self, pos):

@@ -1,21 +1,23 @@
+import math
+import random
+
 import pygame
 
 import pgz
+from pgz import keyboard
 
 pgz.set_resource_root("demo/resources")
 
 
 class Ship(pgz.Actor):
     def __init__(self):
-        super().__init__("ship")
+        super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]))
 
         self.speed = 200
         self.velocity = [0, 0]
         self._old_pos = self.pos
 
     def update(self, dt):
-        from pgz import keyboard
-
         self._old_pos = self.pos[:]
 
         # pressed = pygame.key.get_pressed()
@@ -44,10 +46,9 @@ class Ship(pgz.Actor):
 
 
 class CannonBall(pgz.Actor):
-    def __init__(self, pos, target, deleter):
+    def __init__(self, pos, target):
         super().__init__("cannonball")
 
-        self.deleter = deleter
         self.pos = pos
         self.target = target
         self.speed = 400.0
@@ -64,8 +65,6 @@ class CannonBall(pgz.Actor):
             pgz.global_clock.schedule(self.decrement_explosion_phases, 0.1)
 
     def update(self, dt):
-        import math
-
         if self.reached:
             return
 
@@ -84,47 +83,61 @@ class Game(pgz.MapScene):
     def __init__(self, map):
         super().__init__(map)
 
-        self.ship = Ship()
-        # put the ship in the center of the map
-        self.ship.position = self.map.get_center()
-        self.ship.x += 600
-        self.ship.y += 400
+    def on_enter(self, previous_scene):
+        super().on_enter(previous_scene)
 
-        # add our ship to the group
+        self.ship = Ship()
         self.add_actor(self.ship, central_actor=True)
+
+        # put the ship in the center of the map
+        self.ship.pos = self.map.get_center()
+
+    def draw(self, screen: pgz.Screen):
+        super().draw(screen)
+        # self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
+        self.screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
+        self.draw_health((1000, 10), 15)
+
+    def draw_health(self, pos, value):
+        w = 100
+        h = 20
+        pad = 3
+        GREY = (100, 100, 100)
+        RED = (255, 0, 0)
+        color = RED
+
+        # if value > 100:
+        #     player_shield_color = pygame.GREEN
+        #     player_shield = 100
+        # elif value > 75:
+        #     player_shield_color = pygame.GREEN
+        # elif value > 50:
+        #     player_shield_color = pygame.YELLOW
+        # else:
+        #     player_shield_color = pygame.RED
+
+        self.screen.draw.rect(pgz.ZRect(pos[0] - pad, pos[1] - pad, w + 2 * pad, h + 2 * pad), GREY)
+        self.screen.draw.filled_rect(pgz.ZRect(pos[0], pos[1], w * value / 100.0, h), color)
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
-        self.map.update(dt)
+        super().update(dt)
 
-        if self.map.collide(self.ship):
+        if self.collide_map(self.ship):
             self.ship.move_back(dt)
+
+        if self.collide_group(self.ship, "cannon_balls"):
+            # pgz.sounds.arrr.play()
+            print("BAM!")
 
     def on_mouse_move(self, pos):
         angle = self.ship.angle_to(pos) + 90
         self.ship.angle = angle
 
-    def boom(self):
-        print("boom")
-
     def on_mouse_down(self, pos, button):
-        pgz.sounds.arrr.play()
-
-        ball = CannonBall(self.ship.pos, pos, self.remove_actor)
-        self.add_actor(ball)
-
-    def on_key_down(self, key):
-        if key == pygame.K_EQUALS:
-            self.map.change_zoom(0.25)
-        elif key == pygame.K_MINUS:
-            self.map.change_zoom(-0.25)
-
-    def handle_event(self, event):
-        """Handle pygame input events"""
-
-        # this will be handled if the window is resized
-        if event.type == pygame.VIDEORESIZE:
-            self.map.set_size((event.w, event.h))
+        # pgz.sounds.arrr.play()
+        ball = CannonBall(self.ship.pos, pos)
+        self.add_actor(ball, group_name="cannon_balls")
 
 
 class Menu(pgz.MenuScene):

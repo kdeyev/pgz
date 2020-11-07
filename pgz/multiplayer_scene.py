@@ -33,10 +33,9 @@ class MultiplayerActor(Actor):
 
     def __init__(self, image: str) -> None:
         super().__init__(image)
-        self.uuid: UUID = f"{self.__class__.__name__}-{str(uuid4())}"
 
         self.client_uuid: UUID = ""
-        self.deleter = None
+
         self.keyboard = None
         self._on_prop_change: Optional[Callable[[UUID, str, Any], None]] = None
 
@@ -66,7 +65,7 @@ class MultiplayerActor(Actor):
         return state
 
 
-class MultiplayerClientHeadlessScene(EventDispatcher):
+class MultiplayerClientHeadlessScene(MapScene):
     def __init__(self) -> None:
         super().__init__()
 
@@ -77,7 +76,7 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         # Callback for sending broadcast messages: Message will be received by all clients
         self._broadcast_message: Optional[Callable[[JSON], None]] = None
         # List of the actors belonging to the scene. Different scenes will have different actors. But they are mixed together on the client-side for rendering
-        self._actors: Dict[str, MultiplayerActor] = {}
+        # self._actors: Dict[str, MultiplayerActor] = {}
         # Simple massages dispatcher
         self._rpc = SimpleRPC()
         # Local keyboard object: convenient class for chenking the current keyboard state. The keyboard state is updated based on event coming from the client
@@ -153,28 +152,31 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         except Exception as e:
             print(f"handle_message_: {e}")
 
-    def remove_all_actors_(self) -> None:
-        """
-        Server API:
-        Remove all actors from the scene.
-        """
-        for actor in self._actors.values():
-            self._remove_actor(actor)
+    # def remove_all_actors_(self) -> None:
+    #     """
+    #     Server API:
+    #     Remove all actors from the scene.
+    #     """
+    #     for actor in self._actors.values():
+    #         self._remove_actor(actor)
 
-        self._actors = {}
+    #     self._actors = {}
 
-    def _remove_actor(self, actor: Actor) -> None:
-        """
-        Remove an actor from the scene and send message to clients.
-        """
-        uuid = actor.uuid
-        if not self._map:
-            raise Exception("Map was not configured")
-        self._map.remove_sprite(actor.sprite_delegate)
-        json_message = serialize_json_message("remove_actor_on_client", uuid)
-        if not self._broadcast_message:
-            raise Exception("Broadcast callback was not configured")
-        self._broadcast_message(json_message)
+    # def remove_actor(self, actor: Actor) -> None:
+    #     """
+    #     Overriden from ActorScene
+    #     Remove an actor from the scene and send message to clients.
+    #     """
+    #     super().remove_actor(actor)
+
+    #     uuid = actor.uuid
+    #     # if not self._map:
+    #     #     raise Exception("Map was not configured")
+    #     # self._map.remove_sprite(actor.sprite_delegate)
+    #     json_message = serialize_json_message("remove_actor_on_client", uuid)
+    #     if not self._broadcast_message:
+    #         raise Exception("Broadcast callback was not configured")
+    #     self._broadcast_message(json_message)
 
     def _send_message(self, json_message: JSON) -> None:
         """
@@ -191,13 +193,13 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
             raise Exception("Broadcast callback was not configured")
         self._broadcast_message(json_message)
 
-    @property
-    def actors_(self) -> Dict[UUID, Actor]:
-        """
-        Server API:
-        Get dictionary of actors
-        """
-        return self._actors
+    # @property
+    # def actors_(self) -> Dict[UUID, Actor]:
+    #     """
+    #     Server API:
+    #     Get dictionary of actors
+    #     """
+    #     return self._actors
 
     @property
     def screen(self) -> RPCScreenServer:
@@ -290,21 +292,17 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         :param int dt: time in milliseconds since the last update
         """
 
-    def add_actor(self, actor: Actor, central_actor: bool = False) -> None:
+    def add_actor(self, actor: Actor, central_actor: bool = False, group_name: str = "") -> None:
         """
         Add actor to the scene and send notifications to the  clients.
 
         If central_actor is True, client's camera will track the actor position. You can have only one central actor on the scene.
         """
-
+        super().add_actor(actor, central_actor=central_actor, group_name=group_name)
         actor.client_uuid = self.client_uuid
         actor.deleter = self.remove_actor
         actor.keyboard = self.keyboard
         actor._on_prop_change = self._broadcast_property_change
-        self._actors[actor.uuid] = actor
-        if not self._map:
-            raise Exception("Map was not configured")
-        self._map.add_sprite(actor.sprite_delegate)
 
         json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.client_uuid, actor.image, central_actor)
         if not self._broadcast_message:
@@ -316,10 +314,16 @@ class MultiplayerClientHeadlessScene(EventDispatcher):
         Remore actor from the scene and send notifications to the  clients.
         """
 
-        self._remove_actor(actor)
+        super().remove_actor(actor)
 
         uuid = actor.uuid
-        del self._actors[uuid]
+        # if not self._map:
+        #     raise Exception("Map was not configured")
+        # self._map.remove_sprite(actor.sprite_delegate)
+        json_message = serialize_json_message("remove_actor_on_client", uuid)
+        if not self._broadcast_message:
+            raise Exception("Broadcast callback was not configured")
+        self._broadcast_message(json_message)
 
 
 class MultiplayerSceneServer:
@@ -375,7 +379,7 @@ class MultiplayerSceneServer:
     async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: MultiplayerClientHeadlessScene) -> None:
         actors: List[Actor] = []
         for sc in self._clients.values():
-            actors += sc.actors_.values()
+            actors += sc.get_actors()
 
         actors_states = {actor.uuid: actor.serialize_state() for actor in actors}
         massage = {"uuid": scene.client_uuid, "actors_states": actors_states, "screen_state": scene.screen.get_messages()}
@@ -446,8 +450,7 @@ class MultiplayerSceneServer:
 class MultiplayerClient(MapScene):
     def __init__(self, map: ScrollMap, server_url: str, client_data: JSON = {}) -> None:
         super().__init__(map)
-        self._actors: Dict[str, Actor] = {}
-        self.central_actor: Optional[Actor] = None
+
         self.client_uuid = ""
         self._websocket: Optional[websockets.WebSocketClientProtocol] = None
         self.server_url = server_url
@@ -472,8 +475,7 @@ class MultiplayerClient(MapScene):
 
         @self._rpc.register
         def add_actor_on_client(uuid: UUID, client_uuid: UUID, image: str, central_actor: bool) -> None:
-            actor = Actor(image)
-            self._actors[uuid] = actor
+            actor = Actor(image, uuid=uuid)
 
             if client_uuid != self.client_uuid:
                 # Foreign actor cannot be central
@@ -483,14 +485,13 @@ class MultiplayerClient(MapScene):
 
         @self._rpc.register
         def remove_actor_on_client(uuid: UUID) -> None:
-            actor: Actor = self._actors[uuid]
-            del self._actors[uuid]
+            actor: Actor = self.get_actor(uuid)
             self.remove_actor(actor)
 
         @self._rpc.register
         def on_actor_prop_change(uuid: UUID, prop: str, value: Any) -> None:
             # print(f"MultiplayerClient.on_actor_prop_change {self.client_uuid}: {uuid} {prop}: {value}")
-            actor = self._actors[uuid]
+            actor = self.get_actor(uuid)
             actor.__setattr__(prop, value)
 
         @self._rpc.register
@@ -518,17 +519,7 @@ class MultiplayerClient(MapScene):
             await self._websocket.send(message)
 
     def handle_event(self, event: pygame.event.Event) -> None:
-
-        # this will be handled if the window is resized
-        if event.type == pygame.VIDEORESIZE:
-            self.map.set_size((event.w, event.h))
-            return
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_EQUALS:
-                self.map.change_zoom(0.25)
-            elif event.key == pygame.K_MINUS:
-                self.map.change_zoom(-0.25)
+        super().handle_event(event)
 
         if not self._websocket:
             # not connected yet
@@ -574,11 +565,10 @@ class MultiplayerClient(MapScene):
         state: JSON
         for uuid, state in actors_states.items():
             image = state["image"]
-            actor = Actor(image)
+            actor = Actor(image, uuid=uuid)
             for attr, value in state.items():
                 setattr(actor, attr, value)
 
-            self._actors[uuid] = actor
             self.add_actor(actor)
 
     async def _handle_messages(self) -> None:

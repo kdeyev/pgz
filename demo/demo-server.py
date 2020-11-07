@@ -20,14 +20,8 @@ class Ship(pgz.MultiplayerActor):
         self.speed = 200
         self.velocity = [0, 0]
         self._old_pos = self.pos
-        self.dist_calc = FPSCalc()
-        self.time_calc = FPSCalc()
-        self.real_time_calc = FPSCalc()
-        self.time = time.time()
 
     def update(self, dt):
-        # from pgz import keyboard
-
         self._old_pos = self.pos[:]
 
         # pressed = pygame.key.get_pressed()
@@ -47,25 +41,6 @@ class Ship(pgz.MultiplayerActor):
 
         self.x += self.velocity[0] * dt
         self.y += self.velocity[1] * dt
-
-        dx = self.velocity[0] * dt
-        dy = self.velocity[1] * dt
-        dist = math.sqrt(dx ** 2 + dy ** 2)
-
-        self.dist_calc.push(dist)
-        self.time_calc.push(dt)
-
-        current_time = time.time()
-        real_dt = current_time - self.time
-        self.time = current_time
-        self.real_time_calc.push(real_dt)
-
-        if self.dist_calc.counter == 100:
-            aver_dist = self.dist_calc.aver()
-            aver_dt = self.time_calc.aver()
-            aver_real_dt = self.real_time_calc.aver()
-            print(f"Ship {self.uuid} average dist {aver_dist} average dt {aver_dt} aver_real_dt {aver_real_dt} aver speed {aver_dist/aver_dt}")
-
         # self.rect.topleft = self._position
 
     def move_back(self, dt):
@@ -115,7 +90,7 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         super().__init__()
 
     def on_enter(self, previous_scene):
-        # super().on_enter(previous_scene)
+        super().on_enter(previous_scene)
 
         self.ship = Ship()
         self.add_actor(self.ship, central_actor=True)
@@ -124,7 +99,7 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         self.ship.pos = self.map.get_center()
 
     def draw(self, screen: Screen):
-        self.client_data
+        super().draw(screen)
         self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
         self.screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
         self.draw_health((1000, 10), 15)
@@ -155,8 +130,12 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         # self.map.update(dt)
         super().update(dt)
 
-        if self.map.collide(self.ship):
+        if self.map.collide_map(self.ship):
             self.ship.move_back(dt)
+
+        if self.collide_group(self.ship, "cannon_balls"):
+            # pgz.sounds.arrr.play()
+            print("BAM!")
 
     def on_mouse_move(self, pos):
         angle = self.ship.angle_to(pos) + 90
@@ -165,7 +144,7 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
     def on_mouse_down(self, pos, button):
         # pgz.sounds.arrr.play()
         ball = CannonBall(pos=self.ship.pos, target=pos)
-        self.add_actor(ball)
+        self.add_actor(ball, group_name="cannon_balls")
 
 
 class ServerScene(pgz.Scene):
