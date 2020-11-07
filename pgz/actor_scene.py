@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional
+from uuid import uuid4
 
 import pygame
 
@@ -48,6 +49,15 @@ class ActorScene(Scene):
         super().__init__()
         self._actors: Dict[str, Actor] = {}
         self._collaider = CollisionDetector()
+        # The scene UUID is used for communication
+        self._scene_uuid = str(uuid4())
+
+    @property
+    def scene_uuid(self) -> str:
+        """
+        Get client UUID.
+        """
+        return self._scene_uuid
 
     def set_collaider(self, collaider: CollisionDetector):
         self._collaider = collaider
@@ -58,6 +68,7 @@ class ActorScene(Scene):
 
     def add_actor(self, actor: Actor, group_name: str = "") -> None:
         actor.keyboard = self.keyboard
+        actor.scene_uuid = self.scene_uuid
         self._actors[actor.uuid] = actor
         self._collaider.add_actor(actor, group_name)
         actor.deleter = self.remove_actor

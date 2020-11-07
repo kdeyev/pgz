@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 
+
 import pygame
 
 from .actor import Actor

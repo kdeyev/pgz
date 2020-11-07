@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 import pygame
 
@@ -144,6 +144,19 @@ class Scene(EventDispatcher):
         self._keyboard = Keyboard()
         # self._resolution = None
         # self._screen = None
+
+        # Client data is the data was provided by the client during the handshake: it's usually stuff like player name, avatar, etc
+        self._client_data: Dict[str, Any] = {}
+
+    def set_client_data(self, client_data: Dict[str, Any]):
+        self._client_data = client_data
+
+    @property
+    def client_data(self) -> Dict[str, Any]:
+        """
+        Get data provided by cleint side.
+        """
+        return self._client_data
 
     # def init_screen(self, resolution, screen):
     #     self._screen = screen

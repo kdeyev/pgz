@@ -15,6 +15,7 @@ class Actor(pgzero.actor.Actor):
         self._sprite: SpriteDelegate = SpriteDelegate(self)
 
         self.is_central_actor = False
+        self.scene_uuid: str = ""
 
         self._uuid: str
         if "uuid" in kwargs:

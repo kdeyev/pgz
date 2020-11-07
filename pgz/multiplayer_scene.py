@@ -1,9 +1,6 @@
 import asyncio
 import json
-import time
-import uuid
 from email import message
-from re import A
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
 
 # from re import T
@@ -13,6 +10,7 @@ import nest_asyncio
 import pydantic
 import pygame
 import websockets
+from pygame import event
 
 from pgz.actor_scene import CollisionDetector
 
@@ -20,7 +18,6 @@ from pgz.actor_scene import CollisionDetector
 from .actor import Actor
 from .keyboard import Keyboard
 from .map_scene import MapScene
-from .rpc import SimpleRPC, serialize_json_array_from_queue, serialize_json_message
 from .scene import EventDispatcher, Scene
 from .screen import Screen
 from .screen_rpc import RPCScreenClient, RPCScreenServer
@@ -32,9 +29,18 @@ UUID = str
 JSON = Dict[str, Any]
 
 
+class EventNotification(pydantic.BaseModel):
+    event_type: int
+    attributes: Dict[str, Any]
+
+
+class EventsNotification(pydantic.BaseModel):
+    events: List[EventNotification]
+
+
 class AddedActor(pydantic.BaseModel):
     image: str
-    client_uuid: str
+    scene_uuid: str
     is_central: bool
 
 
@@ -59,7 +65,7 @@ class MultiplayerActor(Actor):
     def __init__(self, image: str) -> None:
         super().__init__(image)
 
-        self.client_uuid: UUID = ""
+        self.scene_uuid: UUID = ""
         self._incremental_changes = {}
 
         self.keyboard = None
@@ -102,37 +108,14 @@ class MultiplayerClientHeadlessScene(MapScene):
     def __init__(self) -> None:
         super().__init__()
 
-        # The scene UUID is used for communication
-        self._client_uuid = ""
-        # Callback for sending broadcast messages: Message will be received by all clients
-        # self._broadcast_message: Optional[Callable[[JSON], None]] = None
-        # Simple massages dispatcher
-        self._rpc = SimpleRPC()
-        # Message buffer: messages are flushing periodically for preventing the network trashing
-        # self._message_queue: asyncio.Queue = asyncio.Queue()
-
-        # Client data is the data was provided by the client during the handshake: it's usually stuff like player name, avatar, etc
-        self._client_data: JSON = {}
-
-        # Bind event message handler
-        @self._rpc.register("handle_client_event")
-        def handle_client_event(event_type: int, attributes: JSON) -> None:
-            # Deserialize event
-            event = pygame.event.Event(event_type, **attributes)
-            self.dispatch_event(event)
-
-    def set_client_data(self, client_data: JSON):
-        self._client_data = client_data
-
-    def init_scene_(self, client_uuid: UUID, map: ScrollMap, collaider: CollisionDetector) -> None:
-        """
-        Server API:
-        Scene initialization by the server
-        """
-        self._client_uuid = client_uuid
-        self.set_map(map)
-        self.set_collaider(collaider)
-        # self._broadcast_message = _broadcast_message
+    # def init_scene_(self, map: ScrollMap, collaider: CollisionDetector) -> None:
+    #     """
+    #     Server API:
+    #     Scene initialization by the server
+    #     """
+    #     self.set_map(map)
+    #     self.set_collaider(collaider)
+    #     # self._broadcast_message = _broadcast_message
 
     def handle_message_(self, message: JSON) -> None:
         """
@@ -157,20 +140,6 @@ class MultiplayerClientHeadlessScene(MapScene):
     #     if self._broadcast_message:
     #         json_message = serialize_json_message("on_actor_prop_change", uuid, prop, value)
     #         self._broadcast_message(json_message)
-
-    @property
-    def client_uuid(self) -> UUID:
-        """
-        Get client UUID.
-        """
-        return self._client_uuid
-
-    @property
-    def client_data(self) -> JSON:
-        """
-        Get data provided by cleint side.
-        """
-        return self._client_data
 
     def draw(self, screen: Screen) -> None:
         """Override this with the scene drawing.
@@ -229,11 +198,10 @@ class MultiplayerClientHeadlessScene(MapScene):
         If central_actor is True, client's camera will track the actor position. You can have only one central actor on the scene.
         """
         super().add_actor(actor, central_actor=central_actor, group_name=group_name)
-        actor.client_uuid = self.client_uuid
         # actor._on_prop_change = self._broadcast_property_change
 
         # if self._broadcast_message:
-        #     json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.client_uuid, actor.image, central_actor)
+        #     json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.scene_uuid, actor.image, central_actor)
         #     self._broadcast_message(json_message)
 
     def remove_actor(self, actor: Actor) -> None:
@@ -308,7 +276,7 @@ class MultiplayerSceneServer:
             current_actors.append(actor.uuid)
             if actor.uuid not in self._latest_actors:
                 changed = True
-                actors_state.added[actor.uuid] = AddedActor(image=actor.image, client_uuid=actor.client_uuid, is_central=actor.is_central_actor)
+                actors_state.added[actor.uuid] = AddedActor(image=actor.image, scene_uuid=actor.scene_uuid, is_central=actor.is_central_actor)
                 # "state": actor.serialize_state()
 
             increment = actor.get_incremental_changes()
@@ -367,16 +335,15 @@ class MultiplayerSceneServer:
 
         rpc_screen = self._screens[websocket]
 
-        massage = {"uuid": scene.client_uuid, "actors_states": actors_states, "screen_state": rpc_screen.get_messages()}
+        massage = {"uuid": scene.scene_uuid, "actors_states": actors_states, "screen_state": rpc_screen.get_messages()}
         await websocket.send(json.dumps(massage))
 
     async def _register_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
-        client_uuid = f"{self._HeadlessSceneClass.__name__}-{str(uuid4())}"
-
         # Create a headless scene
         scene = self._HeadlessSceneClass()
         # Create init the scene
-        scene.init_scene_(client_uuid, self._map, self._collaider)
+        scene.set_map(self._map)
+        scene.set_collaider(self._collaider)
 
         await self._recv_handshake(websocket, scene)
         await self._send_handshake(websocket, scene)
@@ -398,9 +365,12 @@ class MultiplayerSceneServer:
         scene.remove_actors()
         # await notify_users()
 
-    def _handle_client_message(self, websocket: websockets.WebSocketClientProtocol, message: JSON) -> None:
+    def _handle_client_message(self, websocket: websockets.WebSocketClientProtocol, message: str) -> None:
         try:
-            self._clients[websocket].handle_message_(message)
+            scene = self._clients[websocket]
+            events_notification = EventsNotification.parse_raw(message)
+            for event in events_notification.events:
+                scene.dispatch_event(pygame.event.Event(event.event_type, **event.attributes))
         except Exception as e:
             print(f"_handle_client_message: {e}")
 
@@ -410,7 +380,7 @@ class MultiplayerSceneServer:
         try:
             async for message in websocket:
                 try:
-                    self._handle_client_message(websocket, json.loads(message))
+                    self._handle_client_message(websocket, message)
                 except Exception as e:
                     print(f"_serve_client: {e}")
         finally:
@@ -437,11 +407,10 @@ class MultiplayerClient(MapScene):
     def __init__(self, map: ScrollMap, server_url: str, client_data: JSON = {}) -> None:
         super().__init__(map)
 
-        self.client_uuid = ""
         self._websocket: Optional[websockets.WebSocketClientProtocol] = None
         self.server_url = server_url
-        self._rpc = SimpleRPC()
-        self.event_message_queue: asyncio.Queue = asyncio.Queue()
+        # self.event_message_queue: asyncio.Queue = asyncio.Queue()
+        self._event_notification_queue: List[EventNotification] = []
         self._screen_client = RPCScreenClient()
         self._client_data = client_data
 
@@ -468,16 +437,16 @@ class MultiplayerClient(MapScene):
         self._screen_client.draw(screen)
         screen.draw.text(self.server_url, pos=(300, 0))
 
-    def _send_message(self, json_message: JSON) -> None:
-        self.event_message_queue.put_nowait(json_message)
-        # await self._websocket.send(message)
+    # def _send_message(self, json_message: JSON) -> None:
+    #     self.event_message_queue.put_nowait(json_message)
+    #     # await self._websocket.send(message)
 
     async def _flush_messages(self) -> None:
-        if self._websocket and not self.event_message_queue.empty():
+        if self._websocket and len(self._event_notification_queue):
             # create one json array
-            message = serialize_json_array_from_queue(self.event_message_queue)
+            events_notification = EventsNotification(events=self._event_notification_queue)
             # send message
-            await self._websocket.send(message)
+            await self._websocket.send(events_notification.json())
 
     def handle_event(self, event: pygame.event.Event) -> None:
         super().handle_event(event)
@@ -487,11 +456,11 @@ class MultiplayerClient(MapScene):
             return
 
         try:
-            json_message = serialize_json_message("handle_client_event", event.type, event.__dict__)
+            event_notification = EventNotification(event_type=event.type, attributes=event.__dict__)
+            self._event_notification_queue.append(event_notification)
         except Exception as e:
             print(f"handle_event: {e}")
             return
-        self._send_message(json_message)
 
     async def connect_to_server(self, attempts: int = 10) -> bool:
         websocket: Optional[websockets.WebSocketClientProtocol] = None
@@ -520,7 +489,7 @@ class MultiplayerClient(MapScene):
         data = await websocket.recv()
         massage = json.loads(data)
 
-        self.client_uuid = massage["uuid"]
+        self._scene_uuid = massage["uuid"]
         actors_states: Dict[UUID, JSON] = massage["actors_states"]
         uuid: UUID
         state: JSON
@@ -540,7 +509,7 @@ class MultiplayerClient(MapScene):
                 uuid: str
                 added_actor: AddedActor
                 for uuid, added_actor in state_notification.actors.added.items():
-                    self.add_actor_on_client(uuid, added_actor.client_uuid, added_actor.image, added_actor.is_central)
+                    self.add_actor_on_client(uuid, added_actor.scene_uuid, added_actor.image, added_actor.is_central)
 
                 acrtor_state: Dict[str, Any]
                 for uuid, acrtor_state in state_notification.actors.modified.items():
@@ -556,10 +525,10 @@ class MultiplayerClient(MapScene):
                 print(f"_handle_messages: {e}")
 
     # @self._rpc.register
-    def add_actor_on_client(self, uuid: UUID, client_uuid: UUID, image: str, central_actor: bool) -> None:
+    def add_actor_on_client(self, uuid: UUID, scene_uuid: UUID, image: str, central_actor: bool) -> None:
         actor = Actor(image, uuid=uuid)
 
-        if client_uuid != self.client_uuid:
+        if scene_uuid != self.scene_uuid:
             # Foreign actor cannot be central
             central_actor = False
 
@@ -572,7 +541,7 @@ class MultiplayerClient(MapScene):
 
     # @self._rpc.register
     def on_actor_prop_change(self, uuid: UUID, props: Dict[str, Any]) -> None:
-        # print(f"MultiplayerClient.on_actor_prop_change {self.client_uuid}: {uuid} {prop}: {value}")
+        # print(f"MultiplayerClient.on_actor_prop_change {self.scene_uuid}: {uuid} {prop}: {value}")
         actor = self.get_actor(uuid)
         for prop, value in props.items():
             actor.__setattr__(prop, value)
