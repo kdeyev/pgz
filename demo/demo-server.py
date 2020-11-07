@@ -88,7 +88,7 @@ class CannonBall(pgz.MultiplayerActor):
         # self.rect.topleft = self._position
 
 
-class GameScene(pgz.MultiplayerClientHeadlessScene):
+class GameScene(pgz.MapScene):
     def __init__(self):
         super().__init__()
 

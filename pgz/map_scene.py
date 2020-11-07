@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
-
 import pygame
+from pygame.display import update
 
 from .actor import Actor
 from .actor_scene import ActorScene
@@ -14,6 +14,8 @@ class MapScene(ActorScene):
         super().__init__()
         self._map = map
         self.central_actor: Optional[Actor] = None
+        self.block_draw = False
+        self.block_update = False
 
     def dispatch_event(self, event: pygame.event.Event) -> None:
         # transfrom mouse positions
@@ -27,8 +29,17 @@ class MapScene(ActorScene):
     def set_map(self, map):
         self._map = map
 
+    def update(self, dt: float) -> None:
+        if self.block_update:
+            return
+
+        super().update(dt)
+
     def draw(self, surface: Screen) -> None:
         # DO NOT CALL ActorScene.draw !
+
+        if self.block_draw:
+            return
 
         if self.central_actor:
             # center the map/screen on our Ship

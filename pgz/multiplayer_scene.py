@@ -104,117 +104,117 @@ class MultiplayerActor(Actor):
         return state
 
 
-class MultiplayerClientHeadlessScene(MapScene):
-    def __init__(self) -> None:
-        super().__init__()
+# class MultiplayerClientHeadlessScene(MapScene):
+#     def __init__(self) -> None:
+#         super().__init__()
 
-    # def init_scene_(self, map: ScrollMap, collaider: CollisionDetector) -> None:
-    #     """
-    #     Server API:
-    #     Scene initialization by the server
-    #     """
-    #     self.set_map(map)
-    #     self.set_collaider(collaider)
-    #     # self._broadcast_message = _broadcast_message
+#     # def init_scene_(self, map: ScrollMap, collaider: CollisionDetector) -> None:
+#     #     """
+#     #     Server API:
+#     #     Scene initialization by the server
+#     #     """
+#     #     self.set_map(map)
+#     #     self.set_collaider(collaider)
+#     #     # self._broadcast_message = _broadcast_message
 
-    def handle_message_(self, message: JSON) -> None:
-        """
-        Server API:
-        Handle event message coming from the client
-        """
-        try:
-            self._rpc.dispatch(message)
-        except Exception as e:
-            print(f"handle_message_: {e}")
+#     # def handle_message_(self, message: JSON) -> None:
+#     #     """
+#     #     Server API:
+#     #     Handle event message coming from the client
+#     #     """
+#     #     try:
+#     #         self._rpc.dispatch(message)
+#     #     except Exception as e:
+#     #         print(f"handle_message_: {e}")
 
-    # def _send_message(self, json_message: JSON) -> None:
-    #     """
-    #     Send message to the client fo the scene.
-    #     """
-    #     self._message_queue.put_nowait(json_message)
+#     # def _send_message(self, json_message: JSON) -> None:
+#     #     """
+#     #     Send message to the client fo the scene.
+#     #     """
+#     #     self._message_queue.put_nowait(json_message)
 
-    # def _broadcast_property_change(self, uuid: str, prop: str, value: Any) -> None:
-    #     """
-    #     Send message about actor's property change.
-    #     """
-    #     if self._broadcast_message:
-    #         json_message = serialize_json_message("on_actor_prop_change", uuid, prop, value)
-    #         self._broadcast_message(json_message)
+#     # def _broadcast_property_change(self, uuid: str, prop: str, value: Any) -> None:
+#     #     """
+#     #     Send message about actor's property change.
+#     #     """
+#     #     if self._broadcast_message:
+#     #         json_message = serialize_json_message("on_actor_prop_change", uuid, prop, value)
+#     #         self._broadcast_message(json_message)
 
-    def draw(self, screen: Screen) -> None:
-        """Override this with the scene drawing.
+#     def draw(self, screen: Screen) -> None:
+#         """Override this with the scene drawing.
 
-        :param pygame.Surface screen: screen to draw the scene on
-        """
+#         :param pygame.Surface screen: screen to draw the scene on
+#         """
 
-        # DO NOT Call super().draw(screen)
+#         # DO NOT Call super().draw(screen)
 
-    def on_enter(self, previous_scene: Optional[Scene] = None) -> None:
-        """Override this to initialize upon scene entering.
+#     def on_enter(self, previous_scene: Optional[Scene] = None) -> None:
+#         """Override this to initialize upon scene entering.
 
-        The :attr:`application` property is initialized at this point,
-        so you are free to access it through ``self.application``.
-        Stuff like changing resolution etc. should be done here.
+#         The :attr:`application` property is initialized at this point,
+#         so you are free to access it through ``self.application``.
+#         Stuff like changing resolution etc. should be done here.
 
-        If you override this method and want to use class variables
-        to change the application's settings, you must call
-        ``super().on_enter(previous_scene)`` in the subclass.
+#         If you override this method and want to use class variables
+#         to change the application's settings, you must call
+#         ``super().on_enter(previous_scene)`` in the subclass.
 
-        :param Scene|None previous_scene: previous scene to run
-        """
-        super().on_enter(previous_scene)
+#         :param Scene|None previous_scene: previous scene to run
+#         """
+#         super().on_enter(previous_scene)
 
-    def on_exit(self, next_scene: Optional[Scene] = None) -> None:
-        """Override this to deinitialize upon scene exiting.
+#     def on_exit(self, next_scene: Optional[Scene] = None) -> None:
+#         """Override this to deinitialize upon scene exiting.
 
-        The :attr:`application` property is still initialized at this
-        point. Feel free to do saving, settings reset, etc. here.
+#         The :attr:`application` property is still initialized at this
+#         point. Feel free to do saving, settings reset, etc. here.
 
-        :param Scene|None next_scene: next scene to run
-        """
-        super().on_exit(next_scene)
+#         :param Scene|None next_scene: next scene to run
+#         """
+#         super().on_exit(next_scene)
 
-    def handle_event(self, event: pygame.event.Event) -> None:
-        """Override this to handle an event in the scene.
+#     def handle_event(self, event: pygame.event.Event) -> None:
+#         """Override this to handle an event in the scene.
 
-        All of :mod:`pygame`'s events are sent here, so filtering
-        should be applied manually in the subclass.
+#         All of :mod:`pygame`'s events are sent here, so filtering
+#         should be applied manually in the subclass.
 
-        :param pygame.event.Event event: event to handle
-        """
-        super().handle_event(event)
+#         :param pygame.event.Event event: event to handle
+#         """
+#         super().handle_event(event)
 
-    def update(self, dt: float) -> None:
-        """Override this with the scene update tick.
+#     def update(self, dt: float) -> None:
+#         """Override this with the scene update tick.
 
-        :param int dt: time in milliseconds since the last update
-        """
-        # DO NOT call super().update(dt)
+#         :param int dt: time in milliseconds since the last update
+#         """
+#         # DO NOT call super().update(dt)
 
-    def add_actor(self, actor: Actor, central_actor: bool = False, group_name: str = "") -> None:
-        """
-        Add actor to the scene and send notifications to the  clients.
+#     def add_actor(self, actor: Actor, central_actor: bool = False, group_name: str = "") -> None:
+#         """
+#         Add actor to the scene and send notifications to the  clients.
 
-        If central_actor is True, client's camera will track the actor position. You can have only one central actor on the scene.
-        """
-        super().add_actor(actor, central_actor=central_actor, group_name=group_name)
-        # actor._on_prop_change = self._broadcast_property_change
+#         If central_actor is True, client's camera will track the actor position. You can have only one central actor on the scene.
+#         """
+#         super().add_actor(actor, central_actor=central_actor, group_name=group_name)
+#         # actor._on_prop_change = self._broadcast_property_change
 
-        # if self._broadcast_message:
-        #     json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.scene_uuid, actor.image, central_actor)
-        #     self._broadcast_message(json_message)
+#         # if self._broadcast_message:
+#         #     json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.scene_uuid, actor.image, central_actor)
+#         #     self._broadcast_message(json_message)
 
-    def remove_actor(self, actor: Actor) -> None:
-        """
-        Remore actor from the scene and send notifications to the  clients.
-        """
+#     def remove_actor(self, actor: Actor) -> None:
+#         """
+#         Remore actor from the scene and send notifications to the  clients.
+#         """
 
-        super().remove_actor(actor)
+#         super().remove_actor(actor)
 
-        # uuid = actor.uuid
-        # if self._broadcast_message:
-        #     json_message = serialize_json_message("remove_actor_on_client", uuid)
-        #     self._broadcast_message(json_message)
+#         # uuid = actor.uuid
+#         # if self._broadcast_message:
+#         #     json_message = serialize_json_message("remove_actor_on_client", uuid)
+#         #     self._broadcast_message(json_message)
 
 
 class MultiplayerSceneServer:
@@ -228,11 +228,11 @@ class MultiplayerSceneServer:
         self._latest_actors = {}
 
         # Dict of connected clients
-        self._clients: Dict[websockets.WebSocketClientProtocol, MultiplayerClientHeadlessScene] = {}
+        self._clients: Dict[websockets.WebSocketClientProtocol, Scene] = {}
         self._screens: Dict[websockets.WebSocketClientProtocol, RPCScreenServer] = {}
 
         # Class of the headless scenes. Server will instantiate a scene object per connected client
-        assert issubclass(HeadlessSceneClass, MultiplayerClientHeadlessScene)
+        assert issubclass(HeadlessSceneClass, Scene)
         self._HeadlessSceneClass = HeadlessSceneClass
 
     def update(self, dt: float) -> None:
@@ -315,7 +315,7 @@ class MultiplayerSceneServer:
     #         except Exception as e:
     #             print(f"MultiplayerSceneServer._broadcast: {e}")
 
-    async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: MultiplayerClientHeadlessScene) -> None:
+    async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: Scene) -> None:
         massage = await websocket.recv()
         massage = json.loads(massage)
         resolution = massage["resolution"]
@@ -325,7 +325,7 @@ class MultiplayerSceneServer:
 
         scene.set_client_data(massage["client_data"])
 
-    async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: MultiplayerClientHeadlessScene) -> None:
+    async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: Scene) -> None:
 
         actors: List[Actor] = []
         for sc in self._clients.values():
@@ -342,8 +342,12 @@ class MultiplayerSceneServer:
         # Create a headless scene
         scene = self._HeadlessSceneClass()
         # Create init the scene
+
         scene.set_map(self._map)
         scene.set_collaider(self._collaider)
+
+        scene.block_update = True
+        scene.block_draw = True
 
         await self._recv_handshake(websocket, scene)
         await self._send_handshake(websocket, scene)
@@ -445,6 +449,7 @@ class MultiplayerClient(MapScene):
         if self._websocket and len(self._event_notification_queue):
             # create one json array
             events_notification = EventsNotification(events=self._event_notification_queue)
+            self._event_notification_queue = []
             # send message
             await self._websocket.send(events_notification.json())
 
