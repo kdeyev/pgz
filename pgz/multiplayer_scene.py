@@ -81,17 +81,15 @@ class MultiplayerClientHeadlessScene(MapScene):
         # Client data is the data was provided by the client during the handshake: it's usually stuff like player name, avatar, etc
         self._client_data: JSON = {}
 
-        self._rpc_screen: Optional[RPCScreenServer] = None
-
-        # Call EventDispatcher.load_handlers method for setting convenient event shortcuts like on_mouse_down, etc
-        self.load_handlers()
-
         # Bind event message handler
         @self._rpc.register("handle_client_event")
         def handle_client_event(event_type: int, attributes: JSON) -> None:
             # Deserialize event
             event = pygame.event.Event(event_type, **attributes)
             self.dispatch_event(event)
+
+    def set_client_data(self, client_data: JSON):
+        self._client_data = client_data
 
     def init_scene_(self, client_uuid: UUID, map: ScrollMap, _broadcast_message: Callable[[JSON], None]) -> None:
         """
@@ -102,28 +100,26 @@ class MultiplayerClientHeadlessScene(MapScene):
         self.set_map(map)
         self._broadcast_message = _broadcast_message
 
-    def recv_handshake_(self, massage: JSON) -> None:
-        """
-        Server API:
-        Handle handshake message called by server
-        """
-        resolution = massage["resolution"]
+    # def recv_handshake_(self, massage: JSON) -> None:
+    #     """
+    #     Server API:
+    #     Handle handshake message called by server
+    #     """
+    #     resolution = massage["resolution"]
 
-        self._rpc_screen = RPCScreenServer(resolution)
-        self._client_data = massage["client_data"]
+    #     self._rpc_screen = RPCScreenServer(resolution)
+    #     self._client_data = massage["client_data"]
 
-    def redraw_(self) -> None:
-        """
-        Server API
-        Handle scene redraw called by server event loop
-        """
-        if not self._rpc_screen:
-            raise Exception("RPC screen was not configured")
-        self.draw(self._rpc_screen)
-        changed, data = self._rpc_screen.get_messages()
-        if changed:
-            json_message = serialize_json_message("on_screen_redraw", data)
-            self._send_message(json_message)
+    # def redraw_(self) -> None:
+    #     """
+    #     Server API
+    #     Handle scene redraw called by server event loop
+    #     """
+    #     self.draw(self._rpc_screen)
+    #     changed, data = self._rpc_screen.get_messages()
+    #     if changed:
+    #         json_message = serialize_json_message("on_screen_redraw", data)
+    #         self._send_message(json_message)
 
     def handle_message_(self, message: JSON) -> None:
         """
@@ -248,6 +244,7 @@ class MultiplayerSceneServer:
         self._map = map
         # Dict of connected clients
         self._clients: Dict[websockets.WebSocketClientProtocol, MultiplayerClientHeadlessScene] = {}
+        self._screens: Dict[websockets.WebSocketClientProtocol, RPCScreenServer] = {}
 
         # Class of the headless scenes. Server will instantiate a scene object per connected client
         assert issubclass(HeadlessSceneClass, MultiplayerClientHeadlessScene)
@@ -259,8 +256,20 @@ class MultiplayerSceneServer:
             scenes.update(dt)
 
         # server calls internal redraw
-        for scenes in self._clients.values():
-            scenes.redraw_()
+        for ws in self._clients:
+            scene = self._clients[ws]
+            screen = self._screens[ws]
+
+            # Update screen
+            scene.draw(screen)
+
+            # Get changes
+            changed, data = screen.get_messages()
+            if changed:
+                # Send to client
+                json_message = serialize_json_message("on_screen_redraw", data)
+                scene._send_message(json_message)
+
         asyncio.ensure_future(self._flush_messages())
 
     def _broadcast_message(self, json_message: JSON) -> None:
@@ -288,7 +297,13 @@ class MultiplayerSceneServer:
 
     async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: MultiplayerClientHeadlessScene) -> None:
         massage = await websocket.recv()
-        scene.recv_handshake_(json.loads(massage))
+        massage = json.loads(massage)
+        resolution = massage["resolution"]
+
+        rpc_screen = RPCScreenServer(resolution)
+        self._screens[websocket] = rpc_screen
+
+        scene.set_client_data(massage["client_data"])
 
     async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: MultiplayerClientHeadlessScene) -> None:
 
@@ -298,10 +313,9 @@ class MultiplayerSceneServer:
 
         actors_states = {actor.uuid: actor.serialize_state() for actor in actors}
 
-        if not scene._rpc_screen:
-            raise Exception("RPC screen was not configured")
+        rpc_screen = self._screens[websocket]
 
-        massage = {"uuid": scene.client_uuid, "actors_states": actors_states, "screen_state": scene._rpc_screen.get_messages()}
+        massage = {"uuid": scene.client_uuid, "actors_states": actors_states, "screen_state": rpc_screen.get_messages()}
         await websocket.send(json.dumps(massage))
 
     async def _register_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
@@ -325,6 +339,7 @@ class MultiplayerSceneServer:
 
         # First of all remove dead client
         del self._clients[websocket]
+        del self._screens[websocket]
 
         scene.on_exit(None)
         # scene.stop_update_loop()
