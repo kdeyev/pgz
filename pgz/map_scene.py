@@ -39,7 +39,10 @@ class MapScene(ActorScene):
         super().add_actor(actor, group_name)
 
         if central_actor:
+            if self.central_actor:
+                self.central_actor.is_central_actor = False
             self.central_actor = actor
+            self.central_actor.is_central_actor = True
         # add our ship to the group
         self.map.add_sprite(actor.sprite_delegate)
 

@@ -14,6 +14,8 @@ class Actor(pgzero.actor.Actor):
         super().__init__(*args, **kwargs)
         self._sprite: SpriteDelegate = SpriteDelegate(self)
 
+        self.is_central_actor = False
+
         self._uuid: str
         if "uuid" in kwargs:
             self._uuid = kwargs["uuid"]

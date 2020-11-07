@@ -11,6 +11,7 @@ nest-asyncio = "*"
 numpy = "*"
 deepdiff = "*"
 pgzero = "*"
+pydantic = "*"
 
 [dev-packages]
 pre-commit = "*"
