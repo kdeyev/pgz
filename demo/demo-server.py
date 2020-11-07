@@ -15,7 +15,7 @@ YELLOW = tuple(pygame.Color("YELLOW"))
 GREEN = tuple(pygame.Color("GREEN"))
 
 
-class Ship(pgz.MultiplayerActor):
+class Ship(pgz.Actor):
     def __init__(self) -> None:
         super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]))
 
@@ -52,7 +52,7 @@ class Ship(pgz.MultiplayerActor):
         # self.rect.topleft = self._position
 
 
-class CannonBall(pgz.MultiplayerActor):
+class CannonBall(pgz.Actor):
     def __init__(self, pos, target):
         super().__init__("cannonball")
 

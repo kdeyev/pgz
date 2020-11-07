@@ -51,6 +51,7 @@ class ActorScene(Scene):
         self._collaider = CollisionDetector()
         # The scene UUID is used for communication
         self._scene_uuid = str(uuid4())
+        self.accumulate_changes = False
 
     @property
     def scene_uuid(self) -> str:
@@ -67,6 +68,7 @@ class ActorScene(Scene):
             actor.draw(surface)
 
     def add_actor(self, actor: Actor, group_name: str = "") -> None:
+        actor.accumulate_changes = self.accumulate_changes
         actor.keyboard = self.keyboard
         actor.scene_uuid = self.scene_uuid
         self._actors[actor.uuid] = actor

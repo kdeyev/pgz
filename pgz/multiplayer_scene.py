@@ -58,52 +58,6 @@ class StateNotification(pydantic.BaseModel):
     screen: List[Dict[str, Any]] = []
 
 
-class MultiplayerActor(Actor):
-    # DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
-    SEND = Actor.DELEGATED_ATTRIBUTES + ["angle", "image"]
-
-    def __init__(self, image: str) -> None:
-        super().__init__(image)
-
-        self.scene_uuid: UUID = ""
-        self._incremental_changes = {}
-
-        self.keyboard = None
-        self._accumulate_changes = True
-        # self._on_prop_change: Optional[Callable[[UUID, str, Any], None]] = None
-
-    def __setattr__(self, attr: str, value: Any) -> None:
-        if attr in self.__class__.SEND and hasattr(self, "_accumulate_changes") and self._accumulate_changes:
-            if getattr(self, attr) != value:
-                self._incremental_changes[attr] = value
-                # self._on_prop_change(self.uuid, attr, value)
-
-        super().__setattr__(attr, value)
-
-    def get_incremental_changes(self):
-        incremental_changes = self._incremental_changes
-        self._incremental_changes = {}
-        return incremental_changes
-
-    def serialize_state(self) -> JSON:
-        state = {}
-        for attr in self.__class__.SEND:
-            try:
-                value = getattr(self, attr)
-            except Exception as e:
-                print(f"MultiplayerActor.serialize_state: {e}")
-                continue
-
-            try:
-                json.dumps({attr: value})
-            except Exception as e:
-                print(f"MultiplayerActor.serialize_state: {e}")
-                continue
-
-            state[attr] = value
-        return state
-
-
 # class MultiplayerClientHeadlessScene(MapScene):
 #     def __init__(self) -> None:
 #         super().__init__()
@@ -348,6 +302,7 @@ class MultiplayerSceneServer:
 
         scene.block_update = True
         scene.block_draw = True
+        scene.accumulate_changes = True
 
         await self._recv_handshake(websocket, scene)
         await self._send_handshake(websocket, scene)
