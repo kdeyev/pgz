@@ -49,6 +49,10 @@ class SpriteDelegate(pygame.sprite.Sprite):
         self._actor = actor
 
     @property
+    def actor(self) -> Actor:
+        return self._actor
+
+    @property
     def rect(self) -> Optional[pygame.rect.Rect]:  # type: ignore
         return self._actor.rect
 

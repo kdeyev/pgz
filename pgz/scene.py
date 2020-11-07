@@ -2,8 +2,11 @@ from typing import TYPE_CHECKING, Optional, Tuple
 
 import pygame
 
+from pgz import keyboard
+
 from .clock import Clock
 from .event_dispatcher import EventDispatcher
+from .keyboard import Keyboard
 from .screen import Screen
 
 if TYPE_CHECKING:
@@ -164,6 +167,11 @@ class Scene(EventDispatcher):
     def clock(self) -> Clock:
         """Clock object. Actually returns the global clock object."""
         return self.application.clock
+
+    @property
+    def keyboard(self) -> Keyboard:
+        """Clock object. Actually returns the global clock object."""
+        return self.application.keyboard
 
     def draw(self, screen: Screen) -> None:
         """Override this with the scene drawing.

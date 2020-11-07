@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 import pygame
 
-from .actor import Actor
+from .actor import Actor, SpriteDelegate
 from .scene import Scene
 from .screen import Screen
 
@@ -39,6 +39,7 @@ class ActorScene(Scene):
             actor.draw(surface)
 
     def add_actor(self, actor: Actor, group_name: str = "") -> None:
+        actor.keyboard = self.keyboard
         self._actors[actor.uuid] = actor
         self._collaider.add_sprite(actor.sprite_delegate, group_name)
         actor.deleter = self.remove_actor
@@ -63,4 +64,7 @@ class ActorScene(Scene):
             actor.update(dt)
 
     def collide_group(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> Optional[pygame.sprite.Sprite]:
-        return self._collaider.collide_group(sprite, group_name)
+        sprite: SpriteDelegate = self._collaider.collide_group(sprite, group_name)
+        if sprite:
+            return sprite.actor
+        return None

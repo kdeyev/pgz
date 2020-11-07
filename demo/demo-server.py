@@ -1,6 +1,5 @@
 import math
 import random
-import time
 from typing import Optional
 
 import pygame
@@ -12,12 +11,18 @@ from pgz.fps_calc import FPSCalc
 
 pgz.set_resource_root("demo/resources")
 
+BLACK = tuple(pygame.Color("BLACK"))
+RED = tuple(pygame.Color("RED"))
+YELLOW = tuple(pygame.Color("YELLOW"))
+GREEN = tuple(pygame.Color("GREEN"))
+
 
 class Ship(pgz.MultiplayerActor):
     def __init__(self) -> None:
         super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]))
 
         self.speed = 200
+        self.health = 100.0
         self.velocity = [0, 0]
         self._old_pos = self.pos
 
@@ -57,6 +62,8 @@ class CannonBall(pgz.MultiplayerActor):
         self.target = target
         self.speed = 400.0
 
+        self.hit_rate = 10.0  # HP/second
+
         self.reached = False
         self.explosion_phases = 3
 
@@ -69,8 +76,6 @@ class CannonBall(pgz.MultiplayerActor):
             pgz.global_clock.schedule(self.decrement_explosion_phases, 0.1)
 
     def update(self, dt):
-        import math
-
         if self.reached:
             return
 
@@ -86,8 +91,8 @@ class CannonBall(pgz.MultiplayerActor):
 
 
 class GameScene(pgz.MultiplayerClientHeadlessScene):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, map):
+        super().__init__(map)
 
     def on_enter(self, previous_scene):
         super().on_enter(previous_scene)
@@ -98,44 +103,42 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
         # put the ship in the center of the map
         self.ship.pos = self.map.get_center()
 
-    def draw(self, screen: Screen):
+    def draw(self, screen: pgz.Screen):
         super().draw(screen)
-        self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
+        # self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
         self.screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
-        self.draw_health((1000, 10), 15)
+        self.draw_health_bar(self.ship.health)
 
-    def draw_health(self, pos, value):
-        w = 100
-        h = 20
-        pad = 3
-        GREY = (100, 100, 100)
-        RED = (255, 0, 0)
-        color = RED
+    def draw_health_bar(self, health):
+        width = 300
+        height = 20
+        padding = 3
+        pos = (self.resolution[0] - (width + 4 * padding), 2 * padding)
+        health_bar_color = self.get_health_bar_color(health)
 
-        # if value > 100:
-        #     player_shield_color = pygame.GREEN
-        #     player_shield = 100
-        # elif value > 75:
-        #     player_shield_color = pygame.GREEN
-        # elif value > 50:
-        #     player_shield_color = pygame.YELLOW
-        # else:
-        #     player_shield_color = pygame.RED
+        self.screen.draw.rect(pgz.ZRect(pos[0] - padding, pos[1] - padding, width + 2 * padding, height + 2 * padding), BLACK)
+        self.screen.draw.filled_rect(pgz.ZRect(pos[0], pos[1], width * health / 100.0, height), health_bar_color)
 
-        self.screen.draw.rect(ZRect(pos[0] - pad, pos[1] - pad, w + 2 * pad, h + 2 * pad), GREY, 3)
-        self.screen.draw.filled_rect(ZRect(pos[0], pos[1], w * value / 100.0, h), color)
+    def get_health_bar_color(self, health):
+        if health > 75:
+            return GREEN
+        elif health > 50:
+            return YELLOW
+        else:
+            return RED
 
     def update(self, dt):
         """Tasks that occur over time should be handled here"""
-        # self.map.update(dt)
         super().update(dt)
 
-        if self.map.collide_map(self.ship):
+        if self.collide_map(self.ship):
             self.ship.move_back(dt)
 
-        if self.collide_group(self.ship, "cannon_balls"):
+        cannon_ball = self.collide_group(self.ship, "cannon_balls")
+
+        if cannon_ball:
             # pgz.sounds.arrr.play()
-            print("BAM!")
+            self.ship.health -= cannon_ball.hit_rate * dt
 
     def on_mouse_move(self, pos):
         angle = self.ship.angle_to(pos) + 90
@@ -143,8 +146,23 @@ class GameScene(pgz.MultiplayerClientHeadlessScene):
 
     def on_mouse_down(self, pos, button):
         # pgz.sounds.arrr.play()
-        ball = CannonBall(pos=self.ship.pos, target=pos)
-        self.add_actor(ball, group_name="cannon_balls")
+        start_point = self.calc_cannon_ball_start_pos(pos)
+        if start_point:
+            ball = CannonBall(pos=start_point, target=pos)
+            self.add_actor(ball, group_name="cannon_balls")
+
+    def calc_cannon_ball_start_pos(self, pos) -> Optional[Tuple[float, float]]:
+        distance = self.ship.distance_to(pos)
+        min_distance = math.sqrt((self.ship.width / 2) ** 2 + (self.ship.height / 2) ** 2)
+        if distance < min_distance:
+            # too close to the ship
+            return None
+        angle = self.ship.angle_to(pos)
+        start_point = (
+            self.ship.pos[0] + min_distance * math.cos(math.radians(angle)),
+            self.ship.pos[1] - min_distance * math.sin(math.radians(angle)),
+        )
+        return start_point
 
 
 class ServerScene(pgz.Scene):
@@ -170,10 +188,6 @@ class ServerScene(pgz.Scene):
         super().update(dt)
         if self.server:
             self.server.update(dt)
-
-    # def draw(self, screen):
-    #     super().draw(screen)
-    #     self.screen.draw.text(self.server_url, pos=(300, 0))
 
 
 class Menu(pgz.MenuScene):
