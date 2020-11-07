@@ -47,10 +47,10 @@ class ActorScene(Scene):
         del self._actors[actor.uuid]
         self._collaider.remove_sprite(actor.sprite_delegate)
 
-    def remove_actors(self, actor: Actor) -> None:
-        uuids = self._actors.keys()[:]
+    def remove_actors(self) -> None:
+        uuids = [uuid for uuid in self._actors.keys()]
         for uuid in uuids:
-            self.remove_actor(uuid)
+            self.remove_actor(self._actors[uuid])
 
     def get_actor(self, uuid: str) -> Actor:
         return self._actors[uuid]

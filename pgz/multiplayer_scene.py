@@ -409,7 +409,7 @@ class MultiplayerSceneServer:
 
         scene.on_exit(None)
         # scene.stop_update_loop()
-        scene.remove_all_actors_()
+        scene.remove_actors()
         # await notify_users()
 
     def _handle_client_message(self, websocket: websockets.WebSocketClientProtocol, message: JSON) -> None:
