@@ -23,6 +23,9 @@ class MapScene(ActorScene):
             event.pos = scene_pos  # type: ignore
         super().dispatch_event(event)
 
+    def set_map(self, map):
+        self._map = map
+
     def draw(self, surface: Screen) -> None:
         # DO NOT CALL ActorScene.draw !
 

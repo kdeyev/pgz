@@ -5,7 +5,6 @@ from typing import Optional, Tuple
 import pygame
 
 import pgz
-from pgz import keyboard
 
 pgz.set_resource_root("demo/resources")
 
@@ -88,7 +87,7 @@ class CannonBall(pgz.Actor):
         # self.rect.topleft = self._position
 
 
-class Game(pgz.MapScene):
+class GameScene(pgz.MapScene):
     def __init__(self, map):
         super().__init__(map)
 
@@ -104,18 +103,18 @@ class Game(pgz.MapScene):
     def draw(self, screen: pgz.Screen):
         super().draw(screen)
         # self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
-        self.screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
-        self.draw_health_bar(self.ship.health)
+        screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
+        self.draw_health_bar(screen, self.ship.health)
 
-    def draw_health_bar(self, health):
+    def draw_health_bar(self, screen, health):
         width = 300
         height = 20
         padding = 3
-        pos = (self.resolution[0] - (width + 4 * padding), 2 * padding)
+        pos = (screen.width - (width + 4 * padding), 2 * padding)
         health_bar_color = self.get_health_bar_color(health)
 
-        self.screen.draw.rect(pgz.ZRect(pos[0] - padding, pos[1] - padding, width + 2 * padding, height + 2 * padding), BLACK)
-        self.screen.draw.filled_rect(pgz.ZRect(pos[0], pos[1], width * health / 100.0, height), health_bar_color)
+        screen.draw.rect(pgz.ZRect(pos[0] - padding, pos[1] - padding, width + 2 * padding, height + 2 * padding), BLACK)
+        screen.draw.filled_rect(pgz.ZRect(pos[0], pos[1], width * health / 100.0, height), health_bar_color)
 
     def get_health_bar_color(self, health):
         if health > 75:
@@ -178,7 +177,7 @@ class Menu(pgz.MenuScene):
     def start_the_game(self):
         tmx = pgz.maps.default
         map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
-        self.application.change_scene(Game(map))
+        self.change_scene(GameScene(map))
 
 
 if __name__ == "__main__":

@@ -71,22 +71,17 @@ class MultiplayerClientHeadlessScene(MapScene):
 
         # The scene UUID is used for communication
         self._client_uuid = ""
-        # Map object, supposed to be headless: don't add sprites directly to there
-        self._map: Optional[ScrollMap] = None
         # Callback for sending broadcast messages: Message will be received by all clients
         self._broadcast_message: Optional[Callable[[JSON], None]] = None
-        # List of the actors belonging to the scene. Different scenes will have different actors. But they are mixed together on the client-side for rendering
-        # self._actors: Dict[str, MultiplayerActor] = {}
         # Simple massages dispatcher
         self._rpc = SimpleRPC()
-        # Local keyboard object: convenient class for chenking the current keyboard state. The keyboard state is updated based on event coming from the client
-        self.keyboard = Keyboard()
         # Message buffer: messages are flushing periodically for preventing the network trashing
         self._message_queue: asyncio.Queue = asyncio.Queue()
-        # Client-side screen resolution
-        self.resolution = (1, 1)
+
         # Client data is the data was provided by the client during the handshake: it's usually stuff like player name, avatar, etc
         self._client_data: JSON = {}
+
+        self._rpc_screen: Optional[RPCScreenServer] = None
 
         # Call EventDispatcher.load_handlers method for setting convenient event shortcuts like on_mouse_down, etc
         self.load_handlers()
@@ -96,22 +91,7 @@ class MultiplayerClientHeadlessScene(MapScene):
         def handle_client_event(event_type: int, attributes: JSON) -> None:
             # Deserialize event
             event = pygame.event.Event(event_type, **attributes)
-
-            # Update local keyboard helper
-            if event.type == pygame.KEYDOWN:
-                self.keyboard._press(event.key)
-            if event.type == pygame.KEYUP:
-                self.keyboard._release(event.key)
-
-            # Handle client-side screen resolution change
-            if event.type == pygame.VIDEORESIZE:
-                self.resolution = (event.w, event.h)
-
-            # Dispatch events thru EventDispatcher
-            try:
-                self.dispatch_event(event)
-            except Exception as e:
-                print(f"handle_client_event: {e}")
+            self.dispatch_event(event)
 
     def init_scene_(self, client_uuid: UUID, map: ScrollMap, _broadcast_message: Callable[[JSON], None]) -> None:
         """
@@ -119,7 +99,7 @@ class MultiplayerClientHeadlessScene(MapScene):
         Scene initialization by the server
         """
         self._client_uuid = client_uuid
-        self._map = map
+        self.set_map(map)
         self._broadcast_message = _broadcast_message
 
     def recv_handshake_(self, massage: JSON) -> None:
@@ -127,7 +107,9 @@ class MultiplayerClientHeadlessScene(MapScene):
         Server API:
         Handle handshake message called by server
         """
-        self.resolution = massage["resolution"]
+        resolution = massage["resolution"]
+
+        self._rpc_screen = RPCScreenServer(resolution)
         self._client_data = massage["client_data"]
 
     def redraw_(self) -> None:
@@ -135,9 +117,10 @@ class MultiplayerClientHeadlessScene(MapScene):
         Server API
         Handle scene redraw called by server event loop
         """
-        # self._screen.clear()
-        self.draw(self._screen)
-        changed, data = self._screen.get_messages()
+        if not self._rpc_screen:
+            raise Exception("RPC screen was not configured")
+        self.draw(self._rpc_screen)
+        changed, data = self._rpc_screen.get_messages()
         if changed:
             json_message = serialize_json_message("on_screen_redraw", data)
             self._send_message(json_message)
@@ -152,32 +135,6 @@ class MultiplayerClientHeadlessScene(MapScene):
         except Exception as e:
             print(f"handle_message_: {e}")
 
-    # def remove_all_actors_(self) -> None:
-    #     """
-    #     Server API:
-    #     Remove all actors from the scene.
-    #     """
-    #     for actor in self._actors.values():
-    #         self._remove_actor(actor)
-
-    #     self._actors = {}
-
-    # def remove_actor(self, actor: Actor) -> None:
-    #     """
-    #     Overriden from ActorScene
-    #     Remove an actor from the scene and send message to clients.
-    #     """
-    #     super().remove_actor(actor)
-
-    #     uuid = actor.uuid
-    #     # if not self._map:
-    #     #     raise Exception("Map was not configured")
-    #     # self._map.remove_sprite(actor.sprite_delegate)
-    #     json_message = serialize_json_message("remove_actor_on_client", uuid)
-    #     if not self._broadcast_message:
-    #         raise Exception("Broadcast callback was not configured")
-    #     self._broadcast_message(json_message)
-
     def _send_message(self, json_message: JSON) -> None:
         """
         Send message to the client fo the scene.
@@ -188,34 +145,9 @@ class MultiplayerClientHeadlessScene(MapScene):
         """
         Send message about actor's property change.
         """
-        json_message = serialize_json_message("on_actor_prop_change", uuid, prop, value)
-        if not self._broadcast_message:
-            raise Exception("Broadcast callback was not configured")
-        self._broadcast_message(json_message)
-
-    # @property
-    # def actors_(self) -> Dict[UUID, Actor]:
-    #     """
-    #     Server API:
-    #     Get dictionary of actors
-    #     """
-    #     return self._actors
-
-    @property
-    def screen(self) -> RPCScreenServer:
-        """
-        Get RPCScreenServer screen object, which mimics to the Screen API. Any modification of the object will be reflected on the client screen.
-        """
-        return self._screen
-
-    @property
-    def map(self) -> ScrollMap:
-        """
-        Get ScrollMap object.
-        """
-        if not self._map:
-            raise Exception("Map was not configured")
-        return self._map
+        if self._broadcast_message:
+            json_message = serialize_json_message("on_actor_prop_change", uuid, prop, value)
+            self._broadcast_message(json_message)
 
     @property
     def client_uuid(self) -> UUID:
@@ -223,23 +155,6 @@ class MultiplayerClientHeadlessScene(MapScene):
         Get client UUID.
         """
         return self._client_uuid
-
-    @property
-    def resolution(self) -> Tuple[int, int]:
-        """
-        Get resolution of the client's screen. Client sends notifications about the client screen size changes.
-        Screen object (self.screen) will be updated according to the notifications.
-        """
-        return self.screen.resolution
-
-    @resolution.setter
-    def resolution(self, value: Tuple[int, int]) -> None:
-        """
-        Server API:
-        Modify the client's screen resolution. This method will be called by the server internally
-        Screen object (self.screen) will be updated according to the notifications.
-        """
-        self._screen = RPCScreenServer(value)
 
     @property
     def client_data(self) -> JSON:
@@ -254,6 +169,8 @@ class MultiplayerClientHeadlessScene(MapScene):
         :param pygame.Surface screen: screen to draw the scene on
         """
 
+        # DO NOT Call super().draw(screen)
+
     def on_enter(self, previous_scene: Optional[Scene] = None) -> None:
         """Override this to initialize upon scene entering.
 
@@ -267,6 +184,7 @@ class MultiplayerClientHeadlessScene(MapScene):
 
         :param Scene|None previous_scene: previous scene to run
         """
+        super().on_enter(previous_scene)
 
     def on_exit(self, next_scene: Optional[Scene] = None) -> None:
         """Override this to deinitialize upon scene exiting.
@@ -276,6 +194,7 @@ class MultiplayerClientHeadlessScene(MapScene):
 
         :param Scene|None next_scene: next scene to run
         """
+        super().on_exit(next_scene)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Override this to handle an event in the scene.
@@ -285,12 +204,14 @@ class MultiplayerClientHeadlessScene(MapScene):
 
         :param pygame.event.Event event: event to handle
         """
+        super().handle_event(event)
 
     def update(self, dt: float) -> None:
         """Override this with the scene update tick.
 
         :param int dt: time in milliseconds since the last update
         """
+        # DO NOT call super().update(dt)
 
     def add_actor(self, actor: Actor, central_actor: bool = False, group_name: str = "") -> None:
         """
@@ -300,14 +221,11 @@ class MultiplayerClientHeadlessScene(MapScene):
         """
         super().add_actor(actor, central_actor=central_actor, group_name=group_name)
         actor.client_uuid = self.client_uuid
-        actor.deleter = self.remove_actor
-        actor.keyboard = self.keyboard
         actor._on_prop_change = self._broadcast_property_change
 
-        json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.client_uuid, actor.image, central_actor)
-        if not self._broadcast_message:
-            raise Exception("Broadcast callback was not configured")
-        self._broadcast_message(json_message)
+        if self._broadcast_message:
+            json_message = serialize_json_message("add_actor_on_client", actor.uuid, self.client_uuid, actor.image, central_actor)
+            self._broadcast_message(json_message)
 
     def remove_actor(self, actor: Actor) -> None:
         """
@@ -317,13 +235,9 @@ class MultiplayerClientHeadlessScene(MapScene):
         super().remove_actor(actor)
 
         uuid = actor.uuid
-        # if not self._map:
-        #     raise Exception("Map was not configured")
-        # self._map.remove_sprite(actor.sprite_delegate)
-        json_message = serialize_json_message("remove_actor_on_client", uuid)
-        if not self._broadcast_message:
-            raise Exception("Broadcast callback was not configured")
-        self._broadcast_message(json_message)
+        if self._broadcast_message:
+            json_message = serialize_json_message("remove_actor_on_client", uuid)
+            self._broadcast_message(json_message)
 
 
 class MultiplayerSceneServer:
@@ -377,12 +291,17 @@ class MultiplayerSceneServer:
         scene.recv_handshake_(json.loads(massage))
 
     async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: MultiplayerClientHeadlessScene) -> None:
+
         actors: List[Actor] = []
         for sc in self._clients.values():
             actors += sc.get_actors()
 
         actors_states = {actor.uuid: actor.serialize_state() for actor in actors}
-        massage = {"uuid": scene.client_uuid, "actors_states": actors_states, "screen_state": scene.screen.get_messages()}
+
+        if not scene._rpc_screen:
+            raise Exception("RPC screen was not configured")
+
+        massage = {"uuid": scene.client_uuid, "actors_states": actors_states, "screen_state": scene._rpc_screen.get_messages()}
         await websocket.send(json.dumps(massage))
 
     async def _register_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
@@ -504,8 +423,8 @@ class MultiplayerClient(MapScene):
 
     def draw(self, screen: Screen) -> None:
         super().draw(screen)
-        self._screen_client.draw(self.screen)
-        self.screen.draw.text(self.server_url, pos=(300, 0))
+        self._screen_client.draw(screen)
+        screen.draw.text(self.server_url, pos=(300, 0))
 
     def _send_message(self, json_message: JSON) -> None:
         self.event_message_queue.put_nowait(json_message)
@@ -552,7 +471,7 @@ class MultiplayerClient(MapScene):
             return False
 
     async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol) -> None:
-        massage = {"resolution": list(self.resolution), "client_data": self._client_data}
+        massage = {"resolution": list(self._application.resolution), "client_data": self._client_data}
         await websocket.send(json.dumps(massage))
 
     async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol) -> None:
@@ -579,9 +498,3 @@ class MultiplayerClient(MapScene):
                 self._rpc.dispatch(json_messages)
             except Exception as e:
                 print(f"_handle_messages: {e}")
-
-    # def on_key_down(self, key):
-    #     if key == pygame.K_EQUALS:
-    #         self._map.change_zoom(0.25)
-    #     elif key == pygame.K_MINUS:
-    #         self._map.change_zoom(-0.25)
