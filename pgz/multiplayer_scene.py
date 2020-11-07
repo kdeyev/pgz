@@ -11,6 +11,8 @@ import nest_asyncio
 import pygame
 import websockets
 
+from pgz.actor_scene import CollisionDetector
+
 # import jsonrpc_base
 from .actor import Actor
 from .keyboard import Keyboard
@@ -91,35 +93,15 @@ class MultiplayerClientHeadlessScene(MapScene):
     def set_client_data(self, client_data: JSON):
         self._client_data = client_data
 
-    def init_scene_(self, client_uuid: UUID, map: ScrollMap, _broadcast_message: Callable[[JSON], None]) -> None:
+    def init_scene_(self, client_uuid: UUID, map: ScrollMap, collaider: CollisionDetector, _broadcast_message: Callable[[JSON], None]) -> None:
         """
         Server API:
         Scene initialization by the server
         """
         self._client_uuid = client_uuid
         self.set_map(map)
+        self.set_collaider(collaider)
         self._broadcast_message = _broadcast_message
-
-    # def recv_handshake_(self, massage: JSON) -> None:
-    #     """
-    #     Server API:
-    #     Handle handshake message called by server
-    #     """
-    #     resolution = massage["resolution"]
-
-    #     self._rpc_screen = RPCScreenServer(resolution)
-    #     self._client_data = massage["client_data"]
-
-    # def redraw_(self) -> None:
-    #     """
-    #     Server API
-    #     Handle scene redraw called by server event loop
-    #     """
-    #     self.draw(self._rpc_screen)
-    #     changed, data = self._rpc_screen.get_messages()
-    #     if changed:
-    #         json_message = serialize_json_message("on_screen_redraw", data)
-    #         self._send_message(json_message)
 
     def handle_message_(self, message: JSON) -> None:
         """
@@ -242,6 +224,8 @@ class MultiplayerSceneServer:
 
         # The map object will be shared between all the headless scenes
         self._map = map
+        self._collaider = CollisionDetector()
+
         # Dict of connected clients
         self._clients: Dict[websockets.WebSocketClientProtocol, MultiplayerClientHeadlessScene] = {}
         self._screens: Dict[websockets.WebSocketClientProtocol, RPCScreenServer] = {}
@@ -324,7 +308,7 @@ class MultiplayerSceneServer:
         # Create a headless scene
         scene = self._HeadlessSceneClass()
         # Create init the scene
-        scene.init_scene_(client_uuid, self._map, self._broadcast_message)
+        scene.init_scene_(client_uuid, self._map, self._collaider, self._broadcast_message)
 
         await self._recv_handshake(websocket, scene)
         await self._send_handshake(websocket, scene)

@@ -34,6 +34,9 @@ class ActorScene(Scene):
         self._actors: Dict[str, Actor] = {}
         self._collaider = CollisionDetector()
 
+    def set_collaider(self, collaider: CollisionDetector):
+        self._collaider = collaider
+
     def draw(self, surface: Screen) -> None:
         for actor in self._actors.values():
             actor.draw(surface)
