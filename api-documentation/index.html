@@ -93,104 +93,6 @@
 <h1 id="pgz">pgz</h1>
 <p><a name="pgz.actor"></a></p>
 <h1 id="pgzactor">pgz.actor</h1>
-<p><a name="pgz.actor_scene"></a></p>
-<h1 id="pgzactor_scene">pgz.actor_scene</h1>
-<p><a name="pgz.actor_scene.ActorScene"></a></p>
-<h2 id="actorscene-objects">ActorScene Objects</h2>
-<pre><code class="language-python">class ActorScene(Scene)
-</code></pre>
-<p>Scene implementation for management of multiple actors.</p>
-<p>Actors also can be added to different collision groups,
-which allows easily identify collision of an actor with a specific actor group</p>
-<p><a name="pgz.actor_scene.ActorScene.__init__"></a></p>
-<h4 id="__init__">__init__</h4>
-<pre><code class="language-python"> | __init__() -&gt; None
-</code></pre>
-<p>Create an ActorScene object</p>
-<p><a name="pgz.actor_scene.ActorScene.set_collision_detector"></a></p>
-<h4 id="set_collision_detector">set_collision_detector</h4>
-<pre><code class="language-python"> | set_collision_detector(collision_detector: CollisionDetector)
-</code></pre>
-<p>Set external collsinion detector object.</p>
-<p>The default collision detector can be use in the most of the cases.
-This method in used by multiplayer.</p>
-<p><a name="pgz.actor_scene.ActorScene.add_actor"></a></p>
-<h4 id="add_actor">add_actor</h4>
-<pre><code class="language-python"> | add_actor(actor: Actor, group_name: str = &quot;&quot;) -&gt; None
-</code></pre>
-<p>Add actor to the scene and add the actor to the collision group.</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>actor</code> <em>Actor</em> - actor to add</li>
-<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
-</ul>
-<p><a name="pgz.actor_scene.ActorScene.remove_actor"></a></p>
-<h4 id="remove_actor">remove_actor</h4>
-<pre><code class="language-python"> | remove_actor(actor: Actor) -&gt; None
-</code></pre>
-<p>Remove actor from the scene.</p>
-<p>Actor also will be removed from the associated collision detector</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>actor</code> <em>Actor</em> - Actor to be removed</li>
-</ul>
-<p><a name="pgz.actor_scene.ActorScene.remove_actors"></a></p>
-<h4 id="remove_actors">remove_actors</h4>
-<pre><code class="language-python"> | remove_actors() -&gt; None
-</code></pre>
-<p>Remove all actors from the scene and the associated collision detector</p>
-<p><a name="pgz.actor_scene.ActorScene.get_actor"></a></p>
-<h4 id="get_actor">get_actor</h4>
-<pre><code class="language-python"> | get_actor(uuid: str) -&gt; Actor
-</code></pre>
-<p>Get actor object by its UUID</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>uuid</code> <em>str</em> - UUID of the actor to be retrieved</li>
-</ul>
-<p><strong>Returns</strong>:</p>
-<ul>
-<li><code>Actor</code> - Actor associated with the UUID</li>
-</ul>
-<p><a name="pgz.actor_scene.ActorScene.get_actors"></a></p>
-<h4 id="get_actors">get_actors</h4>
-<pre><code class="language-python"> | get_actors() -&gt; List[Actor]
-</code></pre>
-<p>Get list of actors</p>
-<p><strong>Returns</strong>:</p>
-<ul>
-<li><code>List[Actor]</code> - The list of actors on the scene</li>
-</ul>
-<p><a name="pgz.actor_scene.ActorScene.collide_group"></a></p>
-<h4 id="collide_group">collide_group</h4>
-<pre><code class="language-python"> | collide_group(actor: Actor, group_name: str = &quot;&quot;) -&gt; Optional[Actor]
-</code></pre>
-<p>Detect collision of a ginen actor with the actors in requested collsion group.</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>actor</code> <em>Actor</em> - actor to detect collisions with</li>
-<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
-</ul>
-<p><strong>Returns</strong>:</p>
-<ul>
-<li><code>Optional[Actor]</code> - A collins actor in the specified collision group</li>
-</ul>
-<p><a name="pgz.actor_scene.ActorScene.draw"></a></p>
-<h4 id="draw">draw</h4>
-<pre><code class="language-python"> | draw(surface: Screen) -&gt; None
-</code></pre>
-<p>Overriden rendering method
-Implementation of the update method for the ActorScene.</p>
-<p>The ActorScene implementation renders all the actorts attached to the scene.</p>
-<p>:param pgz.Screen screen: screen to draw the scene on</p>
-<p><a name="pgz.actor_scene.ActorScene.update"></a></p>
-<h4 id="update">update</h4>
-<pre><code class="language-python"> | update(dt: float) -&gt; None
-</code></pre>
-<p>Overriden update method
-Implementation of the update method for the ActorScene.</p>
-<p>This method updates all the actors attached to the scene.</p>
-<p>:param int dt: time in milliseconds since the last update</p>
 <p><a name="pgz.application"></a></p>
 <h1 id="pgzapplication">pgz.application</h1>
 <p><a name="pgz.application.Application"></a></p>
@@ -249,30 +151,6 @@ app.run(main_menu)</p>
 <p>Run the main loop of Pygame Zero.</p>
 <p><a name="pgz.clock"></a></p>
 <h1 id="pgzclock">pgz.clock</h1>
-<p><a name="pgz.collision_detector"></a></p>
-<h1 id="pgzcollision_detector">pgz.collision_detector</h1>
-<p><a name="pgz.event_dispatcher"></a></p>
-<h1 id="pgzevent_dispatcher">pgz.event_dispatcher</h1>
-<p><a name="pgz.event_dispatcher.EventDispatcher"></a></p>
-<h2 id="eventdispatcher-objects">EventDispatcher Objects</h2>
-<pre><code class="language-python">class EventDispatcher()
-</code></pre>
-<p>Adapt a pgzero game's raw handler function to take a Pygame Event.</p>
-<p>Returns a one-argument function of the form <code>handler(event)</code>.
-This will ensure that the correct arguments are passed to the raw
-handler based on its argument spec.</p>
-<p>The wrapped handler will also map certain parameter values using
-callables from EVENT_PARAM_MAPPERS; this ensures that the value of
-'button' inside the handler is a real instance of constants.mouse,
-which means (among other things) that it will print as a symbolic value
-rather than a naive integer.</p>
-<p><a name="pgz.event_dispatcher.EventDispatcher.handle_event"></a></p>
-<h4 id="handle_event">handle_event</h4>
-<pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
-</code></pre>
-<p>Override me</p>
-<p><a name="pgz.fps_calc"></a></p>
-<h1 id="pgzfps_calc">pgz.fps_calc</h1>
 <p><a name="pgz.keyboard"></a></p>
 <h1 id="pgzkeyboard">pgz.keyboard</h1>
 <p><a name="pgz.keyboard.Keyboard"></a></p>
@@ -286,137 +164,10 @@ rather than a naive integer.</p>
 <p>is True if the 'A' key is depressed, and False otherwise.</p>
 <p><a name="pgz.loaders"></a></p>
 <h1 id="pgzloaders">pgz.loaders</h1>
-<p><a name="pgz.map_scene"></a></p>
-<h1 id="pgzmap_scene">pgz.map_scene</h1>
-<p><a name="pgz.map_scene.MapScene"></a></p>
-<h2 id="mapscene-objects">MapScene Objects</h2>
-<pre><code class="language-python">class MapScene(ActorScene)
-</code></pre>
-<p>Scene implementation for Tiled map management.</p>
-<p>Extends functionality ActorScene, but in case of MapScene actors are placed on a map.
-The implementation is based on <a href="https://github.com/bitcraft/pyscroll">pyscroll</a>.
-A tiled map can be created and modified with wonderful <a href="https://www.mapeditor.org/">Tiled</a> maps editor.</p>
-<p>The maps loading and usage is backed by <a href="https://github.com/bitcraft/PyTMX">PyTMX</a></p>
-<p>Actors also can be added to different collision groups,
-which allows easily identify collision of an actor with a specific actor group</p>
-<p><a name="pgz.map_scene.MapScene.__init__"></a></p>
-<h4 id="__init___1">__init__</h4>
-<pre><code class="language-python"> | __init__(map: Optional[ScrollMap] = None)
-</code></pre>
-<p>Create a MapScene object</p>
-<p>The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from "default.tmx" file of the resource directory:</p>
-<pre><code>tmx = pgz.maps.default
-map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
-</code></pre>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>map</code> <em>Optional[ScrollMap], optional</em> - Loaded map object. Defaults to None.</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.map"></a></p>
-<h4 id="map">map</h4>
-<pre><code class="language-python"> | @property
- | map() -&gt; ScrollMap
-</code></pre>
-<p>Get map object</p>
-<p><strong>Returns</strong>:</p>
-<ul>
-<li><code>ScrollMap</code> - the map object used by the scene</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.set_map"></a></p>
-<h4 id="set_map">set_map</h4>
-<pre><code class="language-python"> | set_map(map)
-</code></pre>
-<p>Set map object</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>map</code> <em>[type]</em> - map object to set</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.dispatch_event"></a></p>
-<h4 id="dispatch_event">dispatch_event</h4>
-<pre><code class="language-python"> | dispatch_event(event: pygame.event.Event) -&gt; None
-</code></pre>
-<p>Overriden events dispatch method
-Used for mouse cursor position transformation into map "world coordinates"</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>event</code> <em>pygame.event.Event</em> - pygame Event object</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.update"></a></p>
-<h4 id="update_1">update</h4>
-<pre><code class="language-python"> | update(dt: float) -&gt; None
-</code></pre>
-<p>Overriden update method
-Implementation of the update method for the MapScene.</p>
-<p>This method updates all the actors attached to the scene.</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.draw"></a></p>
-<h4 id="draw_1">draw</h4>
-<pre><code class="language-python"> | draw(screen: Screen) -&gt; None
-</code></pre>
-<p>Overriden rendering method
-Implementation of the update method for the MapScene.</p>
-<p>The ActorScene implementation renders all the actorts attached to the scene.</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.add_actor"></a></p>
-<h4 id="add_actor_1">add_actor</h4>
-<pre><code class="language-python"> | add_actor(actor: Actor, central_actor: bool = False, group_name: str = &quot;&quot;) -&gt; None
-</code></pre>
-<p>Overriden add_actor method
-Implementation of the add_actor method for the MapScene.</p>
-<p>The ActorScene implementation renders all the actorts attached to the scene.</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>actor</code> <em>Actor</em> - actor to add</li>
-<li><code>central_actor</code> <em>bool, optional</em> - Sets the actor to be central actor for the scene. The map view will be centered on the actor. Defaults to False.</li>
-<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.remove_actor"></a></p>
-<h4 id="remove_actor_1">remove_actor</h4>
-<pre><code class="language-python"> | remove_actor(actor: Actor) -&gt; None
-</code></pre>
-<p>Overriden remove_actor method
-Implementation of the remove_actor method for the MapScene.</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>actor</code> <em>Actor</em> - actor to be removed</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.handle_event"></a></p>
-<h4 id="handle_event_1">handle_event</h4>
-<pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
-</code></pre>
-<p>Overriden event handler
-Implementation of the event handler method for the MapScene.</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>event</code> <em>pygame.event.Event</em> - pygame event object</li>
-</ul>
-<p><a name="pgz.map_scene.MapScene.collide_map"></a></p>
-<h4 id="collide_map">collide_map</h4>
-<pre><code class="language-python"> | collide_map(actor: Actor) -&gt; bool
-</code></pre>
-<p>Detect collision with tiles in the map object used by the scene</p>
-<p><strong>Arguments</strong>:</p>
-<ul>
-<li><code>actor</code> <em>Actor</em> - actor for collision detection</li>
-</ul>
-<p><strong>Returns</strong>:</p>
-<ul>
-<li><code>bool</code> - True if the collision with map tiles is detected</li>
-</ul>
-<p><a name="pgz.menu_scene"></a></p>
-<h1 id="pgzmenu_scene">pgz.menu_scene</h1>
 <p><a name="pgz.multiplayer_scene"></a></p>
 <h1 id="pgzmultiplayer_scene">pgz.multiplayer_scene</h1>
 <p><a name="pgz.rect"></a></p>
 <h1 id="pgzrect">pgz.rect</h1>
-<p><a name="pgz.rpc"></a></p>
-<h1 id="pgzrpc">pgz.rpc</h1>
 <p><a name="pgz.scene"></a></p>
 <h1 id="pgzscene">pgz.scene</h1>
 <p><a name="pgz.scene.Scene"></a></p>
@@ -498,10 +249,9 @@ the application's settings when the scene is entered:</p>
 If you override :meth:<code>on_enter</code> in the subclass, you must call
 <code>super().on_enter(previous_scene)</code> to use the class variables.</p>
 <p>These settings can further be overridden in individual instances:</p>
-<p>.. code-block:: python</p>
-<pre><code>my_scene0 = MyScene()
-my_scene0.resolution = (1280, 720)
-my_scene1 = MyScene(title='My Second Awesome Scene')
+<pre><code>    my_scene0 = MyScene()
+    my_scene0.resolution = (1280, 720)
+    my_scene1 = MyScene(title='My Second Awesome Scene')
 </code></pre>
 <p>Shotcuts for simpler event handling:</p>
 <p>def on_mouse_up(self, pos, button):
@@ -544,19 +294,19 @@ my_scene1 = MyScene(title='My Second Awesome Scene')
 </code></pre>
 <p>Clock object. Actually returns the global clock object.</p>
 <p><a name="pgz.scene.Scene.draw"></a></p>
-<h4 id="draw_2">draw</h4>
+<h4 id="draw">draw</h4>
 <pre><code class="language-python"> | draw(screen: Screen) -&gt; None
 </code></pre>
 <p>Override this with the scene drawing.</p>
-<p>:param pgz.Screen screen: screen to draw the scene on</p>
+<p>:param pgz.screen.Screen screen: screen to draw the scene on</p>
 <p><a name="pgz.scene.Scene.update"></a></p>
-<h4 id="update_2">update</h4>
+<h4 id="update">update</h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
 <p>Override this with the scene update tick.</p>
 <p>:param int dt: time in milliseconds since the last update</p>
 <p><a name="pgz.scene.Scene.handle_event"></a></p>
-<h4 id="handle_event_2">handle_event</h4>
+<h4 id="handle_event">handle_event</h4>
 <pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Override this to handle an event in the scene.</p>
@@ -583,91 +333,232 @@ to change the application's settings, you must call
 <p>The :attr:<code>application</code> property is still initialized at this
 point. Feel free to do saving, settings reset, etc. here.</p>
 <p>:param Scene|None next_scene: next scene to run</p>
-<p><a name="pgz.screen"></a></p>
-<h1 id="pgzscreen">pgz.screen</h1>
-<p><a name="pgz.screen_rpc"></a></p>
-<h1 id="pgzscreen_rpc">pgz.screen_rpc</h1>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter"></a></p>
-<h2 id="rpcsurfacepainter-objects">RPCSurfacePainter Objects</h2>
-<pre><code class="language-python">class RPCSurfacePainter()
+<p><a name="pgz.scenes"></a></p>
+<h1 id="pgzscenes">pgz.scenes</h1>
+<p><a name="pgz.scenes.actor_scene"></a></p>
+<h1 id="pgzscenesactor_scene">pgz.scenes.actor_scene</h1>
+<p><a name="pgz.scenes.actor_scene.ActorScene"></a></p>
+<h2 id="actorscene-objects">ActorScene Objects</h2>
+<pre><code class="language-python">class ActorScene(Scene)
 </code></pre>
-<p>Interface to pygame.draw that is bound to a surface.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.line"></a></p>
-<h4 id="line">line</h4>
-<pre><code class="language-python"> | line(start: Tuple[Any, Any], end: Tuple[Any, Any], color: Any, width: int = 1) -&gt; None
+<p>Scene implementation for management of multiple actors.</p>
+<p>Actors also can be added to different collision groups, which allows easily identify collision of an actor with a specific actor group.</p>
+<p><a name="pgz.scenes.actor_scene.ActorScene.__init__"></a></p>
+<h4 id="__init__">__init__</h4>
+<pre><code class="language-python"> | __init__() -&gt; None
 </code></pre>
-<p>Draw a line from start to end.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.circle"></a></p>
-<h4 id="circle">circle</h4>
-<pre><code class="language-python"> | circle(pos: Tuple[Any, Any], radius: float, color: Any, width: int = 1) -&gt; None
+<p>Create an ActorScene object</p>
+<p><a name="pgz.scenes.actor_scene.ActorScene.set_collision_detector"></a></p>
+<h4 id="set_collision_detector">set_collision_detector</h4>
+<pre><code class="language-python"> | set_collision_detector(collision_detector: CollisionDetector)
 </code></pre>
-<p>Draw a circle.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.filled_circle"></a></p>
-<h4 id="filled_circle">filled_circle</h4>
-<pre><code class="language-python"> | filled_circle(pos: Tuple[Any, Any], radius: float, color: Any) -&gt; None
+<p>Set external collsinion detector object.</p>
+<p>The default collision detector can be use in the most of the cases.
+This method in used by multiplayer.</p>
+<p><a name="pgz.scenes.actor_scene.ActorScene.add_actor"></a></p>
+<h4 id="add_actor">add_actor</h4>
+<pre><code class="language-python"> | add_actor(actor: Actor, group_name: str = &quot;&quot;) -&gt; None
 </code></pre>
-<p>Draw a filled circle.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.polygon"></a></p>
-<h4 id="polygon">polygon</h4>
-<pre><code class="language-python"> | polygon(points: List[Tuple[Any, Any]], color: Any) -&gt; None
+<p>Add actor to the scene and add the actor to the collision group.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - actor to add</li>
+<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
+</ul>
+<p><a name="pgz.scenes.actor_scene.ActorScene.remove_actor"></a></p>
+<h4 id="remove_actor">remove_actor</h4>
+<pre><code class="language-python"> | remove_actor(actor: Actor) -&gt; None
 </code></pre>
-<p>Draw a polygon.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.filled_polygon"></a></p>
-<h4 id="filled_polygon">filled_polygon</h4>
-<pre><code class="language-python"> | filled_polygon(points: List[Tuple[Any, Any]], color: Any) -&gt; None
+<p>Remove actor from the scene.</p>
+<p>Actor also will be removed from the associated collision detector</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - Actor to be removed</li>
+</ul>
+<p><a name="pgz.scenes.actor_scene.ActorScene.remove_actors"></a></p>
+<h4 id="remove_actors">remove_actors</h4>
+<pre><code class="language-python"> | remove_actors() -&gt; None
 </code></pre>
-<p>Draw a filled polygon.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.rect"></a></p>
-<h4 id="rect">rect</h4>
-<pre><code class="language-python"> | rect(rect: ZRect, color: Any, width: int = 1) -&gt; None
+<p>Remove all actors from the scene and the associated collision detector</p>
+<p><a name="pgz.scenes.actor_scene.ActorScene.get_actor"></a></p>
+<h4 id="get_actor">get_actor</h4>
+<pre><code class="language-python"> | get_actor(uuid: str) -&gt; Actor
 </code></pre>
-<p>Draw a rectangle.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.filled_rect"></a></p>
-<h4 id="filled_rect">filled_rect</h4>
-<pre><code class="language-python"> | filled_rect(rect: ZRect, color: Any) -&gt; None
+<p>Get actor object by its UUID</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>uuid</code> <em>str</em> - UUID of the actor to be retrieved</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Actor</code> - Actor associated with the UUID</li>
+</ul>
+<p><a name="pgz.scenes.actor_scene.ActorScene.get_actors"></a></p>
+<h4 id="get_actors">get_actors</h4>
+<pre><code class="language-python"> | get_actors() -&gt; List[Actor]
 </code></pre>
-<p>Draw a filled rectangle.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.text"></a></p>
-<h4 id="text">text</h4>
-<pre><code class="language-python"> | text(*args: Any, **kwargs: Any) -&gt; None
+<p>Get list of actors</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>List[Actor]</code> - The list of actors on the scene</li>
+</ul>
+<p><a name="pgz.scenes.actor_scene.ActorScene.collide_group"></a></p>
+<h4 id="collide_group">collide_group</h4>
+<pre><code class="language-python"> | collide_group(actor: Actor, group_name: str = &quot;&quot;) -&gt; Optional[Actor]
 </code></pre>
-<p>Draw text to the screen.</p>
-<p><a name="pgz.screen_rpc.RPCSurfacePainter.textbox"></a></p>
-<h4 id="textbox">textbox</h4>
-<pre><code class="language-python"> | textbox(*args: Any, **kwargs: Any) -&gt; None
+<p>Detect collision of a ginen actor with the actors in requested collsion group.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - actor to detect collisions with</li>
+<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Optional[Actor]</code> - A collins actor in the specified collision group</li>
+</ul>
+<p><a name="pgz.scenes.actor_scene.ActorScene.draw"></a></p>
+<h4 id="draw_1">draw</h4>
+<pre><code class="language-python"> | draw(surface: Screen) -&gt; None
 </code></pre>
-<p>Draw text to the screen, wrapped to fit a box</p>
-<p><a name="pgz.screen_rpc.RPCScreenServer"></a></p>
-<h2 id="rpcscreenserver-objects">RPCScreenServer Objects</h2>
-<pre><code class="language-python">class RPCScreenServer()
-</code></pre>
-<p><a name="pgz.screen_rpc.RPCScreenServer.bounds"></a></p>
-<h4 id="bounds">bounds</h4>
-<pre><code class="language-python"> | bounds() -&gt; ZRect
-</code></pre>
-<p>Return a Rect representing the bounds of the screen.</p>
-<p><a name="pgz.screen_rpc.RPCScreenServer.clear"></a></p>
-<h4 id="clear">clear</h4>
-<pre><code class="language-python"> | clear() -&gt; None
-</code></pre>
-<p>Clear the screen to black.</p>
-<p><a name="pgz.scroll_map"></a></p>
-<h1 id="pgzscroll_map">pgz.scroll_map</h1>
-<p><a name="pgz.scroll_map.ScrollMap"></a></p>
-<h2 id="scrollmap-objects">ScrollMap Objects</h2>
-<pre><code class="language-python">class ScrollMap(object)
-</code></pre>
-<p>This class provides functionality:
-- create and manage a pyscroll group
-- load a collision layers
-- manage sprites added to the map
-- allows to detect collisions with loaded collision layers
-- render the map and the sprites on top</p>
-<p><a name="pgz.scroll_map.ScrollMap.update"></a></p>
-<h4 id="update_3">update</h4>
+<p>Overriden rendering method
+Implementation of the update method for the ActorScene.</p>
+<p>The ActorScene implementation renders all the actorts attached to the scene.</p>
+<p>:param pgz.screen.Screen screen: screen to draw the scene on</p>
+<p><a name="pgz.scenes.actor_scene.ActorScene.update"></a></p>
+<h4 id="update_1">update</h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
-<p>Tasks that occur over time should be handled here</p>
+<p>Overriden update method
+Implementation of the update method for the ActorScene.</p>
+<p>This method updates all the actors attached to the scene.</p>
+<p>:param int dt: time in milliseconds since the last update</p>
+<p><a name="pgz.scenes.map_scene"></a></p>
+<h1 id="pgzscenesmap_scene">pgz.scenes.map_scene</h1>
+<p><a name="pgz.scenes.map_scene.MapScene"></a></p>
+<h2 id="mapscene-objects">MapScene Objects</h2>
+<pre><code class="language-python">class MapScene(ActorScene)
+</code></pre>
+<p>Scene implementation for Tiled map management.</p>
+<p>Extends functionality ActorScene, but in case of MapScene actors are placed on a map.
+The implementation is based on <a href="https://github.com/bitcraft/pyscroll">pyscroll</a>.
+A tiled map can be created and modified with wonderful <a href="https://www.mapeditor.org/">Tiled</a> maps editor.</p>
+<p>The maps loading and usage is backed by <a href="https://github.com/bitcraft/PyTMX">PyTMX</a></p>
+<p>Actors also can be added to different collision groups,
+which allows easily identify collision of an actor with a specific actor group</p>
+<p><a name="pgz.scenes.map_scene.MapScene.__init__"></a></p>
+<h4 id="__init___1">__init__</h4>
+<pre><code class="language-python"> | __init__(map: Optional[ScrollMap] = None)
+</code></pre>
+<p>Create a MapScene object</p>
+<p>The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from "default.tmx" file of the resource directory:</p>
+<pre><code>tmx = pgz.maps.default
+map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
+</code></pre>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>map</code> <em>Optional[ScrollMap], optional</em> - Loaded map object. Defaults to None.</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.map"></a></p>
+<h4 id="map">map</h4>
+<pre><code class="language-python"> | @property
+ | map() -&gt; ScrollMap
+</code></pre>
+<p>Get map object</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>ScrollMap</code> - the map object used by the scene</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.set_map"></a></p>
+<h4 id="set_map">set_map</h4>
+<pre><code class="language-python"> | set_map(map)
+</code></pre>
+<p>Set map object</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>map</code> <em>[type]</em> - map object to set</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.dispatch_event"></a></p>
+<h4 id="dispatch_event">dispatch_event</h4>
+<pre><code class="language-python"> | dispatch_event(event: pygame.event.Event) -&gt; None
+</code></pre>
+<p>Overriden events dispatch method
+Used for mouse cursor position transformation into map "world coordinates"</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>event</code> <em>pygame.event.Event</em> - pygame Event object</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.update"></a></p>
+<h4 id="update_2">update</h4>
+<pre><code class="language-python"> | update(dt: float) -&gt; None
+</code></pre>
+<p>Overriden update method
+Implementation of the update method for the MapScene.</p>
+<p>This method updates all the actors attached to the scene.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.draw"></a></p>
+<h4 id="draw_2">draw</h4>
+<pre><code class="language-python"> | draw(screen: Screen) -&gt; None
+</code></pre>
+<p>Overriden rendering method
+Implementation of the update method for the MapScene.</p>
+<p>The ActorScene implementation renders all the actorts attached to the scene.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.add_actor"></a></p>
+<h4 id="add_actor_1">add_actor</h4>
+<pre><code class="language-python"> | add_actor(actor: Actor, central_actor: bool = False, group_name: str = &quot;&quot;) -&gt; None
+</code></pre>
+<p>Overriden add_actor method
+Implementation of the add_actor method for the MapScene.</p>
+<p>The ActorScene implementation renders all the actorts attached to the scene.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - actor to add</li>
+<li><code>central_actor</code> <em>bool, optional</em> - Sets the actor to be central actor for the scene. The map view will be centered on the actor. Defaults to False.</li>
+<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.remove_actor"></a></p>
+<h4 id="remove_actor_1">remove_actor</h4>
+<pre><code class="language-python"> | remove_actor(actor: Actor) -&gt; None
+</code></pre>
+<p>Overriden remove_actor method
+Implementation of the remove_actor method for the MapScene.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - actor to be removed</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.handle_event"></a></p>
+<h4 id="handle_event_1">handle_event</h4>
+<pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
+</code></pre>
+<p>Overriden event handler
+Implementation of the event handler method for the MapScene.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>event</code> <em>pygame.event.Event</em> - pygame event object</li>
+</ul>
+<p><a name="pgz.scenes.map_scene.MapScene.collide_map"></a></p>
+<h4 id="collide_map">collide_map</h4>
+<pre><code class="language-python"> | collide_map(actor: Actor) -&gt; bool
+</code></pre>
+<p>Detect collision with tiles in the map object used by the scene</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - actor for collision detection</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>bool</code> - True if the collision with map tiles is detected</li>
+</ul>
+<p><a name="pgz.scenes.menu_scene"></a></p>
+<h1 id="pgzscenesmenu_scene">pgz.scenes.menu_scene</h1>
+<p><a name="pgz.screen"></a></p>
+<h1 id="pgzscreen">pgz.screen</h1>
               
             </div>
           </div>
