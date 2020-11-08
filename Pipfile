@@ -19,6 +19,8 @@ pylint = "*"
 mypy = "*"
 black = "*"
 isort = "*"
+pydoc-markdown = "*"
+mkdocs = "*"
 
 [pipenv]
 allow_prereleases = true

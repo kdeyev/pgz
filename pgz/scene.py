@@ -104,7 +104,7 @@ class Scene(EventDispatcher):
         my_scene1 = MyScene(title='My Second Awesome Scene')
 
 
-    Shotcuts for simpler event handlingL
+    Shotcuts for simpler event handling:
 
     def on_mouse_up(self, pos, button):
         # Override this for easier events handling.
