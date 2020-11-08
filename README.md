@@ -211,9 +211,12 @@ class Game(pgz.MapScene):
             self.map.change_zoom(-0.25)
 ```
 
+## Game example
+The game example which utilizes using all the described concepts, can be fount in demo/demo_standalone.py
+
 # Multiplayer game with pgz
 
-pgz provides two key components for converting your single-player into multiplyer-game over the network:
+pgz provides two key components for converting your single-player into multiplayer-game over the network:
 
 - pgz.MultiplayerSceneServer
 - pgz.RemoteScene
@@ -231,7 +234,7 @@ self.server.start_server(port=self.port)
 ```
 
 All the scenes will share the map object and collision detector object. So, the communication between different players scenes is done with collision detection.
-If one scene shoots the cannon ball (by implementing the CannobBall actor and adding its instance to the map):
+If one scene shoots the cannon ball (by implementing the CannonBall actor and adding its instance to the map):
 ```
 def on_mouse_down(self, pos, button):
     start_point = self.calc_cannon_ball_start_pos(pos)
@@ -239,7 +242,7 @@ def on_mouse_down(self, pos, button):
         ball = CannonBall(pos=start_point, target=pos)
         self.add_actor(ball, group_name="cannon_balls")
 ```
-Another player(scene) might be harmed by the cannon ball using the collision detecion:
+Another player(scene) might be harmed by the cannon ball using the collision detection:
 ```
 def update(self, dt):
     super().update(dt)
@@ -263,6 +266,8 @@ game = pgz.RemoteScene(map, server_url, client_data={"name": data["name"]})
 ```
 Pay attention that client process needs to have access to the same external resources (like map files, images,...) as the game server.
 
+## Multiplayer game example
+The multiplayer game example can be found in demo/demo_server.py and demo/demo_client.py
 
 ## Demo 
 

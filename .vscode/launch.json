@@ -13,7 +13,7 @@
             "name": "Demo",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/demo/demo-standalone.py",
+            "program": "${workspaceFolder}/demo/demo_standalone.py",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
@@ -23,7 +23,7 @@
             "name": "Demo-Server",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/demo/demo-server.py",
+            "program": "${workspaceFolder}/demo/demo_server.py",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
@@ -33,7 +33,7 @@
             "name": "Demo-Client",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/demo/demo-client.py",
+            "program": "${workspaceFolder}/demo/demo_client.py",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
@@ -43,7 +43,7 @@
             "name": "Another Demo-Client",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/demo/demo-client.py",
+            "program": "${workspaceFolder}/demo/demo_client.py",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
