@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>My Project</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="js/jquery-1.10.2.min.js" defer></script>
+        <script src="js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">My Project</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem active">
+                                <a href="." class="nav-link">Home</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="api-documentation/" class="nav-link">API Documentation</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="api-documentation/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#pgz" class="nav-link">pgz</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#features" class="nav-link">Features</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#installation" class="nav-link">Installation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#quick-start" class="nav-link">Quick start</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#mapscene" class="nav-link">MapScene</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#game-example" class="nav-link">Game example</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#multiplayer-game-with-pgz" class="nav-link">Multiplayer game with pgz</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#multiplayer-game-server" class="nav-link">Multiplayer game server</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#multiplayer-game-client" class="nav-link">Multiplayer game client</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#multiplayer-game-example" class="nav-link">Multiplayer game example</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#demo" class="nav-link">Demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="pgz">pgz</h1>
+<p>pgz aim to make development of advanced <a href="https://www.pygame.org/">pygame</a> games easier.
+pgz uses pgzero as infrastructure intensively, but makes the experience more object oriented.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>More pytonic infrastructure: pgz utilies a lot of features from <a href="https://github.com/lordmauve/pgzero">pgzero</a></li>
+<li>Multi-scene games: The idea and some code was taken from <a href="https://github.com/Mahi/EzPyGame">EzPyGame</a></li>
+<li>Maps, collision detection and maps scrolling: the implementation is based on <a href="https://github.com/bitcraft/pyscroll">pyscroll</a></li>
+<li>Scenes for rendering Menu based <a href="https://github.com/ppizarror/pygame-menu">pygame-menu</a></li>
+<li>Multi-player game over network: based on simple RPC over WebSockets</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>not yet</p>
+<h2 id="quick-start">Quick start</h2>
+<p>pgz heavily uses concepts and some code of <a href="https://github.com/Mahi/EzPyGame">EzPyGame</a> and <a href="https://github.com/lordmauve/pgzero">pgzero</a>.
+pgz game entry point is application, application renders scene, scene can be changed, scene manages actors.</p>
+<p>So pgz operates by 3 main concepts:</p>
+<ul>
+<li>Application</li>
+<li>Scene</li>
+<li>Actor</li>
+</ul>
+<h3 id="application">Application</h3>
+<p>The application and scenes idea was from the <a href="https://github.com/Mahi/EzPyGame">EzPyGame</a>.</p>
+<p>Example of pgz application start:</p>
+<pre><code>if __name__ == &quot;__main__&quot;:
+
+    app = pgz.Application(
+        title=&quot;pgz Standalone Demo&quot;,
+        resolution=(1280, 720),
+        update_rate=60,
+    )
+
+    try:
+        scene = ....
+        app.run(scene)
+
+    except Exception:
+        # pygame.quit()
+        raise
+</code></pre>
+<h3 id="scene">Scene</h3>
+<p>In the snippet above scene object instantiation <code>scene = ....</code> was skipped.</p>
+<p>The application and scenes idea was from the  <a href="https://github.com/Mahi/EzPyGame">EzPyGame</a>.</p>
+<p>Scene is the core of your game, but the active scene of you game can be changed, when you need to change the game behavior.
+Bassically the pgz.Application delegates all the events processing and rendering logic to the active scene.</p>
+<p>If the pgz.Application is not require subclassing, the usage of scenes is based on the subclassing idea.
+There are a few important method to override in pgz.Scene:</p>
+<ul>
+<li><code>handle_event(self, event: pygame.event.Event)</code> - for processing pygame events</li>
+<li><code>draw(self, screen: pgz.Screen)</code> - for rendering of the scene screen</li>
+<li><code>update(self, dt: float)</code> - for modifying the scene state</li>
+<li><code>on_enter(self, previous_scene: pgz.Scene)</code> - for initialization of the scene</li>
+<li><code>on_exit(self, next_scene: pgz.Scene)</code> - for initialization of the scene</li>
+</ul>
+<pre><code>class Game(Scene):
+    ...
+
+    def on_enter(self, previous_scene):
+        self.previous_scene = previous_scene
+
+    def update(self, dt):
+        self.player.move(dt)
+        if self.player.died():
+            self.application.change_scene(self.previous_scene)
+</code></pre>
+<p>Good news that pgz provides a few pgz.Scene derived scenes for common use cases. So you can subclass from the scene implementation, which is more suitable for your game:</p>
+<ul>
+<li><code>pgz.MenuScene</code> - implements game menu rendering as a pgz.Scene subclass</li>
+<li><code>pgz.ActorScene</code> - implements the basic actors managements, updates, rendering logic and actors collision detection.</li>
+<li><code>pgz.MapScene</code> - extends pgz.ActorScene for games based on the tiled maps. It also implements the tiles collision detection.</li>
+<li><code>pgz.RemoteScene</code> - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game</li>
+</ul>
+<h3 id="actors">Actors</h3>
+<p>Actor concept was inspired from <a href="https://github.com/lordmauve/pgzero">pgzero</a>.
+Actor is a sprite:</p>
+<pre><code>alien = Actor('alien')
+alien.pos = 100, 56
+</code></pre>
+<p>The subclassing from the actor may be a good idea for building of the more complicated logic:</p>
+<pre><code>class Ship(pgz.Actor):
+    def __init__(self) -&gt; None:
+        super().__init__(random.choice([&quot;ship (1)&quot;, &quot;ship (2)&quot;, &quot;ship (3)&quot;, &quot;ship (4)&quot;, &quot;ship (5)&quot;, &quot;ship (6)&quot;]))
+
+    def update(self, dt):
+        self._old_pos = self.pos[:]
+
+        if self.keyboard.up:
+            self.velocity[1] = -self.speed
+        elif self.keyboard.down:
+            self.velocity[1] = self.speed
+        else:
+            self.velocity[1] = 0
+
+        if self.keyboard.left:
+            self.velocity[0] = -self.speed
+        elif self.keyboard.right:
+            self.velocity[0] = self.speed
+        else:
+            self.velocity[0] = 0
+
+        self.x += self.velocity[0] * dt
+        self.y += self.velocity[1] * dt
+
+    def move_back(self, dt):
+        &quot;&quot;&quot;If called after an update, the sprite can move back&quot;&quot;&quot;
+        self.pos = self._old_pos[:]
+</code></pre>
+<p>Two important methods for overriding are:</p>
+<pre><code>    def draw(self, screen: Screen) -&gt; None:
+        pass
+
+    def update(self, dt: float) -&gt; None:
+        pass
+</code></pre>
+<p>Once actor is constructed in can be attached to ActorScene and the scene will take care of calling draw and update methods:</p>
+<pre><code>scene.add_actor(ship)
+</code></pre>
+<h2 id="mapscene">MapScene</h2>
+<p>The usage of pgz.MapScene will require the instantiation of a map object. pgz provides a way for loading and handling <a href="https://www.mapeditor.org/">Tiled</a> maps.</p>
+<h3 id="map-loading">Map loading</h3>
+<p>The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from "default.tmx" file of the resource directory: </p>
+<pre><code>tmx = pgz.maps.default
+</code></pre>
+<p>The "mtx" files can be created and modified with wonderful <a href="https://www.mapeditor.org/">Tiled</a> mps editor.</p>
+<h3 id="map-management-and-rendering">Map management and rendering</h3>
+<p>The maps loading and usage is backed by <a href="https://github.com/bitcraft/pyscroll">pyscroll</a></p>
+<p>pgz provides a pgz.ScrollMap class which covers listed functionality:
+- create and manage a pyscroll group
+- load a collision layers
+- manage sprites added to the map
+- allows to detect collisions with loaded collision layers
+- render the map and the sprites on top</p>
+<p>The code example will load tiled map, instantiate a pgz.ScrollMap object and initialize "Islands" layer of the tmx map as a collision layer.</p>
+<pre><code>tmx = pgz.maps.default
+map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
+</code></pre>
+<p>Once the map object is initialized it can be used with pgz.MapScene:</p>
+<pre><code>scene = pgz.MapScene(map)
+scene.add_actor(ship)
+
+...
+if scene.collide_map(ship):
+    print(&quot;I found an island!&quot;)
+</code></pre>
+<p>A more complete example of the pgz.MapScene subclassing:</p>
+<pre><code>class Game(pgz.MapScene):
+    def __init__(self, map):
+        super().__init__(map)
+
+        self.ship = Ship()
+        # put the ship in the center of the map
+        self.ship.position = self.map.get_center()
+        self.ship.x += 600
+        self.ship.y += 400
+
+        # add our ship to the group
+        self.add_actor(self.ship, central_actor=True)
+
+    def update(self, dt):
+        self.map.update(dt)
+
+        if self.map.collide_map(self.ship):
+            self.ship.move_back(dt)
+
+    def on_mouse_move(self, pos):
+        angle = self.ship.angle_to(pos) + 90
+        self.ship.angle = angle
+
+    def on_mouse_down(self, pos, button):
+        ball = CannonBall(self.ship.pos, pos, self.remove_actor)
+        self.add_actor(ball)
+
+    def on_key_down(self, key):
+        if key == pygame.K_EQUALS:
+            self.map.change_zoom(0.25)
+        elif key == pygame.K_MINUS:
+            self.map.change_zoom(-0.25)
+</code></pre>
+<h2 id="game-example">Game example</h2>
+<p>The game example which utilizes using all the described concepts, can be fount in demo/demo_standalone.py</p>
+<h1 id="multiplayer-game-with-pgz">Multiplayer game with pgz</h1>
+<p>pgz provides two key components for converting your single-player into multiplayer-game over the network:</p>
+<ul>
+<li>pgz.MultiplayerSceneServer</li>
+<li>pgz.RemoteScene</li>
+</ul>
+<h2 id="multiplayer-game-server">Multiplayer game server</h2>
+<p>MultiplayerSceneServer opens a WebSocket server and instantiate a pgz.Scene per connected player(client):</p>
+<pre><code>tmx = pgz.maps.default
+map = pgz.ScrollMap((1280, 720), tmx, [&quot;Islands&quot;])
+
+# Build and start game server
+self.server = pgz.MultiplayerSceneServer(map, GameScene)
+self.server.start_server(port=self.port)
+</code></pre>
+<p>All the scenes will share the map object and collision detector object. So, the communication between different players scenes is done with collision detection.
+If one scene shoots the cannon ball (by implementing the CannonBall actor and adding its instance to the map):</p>
+<pre><code>def on_mouse_down(self, pos, button):
+    start_point = self.calc_cannon_ball_start_pos(pos)
+    if start_point:
+        ball = CannonBall(pos=start_point, target=pos)
+        self.add_actor(ball, group_name=&quot;cannon_balls&quot;)
+</code></pre>
+<p>Another player(scene) might be harmed by the cannon ball using the collision detection:</p>
+<pre><code>def update(self, dt):
+    super().update(dt)
+
+    cannon_ball = self.collide_group(self.ship, &quot;cannon_balls&quot;)
+    if cannon_ball:
+        # pgz.sounds.arrr.play()
+        self.ship.health -= cannon_ball.hit_rate * dt
+</code></pre>
+<h2 id="multiplayer-game-client">Multiplayer game client</h2>
+<p>pgz.RemoteScene allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:</p>
+<pre><code>data = self.menu.get_input_data()
+server_url = data[&quot;server_url&quot;]
+
+tmx = pgz.maps.default
+map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
+game = pgz.RemoteScene(map, server_url, client_data={&quot;name&quot;: data[&quot;name&quot;]})
+</code></pre>
+<p>Pay attention that client process needs to have access to the same external resources (like map files, images,...) as the game server.</p>
+<h2 id="multiplayer-game-example">Multiplayer game example</h2>
+<p>The multiplayer game example can be found in demo/demo_server.py and demo/demo_client.py</p>
+<h2 id="demo">Demo</h2>
+<p><img alt="Alt Text" src="img/demo.gif" /></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js" defer></script>
+        <script src="search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.1.2
+Build Date UTC : 2020-11-08 17:37:19.847890+00:00
+-->
