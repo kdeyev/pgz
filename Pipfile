@@ -25,3 +25,8 @@ flake8 = "*"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+run-mypy = "mypy pgz"
+build-api-docs = "pydoc-markdown --build"
+deploy-docs = "mkdocs gh-deploy -f docs/mkdocs.yml"
