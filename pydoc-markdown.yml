@@ -16,5 +16,3 @@ renderer:
   mkdocs_config:
     site_name: pgz
     theme: readthedocs
-  # output_directory: docs
-  # content_directory: .

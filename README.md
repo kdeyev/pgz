@@ -26,6 +26,10 @@ So pgz operates by 3 main concepts:
 - Scene
 - Actor
 
+# Documentation
+
+More detailed documentation can be found [here](https://kdeyev.github.io/pgz)
+
 ### Application
 
 The application and scenes idea was from the [EzPyGame](https://github.com/Mahi/EzPyGame).
