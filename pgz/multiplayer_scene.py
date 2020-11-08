@@ -14,13 +14,13 @@ from pygame import event
 
 # import jsonrpc_base
 from .actor import Actor
-from .collision_detector import CollisionDetector
 from .keyboard import Keyboard
-from .map_scene import MapScene
 from .scene import EventDispatcher, Scene
+from .scenes.map_scene import MapScene
 from .screen import Screen
-from .screen_rpc import RPCScreenClient, RPCScreenServer
-from .scroll_map import ScrollMap
+from .utils.collision_detector import CollisionDetector
+from .utils.screen_rpc import RPCScreenClient, RPCScreenServer
+from .utils.scroll_map import ScrollMap
 
 nest_asyncio.apply()
 

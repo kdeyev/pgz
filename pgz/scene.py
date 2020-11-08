@@ -4,9 +4,9 @@ from uuid import uuid4
 import pygame
 
 from .clock import Clock, clock
-from .event_dispatcher import EventDispatcher
 from .keyboard import Keyboard
 from .screen import Screen
+from .utils.event_dispatcher import EventDispatcher
 
 if TYPE_CHECKING:
     from .application import Application
@@ -97,12 +97,11 @@ class Scene(EventDispatcher):
 
     These settings can further be overridden in individual instances:
 
-    .. code-block:: python
-
+    ```
         my_scene0 = MyScene()
         my_scene0.resolution = (1280, 720)
         my_scene1 = MyScene(title='My Second Awesome Scene')
-
+    ```
 
     Shotcuts for simpler event handling:
 
@@ -208,7 +207,7 @@ class Scene(EventDispatcher):
     def draw(self, screen: Screen) -> None:
         """Override this with the scene drawing.
 
-        :param pgz.Screen screen: screen to draw the scene on
+        :param pgz.screen.Screen screen: screen to draw the scene on
         """
 
     def update(self, dt: float) -> None:

@@ -5,9 +5,9 @@ from deepdiff import DeepDiff
 from pgzero.rect import RECT_CLASSES, ZRect
 from pgzero.screen import Screen, make_color, ptext, round_pos
 
+from ..utils.rpc import SimpleRPC, serialize_json_message
+
 JSON = Dict[str, Any]
-# from .jsonrpc_client import Server
-from .rpc import SimpleRPC, serialize_json_message
 
 
 class RPCSurfacePainter:

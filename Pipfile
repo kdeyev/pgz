@@ -30,3 +30,4 @@ allow_prereleases = true
 run-mypy = "mypy pgz"
 build-api-docs = "pydoc-markdown --build"
 deploy-docs = "mkdocs gh-deploy -f build/docs/mkdocs.yml"
+start-local-docs = "pydoc-markdown --server --open"

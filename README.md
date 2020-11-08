@@ -15,6 +15,10 @@ pgz uses pgzero as infrastructure intensively, but makes the experience more obj
 not yet
 
 
+# Documentation
+
+More detailed documentation can be found [here](https://kdeyev.github.io/pgz)
+
 ## Quick start
 
 pgz heavily uses concepts and some code of [EzPyGame](https://github.com/Mahi/EzPyGame) and [pgzero](https://github.com/lordmauve/pgzero).
@@ -25,10 +29,6 @@ So pgz operates by 3 main concepts:
 - Application
 - Scene
 - Actor
-
-# Documentation
-
-More detailed documentation can be found [here](https://kdeyev.github.io/pgz)
 
 ### Application
 

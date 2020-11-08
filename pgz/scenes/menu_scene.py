@@ -3,8 +3,8 @@ from typing import Optional
 import pygame
 import pygame_menu
 
-from .scene import Scene
-from .screen import Screen
+from ..scene import Scene
+from ..screen import Screen
 
 
 class MenuScene(Scene):

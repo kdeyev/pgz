@@ -1,15 +1,19 @@
 from .actor import Actor  # noqa
-from .actor_scene import ActorScene  # noqa
 from .application import Application, FPSCalc  # noqa
 from .clock import Clock, global_clock
 from .keyboard import keyboard  # noqa
-from .loaders import sounds  # noqas; noqas
-from .loaders import images, maps
+from .loaders import images  # noqa
+from .loaders import maps  # noqa
+from .loaders import sounds  # noqa
 from .loaders import set_root as set_resource_root  # noqa
-from .map_scene import MapScene  # noqa
-from .menu_scene import MenuScene  # noqa
-from .multiplayer_scene import RemoteScene, MultiplayerSceneServer  # noqa
+from .multiplayer_scene import MultiplayerSceneServer, RemoteScene  # noqa
 from .rect import ZRect  # noqa
 from .scene import EventDispatcher, Scene  # noqa
+from .scenes.actor_scene import ActorScene  # noqa
+from .scenes.map_scene import MapScene  # noqa
+from .scenes.menu_scene import MenuScene  # noqa
 from .screen import Screen  # noqa
-from .scroll_map import ScrollMap  # noqa
+from .utils.collision_detector import CollisionDetector  # noqa
+from .utils.event_dispatcher import EventDispatcher  # noqa
+from .utils.fps_calc import FPSCalc  # noqa
+from .utils.scroll_map import ScrollMap  # noqa

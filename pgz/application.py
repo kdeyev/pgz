@@ -8,9 +8,9 @@ import pygame
 from pgz.scene import Scene
 
 from .clock import Clock, global_clock
-from .fps_calc import FPSCalc
 from .keyboard import keyboard
 from .screen import Screen
+from .utils.fps_calc import FPSCalc
 
 
 class Application:

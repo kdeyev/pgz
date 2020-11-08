@@ -2,12 +2,10 @@ import json
 from typing import Any, Callable, Dict, Optional, cast
 from uuid import uuid4
 
+import pgzero
 import pgzero.actor
 import pygame
-from pgzero.actor import Actor
-from pygame.display import update
 
-from .rect import ZRect
 from .screen import Screen
 
 

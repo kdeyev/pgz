@@ -2,18 +2,17 @@ from typing import Dict, List, Optional
 
 import pygame
 
-from .actor import Actor, SpriteDelegate
-from .collision_detector import CollisionDetector
-from .scene import Scene
-from .screen import Screen
+from ..actor import Actor, SpriteDelegate
+from ..scene import Scene
+from ..screen import Screen
+from ..utils.collision_detector import CollisionDetector
 
 
 class ActorScene(Scene):
     """
     Scene implementation for management of multiple actors.
 
-    Actors also can be added to different collision groups,
-    which allows easily identify collision of an actor with a specific actor group
+    Actors also can be added to different collision groups, which allows easily identify collision of an actor with a specific actor group.
     """
 
     def __init__(self) -> None:
@@ -126,7 +125,7 @@ class ActorScene(Scene):
 
         The ActorScene implementation renders all the actorts attached to the scene.
 
-        :param pgz.Screen screen: screen to draw the scene on
+        :param pgz.screen.Screen screen: screen to draw the scene on
         """
 
         for actor in self._actors.values():

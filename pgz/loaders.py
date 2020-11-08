@@ -13,3 +13,5 @@ class MapLoader(ResourceLoader):
 
 
 maps = MapLoader("maps")
+
+set_resource_root = set_root

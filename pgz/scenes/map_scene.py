@@ -2,10 +2,10 @@ from typing import Optional
 
 import pygame
 
-from .actor import Actor
+from ..actor import Actor
+from ..screen import Screen
+from ..utils.scroll_map import ScrollMap
 from .actor_scene import ActorScene
-from .screen import Screen
-from .scroll_map import ScrollMap
 
 
 class MapScene(ActorScene):
