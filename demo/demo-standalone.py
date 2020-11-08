@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 
-from my_game import GameScene
+from my_pirate_game import GameScene
 
 import pgz
 
@@ -12,16 +12,19 @@ class Menu(pgz.MenuScene):
 
         self.menu = pygame_menu.Menu(300, 400, "Welcome", theme=pygame_menu.themes.THEME_BLUE)
 
-        self.menu.add_text_input("Name :", default="John Doe")
+        self.menu.add_text_input("Name :", textinput_id="name", default="John Doe")
         # self.menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
         self.menu.add_button("Play", self.start_the_game)
         self.menu.add_button("Quit", pygame_menu.events.EXIT)
 
     def start_the_game(self):
+        data = self.menu.get_input_data()
+
         scene = GameScene()
         tmx = pgz.maps.default
         map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
         scene.set_map(map)
+        scene.set_client_data({"name": data["name"]})
         self.change_scene(scene)
 
 

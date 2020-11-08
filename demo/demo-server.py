@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 import pygame_menu
-from my_game import GameScene
+from my_pirate_game import GameScene
 
 import pgz
 

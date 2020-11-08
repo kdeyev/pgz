@@ -208,7 +208,7 @@ class MultiplayerSceneServer:
         self._server_task.cancel()
 
 
-class MultiplayerClient(MapScene):
+class RemoteScene(MapScene):
     def __init__(self, map: ScrollMap, server_url: str, client_data: JSON = {}) -> None:
         super().__init__(map)
 

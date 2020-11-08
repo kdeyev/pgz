@@ -21,6 +21,7 @@ black = "*"
 isort = "*"
 pydoc-markdown = "*"
 mkdocs = "*"
+flake8 = "*"
 
 [pipenv]
 allow_prereleases = true

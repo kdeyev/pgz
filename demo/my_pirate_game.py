@@ -102,7 +102,7 @@ class GameScene(pgz.MapScene):
 
     def draw(self, screen: pgz.Screen):
         super().draw(screen)
-        # self.screen.draw.text(text=self.client_data["name"], pos=(700, 0))
+        screen.draw.text(text=self.client_data["name"], pos=(700, 0))
         screen.draw.text(text=f"from server {int(self.ship.x)}", pos=(500, 0))
         self.draw_health_bar(screen, self.ship.health)
 
@@ -142,7 +142,6 @@ class GameScene(pgz.MapScene):
         self.ship.angle = angle
 
     def on_mouse_down(self, pos, button):
-        # pgz.sounds.arrr.play()
         start_point = self.calc_cannon_ball_start_pos(pos)
         if start_point:
             ball = CannonBall(pos=start_point, target=pos)

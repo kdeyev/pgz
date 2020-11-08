@@ -13,7 +13,7 @@
             "name": "Demo",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/demo/demo.py",
+            "program": "${workspaceFolder}/demo/demo-standalone.py",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
