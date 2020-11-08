@@ -1,4 +1,5 @@
 from .actor import Actor  # noqa
+from .actor_scene import ActorScene  # noqa
 from .application import Application, FPSCalc  # noqa
 from .clock import Clock, global_clock
 from .keyboard import keyboard  # noqa

@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from uuid import uuid4
 
 import pygame
 
@@ -148,6 +149,16 @@ class Scene(EventDispatcher):
         # Client data is the data was provided by the client during the handshake: it's usually stuff like player name, avatar, etc
         self._client_data: Dict[str, Any] = {}
 
+        # The scene UUID is used for communication
+        self._scene_uuid = str(uuid4())
+
+    @property
+    def scene_uuid(self) -> str:
+        """
+        Get scene UUID.
+        """
+        return self._scene_uuid
+
     def set_client_data(self, client_data: Dict[str, Any]):
         self._client_data = client_data
 
@@ -197,7 +208,7 @@ class Scene(EventDispatcher):
     def draw(self, screen: Screen) -> None:
         """Override this with the scene drawing.
 
-        :param pygame.Surface screen: screen to draw the scene on
+        :param pgz.Screen screen: screen to draw the scene on
         """
 
     def update(self, dt: float) -> None:

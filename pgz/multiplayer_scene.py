@@ -62,13 +62,13 @@ class StateNotification(pydantic.BaseModel):
 #     def __init__(self) -> None:
 #         super().__init__()
 
-#     # def init_scene_(self, map: ScrollMap, collaider: CollisionDetector) -> None:
+#     # def init_scene_(self, map: ScrollMap, collision_detector: CollisionDetector) -> None:
 #     #     """
 #     #     Server API:
 #     #     Scene initialization by the server
 #     #     """
 #     #     self.set_map(map)
-#     #     self.set_collaider(collaider)
+#     #     self.set_collision_detector(collision_detector)
 #     #     # self._broadcast_message = _broadcast_message
 
 #     # def handle_message_(self, message: JSON) -> None:
@@ -177,7 +177,7 @@ class MultiplayerSceneServer:
 
         # The map object will be shared between all the headless scenes
         self._map = map
-        self._collaider = CollisionDetector()
+        self._collision_detector = CollisionDetector()
 
         self._latest_actors = {}
 
@@ -226,7 +226,7 @@ class MultiplayerSceneServer:
         actors_state = ActorsStateNotification()
         changed = False
         current_actors = []
-        for actor in self._collaider.get_actors():
+        for actor in self._collision_detector.get_actors():
             current_actors.append(actor.uuid)
             if actor.uuid not in self._latest_actors:
                 changed = True
@@ -298,7 +298,7 @@ class MultiplayerSceneServer:
         # Create init the scene
 
         scene.set_map(self._map)
-        scene.set_collaider(self._collaider)
+        scene.set_collision_detector(self._collision_detector)
 
         scene.block_update = True
         scene.block_draw = True
