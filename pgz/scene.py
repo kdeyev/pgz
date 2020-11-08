@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from uuid import uuid4
 
 import pygame
 
@@ -103,7 +104,7 @@ class Scene(EventDispatcher):
         my_scene1 = MyScene(title='My Second Awesome Scene')
 
 
-    Shotcuts for simpler event handlingL
+    Shotcuts for simpler event handling:
 
     def on_mouse_up(self, pos, button):
         # Override this for easier events handling.
@@ -145,6 +146,29 @@ class Scene(EventDispatcher):
         # self._resolution = None
         # self._screen = None
 
+        # Client data is the data was provided by the client during the handshake: it's usually stuff like player name, avatar, etc
+        self._client_data: Dict[str, Any] = {}
+
+        # The scene UUID is used for communication
+        self._scene_uuid = str(uuid4())
+
+    @property
+    def scene_uuid(self) -> str:
+        """
+        Get scene UUID.
+        """
+        return self._scene_uuid
+
+    def set_client_data(self, client_data: Dict[str, Any]):
+        self._client_data = client_data
+
+    @property
+    def client_data(self) -> Dict[str, Any]:
+        """
+        Get data provided by cleint side.
+        """
+        return self._client_data
+
     # def init_screen(self, resolution, screen):
     #     self._screen = screen
     #     self._resolution = resolution
@@ -184,7 +208,7 @@ class Scene(EventDispatcher):
     def draw(self, screen: Screen) -> None:
         """Override this with the scene drawing.
 
-        :param pygame.Surface screen: screen to draw the scene on
+        :param pgz.Screen screen: screen to draw the scene on
         """
 
     def update(self, dt: float) -> None:

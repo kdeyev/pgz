@@ -11,6 +11,7 @@ nest-asyncio = "*"
 numpy = "*"
 deepdiff = "*"
 pgzero = "*"
+pydantic = "*"
 
 [dev-packages]
 pre-commit = "*"
@@ -18,6 +19,8 @@ pylint = "*"
 mypy = "*"
 black = "*"
 isort = "*"
+pydoc-markdown = "*"
+mkdocs = "*"
 
 [pipenv]
 allow_prereleases = true

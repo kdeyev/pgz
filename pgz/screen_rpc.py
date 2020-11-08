@@ -92,10 +92,6 @@ class RPCScreenServer:
 
         self.width, self.height = size
 
-    # def send_message(self, message):
-    #     json_message = serialize_json_message(message.method, message.params)
-    #     self._messages.append(json_message)
-
     def get_messages(self) -> Tuple[bool, List[JSON]]:
         if DeepDiff(self._messages, self._prev_messages) == {}:
             self._messages.clear()
