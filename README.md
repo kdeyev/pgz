@@ -18,7 +18,7 @@ not yet
 
 More detailed documentation can be found [here](https://kdeyev.github.io/pgz)
 
-## Quick start
+## Quick Start
 
 pgz heavily uses concepts and some code of [EzPyGame](https://github.com/Mahi/EzPyGame) and [pgzero](https://github.com/lordmauve/pgzero).
 pgz game entry point is application, application renders scene, scene can be changed, scene manages actors.
@@ -146,14 +146,14 @@ scene.add_actor(ship)
 
 The usage of pgz.MapScene will require the instantiation of a map object. pgz provides a way for loading and handling [Tiled](https://www.mapeditor.org/) maps.
 
-### Map loading
+### Map Loading
 The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from "default.tmx" file of the resource directory: 
 ```
 tmx = pgz.maps.default
 ```
 The "mtx" files can be created and modified with wonderful [Tiled](https://www.mapeditor.org/) mps editor.
 
-### Map management and rendering 
+### Map Management and Rendering 
 The maps loading and usage is backed by [pyscroll](https://github.com/bitcraft/pyscroll)
     
 pgz provides a pgz.ScrollMap class which covers listed functionality:
@@ -214,17 +214,17 @@ class Game(pgz.MapScene):
             self.map.change_zoom(-0.25)
 ```
 
-## Game example
+## Game Example
 The game example which utilizes using all the described concepts, can be fount in demo/demo_standalone.py
 
-# Multiplayer game with pgz
+# Multiplayer Game with pgz
 
 pgz provides two key components for converting your single-player into multiplayer-game over the network:
 
 - pgz.MultiplayerSceneServer
 - pgz.RemoteSceneClient
 
-## Multiplayer game server
+## Multiplayer Game Server
 
 MultiplayerSceneServer opens a WebSocket server and instantiate a pgz.Scene per connected player(client):
 ```
@@ -256,7 +256,7 @@ def update(self, dt):
         self.ship.health -= cannon_ball.hit_rate * dt
 ```
 
-## Multiplayer game client
+## Multiplayer Game Client
 
 pgz.RemoteSceneClient allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:
 ```
@@ -269,7 +269,7 @@ game = pgz.RemoteSceneClient(map, server_url, client_data={"name": data["name"]}
 ```
 Pay attention that client process needs to have access to the same external resources (like map files, images,...) as the game server.
 
-## Multiplayer game example
+## Multiplayer Game Example
 The multiplayer game example can be found in demo/demo_server.py and demo/demo_client.py
 
 ## Demo 
