@@ -1,7 +1,7 @@
 from .actor import Actor  # noqa
 from .application import Application, FPSCalc  # noqa
 from .clock import Clock, global_clock
-from .keyboard import keyboard  # noqa
+from .keyboard import Keyboard  # noqa
 from .loaders import images  # noqa
 from .loaders import maps  # noqa
 from .loaders import sounds  # noqa

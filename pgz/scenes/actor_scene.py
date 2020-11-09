@@ -121,11 +121,13 @@ class ActorScene(Scene):
     def draw(self, surface: Screen) -> None:
         """
         Overriden rendering method
+        
         Implementation of the update method for the ActorScene.
 
         The ActorScene implementation renders all the actorts attached to the scene.
 
-        :param pgz.screen.Screen screen: screen to draw the scene on
+        Args:
+            screen (Screen): screen to draw the scene on
         """
 
         for actor in self._actors.values():
@@ -134,11 +136,13 @@ class ActorScene(Scene):
     def update(self, dt: float) -> None:
         """
         Overriden update method
+        
         Implementation of the update method for the ActorScene.
 
         This method updates all the actors attached to the scene.
 
-        :param int dt: time in milliseconds since the last update
+        Args:
+            dt (float): time in milliseconds since the last update
         """
 
         for actor in self._actors.values():

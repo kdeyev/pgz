@@ -14,7 +14,6 @@ pgz uses pgzero as infrastructure intensively, but makes the experience more obj
 
 not yet
 
-
 # Documentation
 
 More detailed documentation can be found [here](https://kdeyev.github.io/pgz)

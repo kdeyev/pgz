@@ -9,14 +9,15 @@ PREFIX_RE = re.compile(r"^K_(?!\d$)")
 
 
 class Keyboard:
-    """The current state of the keyboard.
+    """
+    The current state of the keyboard.
 
-    Each attribute represents a key. For example, ::
-
-        keyboard.a
+    Each attribute represents a key. For example,
+    ```
+    keyboard.a
+    ```
 
     is True if the 'A' key is depressed, and False otherwise.
-
     """
 
     def __init__(self) -> None:
@@ -55,6 +56,3 @@ class Keyboard:
 
     def __repr__(self) -> str:
         return "<Keyboard pressed={}>".format(self._pressed)
-
-
-keyboard = Keyboard()

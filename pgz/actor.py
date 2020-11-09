@@ -69,9 +69,13 @@ class SpriteDelegate(pygame.sprite.Sprite):
         self._actor.update(*args, **kwargs)
 
 
-class MultiplayerActor(BaseActor):
+class Actor(BaseActor):
+    """
+    The main Actor API is inspired from [pgzero.Actor](https://pygame-zero.readthedocs.io/en/stable/builtins.html#actors)
+    """
+
     # DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
-    SEND = BaseActor.DELEGATED_ATTRIBUTES + ["angle", "image"]
+    ATTRIBUTES_TO_TRACK = BaseActor.DELEGATED_ATTRIBUTES + ["angle", "image"]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -84,7 +88,7 @@ class MultiplayerActor(BaseActor):
         # self._on_prop_change: Optional[Callable[[UUID, str, Any], None]] = None
 
     def __setattr__(self, attr: str, value: Any) -> None:
-        if attr in self.__class__.SEND and hasattr(self, "accumulate_changes") and self.accumulate_changes:
+        if attr in self.__class__.ATTRIBUTES_TO_TRACK and hasattr(self, "accumulate_changes") and self.accumulate_changes:
             if getattr(self, attr) != value:
                 self._incremental_changes[attr] = value
                 # self._on_prop_change(self.uuid, attr, value)
@@ -98,7 +102,7 @@ class MultiplayerActor(BaseActor):
 
     def serialize_state(self) -> Dict[str, Any]:
         state = {}
-        for attr in self.__class__.SEND:
+        for attr in self.__class__.ATTRIBUTES_TO_TRACK:
             try:
                 value = getattr(self, attr)
             except Exception as e:
@@ -113,6 +117,3 @@ class MultiplayerActor(BaseActor):
 
             state[attr] = value
         return state
-
-
-Actor = MultiplayerActor
