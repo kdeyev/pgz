@@ -120,6 +120,14 @@
             
             <li class="nav-item" data-level="1"><a href="#pgzmultiplayermultiplayer_scene" class="nav-link">pgz.multiplayer.multiplayer_scene</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#multiplayersceneserver" class="nav-link">MultiplayerSceneServer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#remotesceneclient" class="nav-link">RemoteSceneClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             
@@ -199,6 +207,10 @@
             
             <li class="nav-item" data-level="1"><a href="#pgzutilscollision_detector" class="nav-link">pgz.utils.collision_detector</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#collisiondetector" class="nav-link">CollisionDetector</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             
@@ -233,7 +245,7 @@
 <h1 id="pgz">pgz<a class="headerlink" href="#pgz" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.actor"></a></p>
 <h1 id="pgzactor">pgz.actor<a class="headerlink" href="#pgzactor" title="Permanent link">&para;</a></h1>
-<p>pgz uses the <code>pgzero.Clock</code> implementation a sprite representation.
+<p>pgz uses the <code>pgzero.actor.Actor</code> implementation a sprite representation.
 More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#actors">here</a></p>
 <p><a name="pgz.application"></a></p>
 <h1 id="pgzapplication">pgz.application<a class="headerlink" href="#pgzapplication" title="Permanent link">&para;</a></h1>
@@ -396,11 +408,11 @@ app.run(main_menu)
 </ul>
 <p><a name="pgz.clock"></a></p>
 <h1 id="pgzclock">pgz.clock<a class="headerlink" href="#pgzclock" title="Permanent link">&para;</a></h1>
-<p>pgz uses the <code>pgzero.Clock</code> implementation for scheduling game events.
+<p>pgz uses the <code>pgzero.clock.Clock</code> implementation for scheduling game events.
 More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#clock">here</a></p>
 <p><a name="pgz.keyboard"></a></p>
 <h1 id="pgzkeyboard">pgz.keyboard<a class="headerlink" href="#pgzkeyboard" title="Permanent link">&para;</a></h1>
-<p>pgz uses the <code>pgzero.Keyboard</code> implementation for tracking the keyboard state.
+<p>pgz uses the <code>pgzero.keyboard.Keyboard</code> implementation for tracking the keyboard state.
 More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#the-keyboard">here</a></p>
 <p><a name="pgz.keyboard.Keyboard"></a></p>
 <h2 id="keyboard_1">Keyboard<a class="headerlink" href="#keyboard_1" title="Permanent link">&para;</a></h2>
@@ -413,7 +425,7 @@ More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/st
 <p>is True if the &lsquo;A&rsquo; key is depressed, and False otherwise.</p>
 <p><a name="pgz.loaders"></a></p>
 <h1 id="pgzloaders">pgz.loaders<a class="headerlink" href="#pgzloaders" title="Permanent link">&para;</a></h1>
-<p>pgz uses the <code>pgzero</code> module implementation for the source managemens.
+<p>pgz uses the <code>pgzero.loaders</code> module implementation for the source managemens.
 More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#resource-loading">here</a></p>
 <p>The extension was provided by pgz is the <code>MapLoader</code> resource loader, which loads TMX tiled maps in the same manner as all other resources are loaded</p>
 <p><strong>Examples</strong>:</p>
@@ -422,8 +434,160 @@ More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/st
 </code></pre>
 <p><a name="pgz.multiplayer"></a></p>
 <h1 id="pgzmultiplayer">pgz.multiplayer<a class="headerlink" href="#pgzmultiplayer" title="Permanent link">&para;</a></h1>
+<p>Set of tools for converting you singleplayer game to the multiplayer one.</p>
 <p><a name="pgz.multiplayer.multiplayer_scene"></a></p>
 <h1 id="pgzmultiplayermultiplayer_scene">pgz.multiplayer.multiplayer_scene<a class="headerlink" href="#pgzmultiplayermultiplayer_scene" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.multiplayer.multiplayer_scene.MultiplayerSceneServer"></a></p>
+<h2 id="multiplayersceneserver">MultiplayerSceneServer<a class="headerlink" href="#multiplayersceneserver" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class MultiplayerSceneServer()
+</code></pre>
+<p>Scene server implementation.</p>
+<p>MultiplayerSceneServer opens a WebSocket server and instantiate a pgz.Scene per connected player(client):</p>
+<pre><code>tmx = pgz.maps.default
+map = pgz.ScrollMap((1280, 720), tmx, [&quot;Islands&quot;])
+
+# Build and start game server
+self.server = pgz.MultiplayerSceneServer(map, GameScene)
+self.server.start_server(port=self.port)
+</code></pre>
+<p>All the scenes will share the map object and collision detector object. So, the communication between different players scenes is done with collision detection.
+If one scene shoots the cannon ball (by implementing the CannonBall actor and adding its instance to the map):</p>
+<pre><code>def on_mouse_down(self, pos, button):
+start_point = self.calc_cannon_ball_start_pos(pos)
+if start_point:
+ball = CannonBall(pos=start_point, target=pos)
+self.add_actor(ball, group_name=&quot;cannon_balls&quot;)
+</code></pre>
+<p>Another player(scene) might be harmed by the cannon ball using the collision detection:</p>
+<pre><code>def update(self, dt):
+super().update(dt)
+
+cannon_ball = self.collide_group(self.ship, &quot;cannon_balls&quot;)
+if cannon_ball:
+# pgz.sounds.arrr.play()
+self.ship.health -= cannon_ball.hit_rate * dt
+</code></pre>
+<p><a name="pgz.multiplayer.multiplayer_scene.MultiplayerSceneServer.__init__"></a></p>
+<h4 id="__init___1">__init__<a class="headerlink" href="#__init___1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | __init__(map: ScrollMap, HeadlessSceneClass: Scene)
+</code></pre>
+<p>Create MultiplayerSceneServer instance.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>map</code> <em>ScrollMap</em> - a <code>pgz.ScrollMap</code> object. Will be shared across all the scenes in the server</li>
+<li><code>HeadlessSceneClass</code> <em>Callable</em> - a scene class. HeadlessSceneClass will be used as a scene object factory.</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.MultiplayerSceneServer.update"></a></p>
+<h4 id="update">update<a class="headerlink" href="#update" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | update(dt: float) -&gt; None
+</code></pre>
+<p>Update method similar to the <code>pgz.scene.Scene.update</code> method.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.MultiplayerSceneServer.start_server"></a></p>
+<h4 id="start_server">start_server<a class="headerlink" href="#start_server" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | start_server(host: str = &quot;localhost&quot;, port: int = 8765) -&gt; None
+</code></pre>
+<p>Start the scene server.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>host</code> <em>str, optional</em> - host name. Defaults to &ldquo;localhost&rdquo;.</li>
+<li><code>port</code> <em>int, optional</em> - port number for listeting of a incoming WebSocket connections. Defaults to 8765.</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.MultiplayerSceneServer.stop_server"></a></p>
+<h4 id="stop_server">stop_server<a class="headerlink" href="#stop_server" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | stop_server() -&gt; None
+</code></pre>
+<p>Stop the server and disconnect all the clients</p>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient"></a></p>
+<h2 id="remotesceneclient">RemoteSceneClient<a class="headerlink" href="#remotesceneclient" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class RemoteSceneClient(MapScene)
+</code></pre>
+<p>pgz.RemoteSceneClient allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:</p>
+<pre><code>data = self.menu.get_input_data()
+server_url = data[&quot;server_url&quot;]
+
+tmx = pgz.maps.default
+map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
+game = pgz.RemoteSceneClient(map, server_url, client_data={&quot;name&quot;: data[&quot;name&quot;]})
+</code></pre>
+<p>Pay attention that client process needs to have access to the same external resources (like map files, images,&hellip;) as the game server.</p>
+<p>Pay attention that the <code>RemoteSceneClient</code> uses <code>pgz.RPCScreenClient</code> instead of <code>pgz.Screen</code>.</p>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient.__init__"></a></p>
+<h4 id="__init___2">__init__<a class="headerlink" href="#__init___2" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | __init__(map: ScrollMap, server_url: str, client_data: JSON = {}) -&gt; None
+</code></pre>
+<p>Create a remote scene client object.</p>
+<p><code>client_data</code> will be send to the remote scene object. The common usage - remote scene configuration.
+For example the used select the players avatar image: the image name should be a part of the client_data object.
+So the remote scene will be able to load a correct sprite and the actor&rsquo;s state with other clients.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>map</code> <em>ScrollMap</em> - map object will be used for actors management and rendering</li>
+<li><code>server_url</code> <em>str</em> - remote server URL</li>
+<li><code>client_data</code> <em>JSON, optional</em> - data will be sent to the remote scene object. Defaults to {}.</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient.on_exit"></a></p>
+<h4 id="on_exit">on_exit<a class="headerlink" href="#on_exit" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | on_exit(next_scene: Optional[Scene]) -&gt; None
+</code></pre>
+<p>Overriden deinitialization method</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>next_scene</code> <em>Optional[Scene]</em> - next scene to run</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient.on_enter"></a></p>
+<h4 id="on_enter">on_enter<a class="headerlink" href="#on_enter" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | on_enter(previous_scene: Optional[Scene]) -&gt; None
+</code></pre>
+<p>Overriden initialization method</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>previous_scene</code> <em>Optional[Scene]</em> - previous scene was running</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient.update"></a></p>
+<h4 id="update_1">update<a class="headerlink" href="#update_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | update(dt: float) -&gt; None
+</code></pre>
+<p>Overriden update method</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient.draw"></a></p>
+<h4 id="draw">draw<a class="headerlink" href="#draw" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | draw(screen: Screen) -&gt; None
+</code></pre>
+<p>Overriden rendering method</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient.handle_event"></a></p>
+<h4 id="handle_event">handle_event<a class="headerlink" href="#handle_event" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
+</code></pre>
+<p>Overriden event handler</p>
+<p>Events will be accumulated internally and flushed all together to the remote scene.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>event</code> <em>pygame.event.Event</em> - pygame event object</li>
+</ul>
+<p><a name="pgz.multiplayer.multiplayer_scene.RemoteSceneClient.connect_to_server"></a></p>
+<h4 id="connect_to_server">connect_to_server<a class="headerlink" href="#connect_to_server" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | async connect_to_server(attempts: int = 10) -&gt; bool
+</code></pre>
+<p>Connect to the remote scene server.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>attempts</code> <em>int, optional</em> - number of attempts to connect. Defaults to 10.</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>bool</code> - True if connected successfully</li>
+</ul>
 <p><a name="pgz.multiplayer.rpc"></a></p>
 <h1 id="pgzmultiplayerrpc">pgz.multiplayer.rpc<a class="headerlink" href="#pgzmultiplayerrpc" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.multiplayer.screen_rpc"></a></p>
@@ -691,7 +855,7 @@ pass
 <li><code>Keyboard</code> - keyboard object</li>
 </ul>
 <p><a name="pgz.scene.Scene.draw"></a></p>
-<h4 id="draw">draw<a class="headerlink" href="#draw" title="Permanent link">&para;</a></h4>
+<h4 id="draw_1">draw<a class="headerlink" href="#draw_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(screen: Screen) -&gt; None
 </code></pre>
 <p>Override this with the scene drawing.</p>
@@ -700,7 +864,7 @@ pass
 <li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
 </ul>
 <p><a name="pgz.scene.Scene.update"></a></p>
-<h4 id="update">update<a class="headerlink" href="#update" title="Permanent link">&para;</a></h4>
+<h4 id="update_2">update<a class="headerlink" href="#update_2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
 <p>Override this with the scene update tick.</p>
@@ -709,7 +873,7 @@ pass
 <li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
 </ul>
 <p><a name="pgz.scene.Scene.handle_event"></a></p>
-<h4 id="handle_event">handle_event<a class="headerlink" href="#handle_event" title="Permanent link">&para;</a></h4>
+<h4 id="handle_event_1">handle_event<a class="headerlink" href="#handle_event_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Override this to handle an event in the scene.</p>
@@ -720,7 +884,7 @@ should be applied manually in the subclass.</p>
 <li><code>event</code> <em>pygame.event.Event</em> - event to handle</li>
 </ul>
 <p><a name="pgz.scene.Scene.on_enter"></a></p>
-<h4 id="on_enter">on_enter<a class="headerlink" href="#on_enter" title="Permanent link">&para;</a></h4>
+<h4 id="on_enter_1">on_enter<a class="headerlink" href="#on_enter_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | on_enter(previous_scene: Optional[&quot;Scene&quot;]) -&gt; None
 </code></pre>
 <p>Override this to initialize upon scene entering.</p>
@@ -732,7 +896,7 @@ to change the application&rsquo;s settings, you must call
 <li><code>previous_scene</code> <em>Optional[Scene]</em> - previous scene was running</li>
 </ul>
 <p><a name="pgz.scene.Scene.on_exit"></a></p>
-<h4 id="on_exit">on_exit<a class="headerlink" href="#on_exit" title="Permanent link">&para;</a></h4>
+<h4 id="on_exit_1">on_exit<a class="headerlink" href="#on_exit_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | on_exit(next_scene: Optional[&quot;Scene&quot;]) -&gt; None
 </code></pre>
 <p>Override this to deinitialize upon scene exiting.</p>
@@ -747,7 +911,7 @@ to change the application&rsquo;s settings, you must call
 <li><code>pgz.MenuScene</code> - implements game menu rendering as a pgz.Scene subclass</li>
 <li><code>pgz.ActorScene</code> - implements the basic actors managements, updates, rendering logic and actors collision detection.</li>
 <li><code>pgz.MapScene</code> - extends pgz.ActorScene for games based on the tiled maps. It also implements the tiles collision detection.</li>
-<li><code>pgz.RemoteScene</code> - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game</li>
+<li><code>pgz.RemoteSceneClient</code> - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene"></a></p>
 <h1 id="pgzscenesactor_scene">pgz.scenes.actor_scene<a class="headerlink" href="#pgzscenesactor_scene" title="Permanent link">&para;</a></h1>
@@ -758,7 +922,7 @@ to change the application&rsquo;s settings, you must call
 <p>Scene implementation for management of multiple actors.</p>
 <p>Actors also can be added to different collision groups, which allows easily identify collision of an actor with a specific actor group.</p>
 <p><a name="pgz.scenes.actor_scene.ActorScene.__init__"></a></p>
-<h4 id="__init___1">__init__<a class="headerlink" href="#__init___1" title="Permanent link">&para;</a></h4>
+<h4 id="__init___3">__init__<a class="headerlink" href="#__init___3" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | __init__() -&gt; None
 </code></pre>
 <p>Create an ActorScene object</p>
@@ -831,7 +995,7 @@ This method in used by multiplayer.</p>
 <li><code>Optional[Actor]</code> - A collins actor in the specified collision group</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.draw"></a></p>
-<h4 id="draw_1">draw<a class="headerlink" href="#draw_1" title="Permanent link">&para;</a></h4>
+<h4 id="draw_2">draw<a class="headerlink" href="#draw_2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(surface: Screen) -&gt; None
 </code></pre>
 <p>Overriden rendering method</p>
@@ -842,7 +1006,7 @@ This method in used by multiplayer.</p>
 <li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.update"></a></p>
-<h4 id="update_1">update<a class="headerlink" href="#update_1" title="Permanent link">&para;</a></h4>
+<h4 id="update_3">update<a class="headerlink" href="#update_3" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
 <p>Overriden update method</p>
@@ -866,7 +1030,7 @@ A tiled map can be created and modified with wonderful <a href="https://www.mape
 <p>Actors also can be added to different collision groups,
 which allows easily identify collision of an actor with a specific actor group</p>
 <p><a name="pgz.scenes.map_scene.MapScene.__init__"></a></p>
-<h4 id="__init___2">__init__<a class="headerlink" href="#__init___2" title="Permanent link">&para;</a></h4>
+<h4 id="__init___4">__init__<a class="headerlink" href="#__init___4" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | __init__(map: Optional[ScrollMap] = None)
 </code></pre>
 <p>Create a MapScene object</p>
@@ -908,7 +1072,7 @@ Used for mouse cursor position transformation into map &ldquo;world coordinates&
 <li><code>event</code> <em>pygame.event.Event</em> - pygame Event object</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.update"></a></p>
-<h4 id="update_2">update<a class="headerlink" href="#update_2" title="Permanent link">&para;</a></h4>
+<h4 id="update_4">update<a class="headerlink" href="#update_4" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
 <p>Overriden update method
@@ -919,7 +1083,7 @@ Implementation of the update method for the MapScene.</p>
 <li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.draw"></a></p>
-<h4 id="draw_2">draw<a class="headerlink" href="#draw_2" title="Permanent link">&para;</a></h4>
+<h4 id="draw_3">draw<a class="headerlink" href="#draw_3" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(screen: Screen) -&gt; None
 </code></pre>
 <p>Overriden rendering method
@@ -953,7 +1117,7 @@ Implementation of the remove_actor method for the MapScene.</p>
 <li><code>actor</code> <em>Actor</em> - actor to be removed</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.handle_event"></a></p>
-<h4 id="handle_event_1">handle_event<a class="headerlink" href="#handle_event_1" title="Permanent link">&para;</a></h4>
+<h4 id="handle_event_2">handle_event<a class="headerlink" href="#handle_event_2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Overriden event handler
@@ -1007,7 +1171,7 @@ scene.set_client_data({&quot;name&quot;: data[&quot;name&quot;]})
 self.change_scene(scene)
 </code></pre>
 <p><a name="pgz.scenes.menu_scene.MenuScene.__init__"></a></p>
-<h4 id="__init___3">__init__<a class="headerlink" href="#__init___3" title="Permanent link">&para;</a></h4>
+<h4 id="__init___5">__init__<a class="headerlink" href="#__init___5" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | __init__(menu: Optional[pygame_menu.Menu] = None)
 </code></pre>
 <p>Create <code>MenuScene</code></p>
@@ -1027,7 +1191,7 @@ self.change_scene(scene)
 <li><code>pygame_menu.Menu</code> - internal menu object.</li>
 </ul>
 <p><a name="pgz.scenes.menu_scene.MenuScene.draw"></a></p>
-<h4 id="draw_3">draw<a class="headerlink" href="#draw_3" title="Permanent link">&para;</a></h4>
+<h4 id="draw_4">draw<a class="headerlink" href="#draw_4" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(screen: Screen) -&gt; None
 </code></pre>
 <p>Overriden rendering method
@@ -1038,7 +1202,7 @@ Implementation of the update method for the ActorScene.</p>
 <li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
 </ul>
 <p><a name="pgz.scenes.menu_scene.MenuScene.on_exit"></a></p>
-<h4 id="on_exit_1">on_exit<a class="headerlink" href="#on_exit_1" title="Permanent link">&para;</a></h4>
+<h4 id="on_exit_2">on_exit<a class="headerlink" href="#on_exit_2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | on_exit(next_scene: Optional[Scene]) -&gt; None
 </code></pre>
 <p>Overriden deinitialization method</p>
@@ -1047,7 +1211,7 @@ Implementation of the update method for the ActorScene.</p>
 <li><code>next_scene</code> <em>Optional[Scene]</em> - next scene to run</li>
 </ul>
 <p><a name="pgz.scenes.menu_scene.MenuScene.handle_event"></a></p>
-<h4 id="handle_event_2">handle_event<a class="headerlink" href="#handle_event_2" title="Permanent link">&para;</a></h4>
+<h4 id="handle_event_3">handle_event<a class="headerlink" href="#handle_event_3" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Overriden event handling method method</p>
@@ -1065,6 +1229,72 @@ More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/st
 <h1 id="pgzutils">pgz.utils<a class="headerlink" href="#pgzutils" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.utils.collision_detector"></a></p>
 <h1 id="pgzutilscollision_detector">pgz.utils.collision_detector<a class="headerlink" href="#pgzutilscollision_detector" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.utils.collision_detector.CollisionDetector"></a></p>
+<h2 id="collisiondetector">CollisionDetector<a class="headerlink" href="#collisiondetector" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class CollisionDetector(object)
+</code></pre>
+<p>Class helper for easier collision detection</p>
+<p>The class manages multiple collision groups and can detect a collsion with each one of groups independently.</p>
+<p><a name="pgz.utils.collision_detector.CollisionDetector.__init__"></a></p>
+<h4 id="__init___6">__init__<a class="headerlink" href="#__init___6" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | __init__() -&gt; None
+</code></pre>
+<p>Create a collision detecor</p>
+<p><a name="pgz.utils.collision_detector.CollisionDetector.add_actor"></a></p>
+<h4 id="add_actor_2">add_actor<a class="headerlink" href="#add_actor_2" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | add_actor(actor: Actor, group_name: str = &quot;&quot;) -&gt; None
+</code></pre>
+<p>Add an actor to the detector</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - actor to add</li>
+<li><code>group_name</code> <em>str, optional</em> - collision group to use. Defaults to &ldquo;&rdquo;.</li>
+</ul>
+<p><a name="pgz.utils.collision_detector.CollisionDetector.remove_actor"></a></p>
+<h4 id="remove_actor_2">remove_actor<a class="headerlink" href="#remove_actor_2" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | remove_actor(actor: Actor) -&gt; None
+</code></pre>
+<p>Remore an actor from the detector and all collision groups</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>actor</code> <em>Actor</em> - actor to remove</li>
+</ul>
+<p><a name="pgz.utils.collision_detector.CollisionDetector.get_actor"></a></p>
+<h4 id="get_actor_1">get_actor<a class="headerlink" href="#get_actor_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | get_actor(uuid: str) -&gt; Actor
+</code></pre>
+<p>Get actor by UUID</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>uuid</code> <em>str</em> - UUID of the actor</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Actor</code> - actor associated with the UUID</li>
+</ul>
+<p><a name="pgz.utils.collision_detector.CollisionDetector.get_actors"></a></p>
+<h4 id="get_actors_1">get_actors<a class="headerlink" href="#get_actors_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | get_actors() -&gt; List[Actor]
+</code></pre>
+<p>Get list of all the known actors.</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>List[Actor]</code> - list of actors</li>
+</ul>
+<p><a name="pgz.utils.collision_detector.CollisionDetector.collide_group"></a></p>
+<h4 id="collide_group_1">collide_group<a class="headerlink" href="#collide_group_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | collide_group(sprite: pygame.sprite.Sprite, group_name: str = &quot;&quot;) -&gt; Optional[pygame.sprite.Sprite]
+</code></pre>
+<p>Detect a collision of an actor with a specified collsion group.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>sprite</code> <em>pygame.sprite.Sprite</em> - actor to use for collision detection.</li>
+<li><code>group_name</code> <em>str, optional</em> - collision group name. Defaults to &ldquo;&rdquo;.</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Optional[pygame.sprite.Sprite]</code> - actor was found in the collsion group.</li>
+</ul>
 <p><a name="pgz.utils.event_dispatcher"></a></p>
 <h1 id="pgzutilsevent_dispatcher">pgz.utils.event_dispatcher<a class="headerlink" href="#pgzutilsevent_dispatcher" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.utils.event_dispatcher.EventDispatcher"></a></p>
@@ -1081,7 +1311,7 @@ callables from EVENT_PARAM_MAPPERS; this ensures that the value of
 which means (among other things) that it will print as a symbolic value
 rather than a naive integer.</p>
 <p><a name="pgz.utils.event_dispatcher.EventDispatcher.handle_event"></a></p>
-<h4 id="handle_event_3">handle_event<a class="headerlink" href="#handle_event_3" title="Permanent link">&para;</a></h4>
+<h4 id="handle_event_4">handle_event<a class="headerlink" href="#handle_event_4" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Override me</p>
@@ -1093,17 +1323,87 @@ rather than a naive integer.</p>
 <h2 id="scrollmap">ScrollMap<a class="headerlink" href="#scrollmap" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">class ScrollMap(object)
 </code></pre>
+<p>Scroll Map object.</p>
+<p>The implementation is based on <a href="https://github.com/bitcraft/pyscroll">pyscroll</a></p>
 <p>This class provides functionality:
 - create and manage a pyscroll group
 - load a collision layers
 - manage sprites added to the map
 - allows to detect collisions with loaded collision layers
 - render the map and the sprites on top</p>
+<p><a name="pgz.utils.scroll_map.ScrollMap.__init__"></a></p>
+<h4 id="__init___7">__init__<a class="headerlink" href="#__init___7" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | __init__(screen_size: Tuple[int, int], tmx: pytmx.TiledMap, collision_layers: List[str] = []) -&gt; None
+</code></pre>
+<p>Create scroll map object.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>screen_size</code> <em>Tuple[int, int]</em> - screen resolution will be used to the map rendering</li>
+<li><code>tmx</code> <em>pytmx.TiledMap</em> - loaded <code>pytmx.TiledMap</code> object</li>
+<li><code>collision_layers</code> <em>List[str], optional</em> - List of <code>pytmx.TiledMap</code> layer names will be used for tiles collision detection. Defaults to [].</li>
+</ul>
+<p><a name="pgz.utils.scroll_map.ScrollMap.add_collision_layers"></a></p>
+<h4 id="add_collision_layers">add_collision_layers<a class="headerlink" href="#add_collision_layers" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | add_collision_layers(collision_layers: List[str]) -&gt; None
+</code></pre>
+<p>Load <code>pytmx.TiledMap</code> layer tiles for collision detection.</p>
+<p>Some layer in the <code>pytmx.TiledMap</code> might be be used for collision detection.
+For example: the layer includes &ldquo;island tiles&rdquo; might be used for collision detection with a &ldquo;ship&rdquo; actor.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>collision_layers</code> <em>List[str]</em> - List of <code>pytmx.TiledMap</code> layer names will be used for tiles collision detection.</li>
+</ul>
+<p><a name="pgz.utils.scroll_map.ScrollMap.draw"></a></p>
+<h4 id="draw_5">draw<a class="headerlink" href="#draw_5" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | draw(screen: Screen) -&gt; None
+</code></pre>
+<p>Draw method similar to the <code>pgz.scene.Scene.draw</code> method.</p>
+<p>Will draw the map and all actors on top.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
+</ul>
 <p><a name="pgz.utils.scroll_map.ScrollMap.update"></a></p>
-<h4 id="update_3">update<a class="headerlink" href="#update_3" title="Permanent link">&para;</a></h4>
+<h4 id="update_5">update<a class="headerlink" href="#update_5" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
-<p>Tasks that occur over time should be handled here</p></div>
+<p>Update method similar to the <code>pgz.scene.Scene.update</code> method.</p>
+<p>All the actors attached to the map will be updated.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
+</ul>
+<p><a name="pgz.utils.scroll_map.ScrollMap.add_sprite"></a></p>
+<h4 id="add_sprite">add_sprite<a class="headerlink" href="#add_sprite" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | add_sprite(sprite: pygame.sprite.Sprite) -&gt; None
+</code></pre>
+<p>Add actor/sprite to the map</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>sprite</code> <em>pygame.sprite.Sprite</em> - sprite object to add</li>
+</ul>
+<p><a name="pgz.utils.scroll_map.ScrollMap.remove_sprite"></a></p>
+<h4 id="remove_sprite">remove_sprite<a class="headerlink" href="#remove_sprite" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | remove_sprite(sprite: pygame.sprite.Sprite) -&gt; None
+</code></pre>
+<p>Remove sprite/actor from the map.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>sprite</code> <em>pygame.sprite.Sprite</em> - sprite object to remove</li>
+</ul>
+<p><a name="pgz.utils.scroll_map.ScrollMap.collide_map"></a></p>
+<h4 id="collide_map_1">collide_map<a class="headerlink" href="#collide_map_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | collide_map(sprite: pygame.sprite.Sprite) -&gt; bool
+</code></pre>
+<p>Detect a collision with tiles on the map</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>sprite</code> <em>pygame.sprite.Sprite</em> - sprite/actor for detection</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>bool</code> - True is the collision with the colision layers was detected</li>
+</ul></div>
             </div>
         </div>
 

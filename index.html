@@ -203,7 +203,7 @@ There are a few important method to override in pgz.Scene:</p>
 <li><code>pgz.MenuScene</code> - implements game menu rendering as a pgz.Scene subclass</li>
 <li><code>pgz.ActorScene</code> - implements the basic actors managements, updates, rendering logic and actors collision detection.</li>
 <li><code>pgz.MapScene</code> - extends pgz.ActorScene for games based on the tiled maps. It also implements the tiles collision detection.</li>
-<li><code>pgz.RemoteScene</code> - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game</li>
+<li><code>pgz.RemoteSceneClient</code> - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game</li>
 </ul>
 <h3 id="actors">Actors<a class="headerlink" href="#actors" title="Permanent link">&para;</a></h3>
 <p>Actor concept was inspired from <a href="https://github.com/lordmauve/pgzero">pgzero</a>.
@@ -317,7 +317,7 @@ if scene.collide_map(ship):
 <p>pgz provides two key components for converting your single-player into multiplayer-game over the network:</p>
 <ul>
 <li>pgz.MultiplayerSceneServer</li>
-<li>pgz.RemoteScene</li>
+<li>pgz.RemoteSceneClient</li>
 </ul>
 <h2 id="multiplayer-game-server">Multiplayer game server<a class="headerlink" href="#multiplayer-game-server" title="Permanent link">&para;</a></h2>
 <p>MultiplayerSceneServer opens a WebSocket server and instantiate a pgz.Scene per connected player(client):</p>
@@ -346,13 +346,13 @@ If one scene shoots the cannon ball (by implementing the CannonBall actor and ad
         self.ship.health -= cannon_ball.hit_rate * dt
 </code></pre>
 <h2 id="multiplayer-game-client">Multiplayer game client<a class="headerlink" href="#multiplayer-game-client" title="Permanent link">&para;</a></h2>
-<p>pgz.RemoteScene allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:</p>
+<p>pgz.RemoteSceneClient allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:</p>
 <pre><code>data = self.menu.get_input_data()
 server_url = data[&quot;server_url&quot;]
 
 tmx = pgz.maps.default
 map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
-game = pgz.RemoteScene(map, server_url, client_data={&quot;name&quot;: data[&quot;name&quot;]})
+game = pgz.RemoteSceneClient(map, server_url, client_data={&quot;name&quot;: data[&quot;name&quot;]})
 </code></pre>
 <p>Pay attention that client process needs to have access to the same external resources (like map files, images,&hellip;) as the game server.</p>
 <h2 id="multiplayer-game-example">Multiplayer game example<a class="headerlink" href="#multiplayer-game-example" title="Permanent link">&para;</a></h2>
@@ -442,5 +442,5 @@ game = pgz.RemoteScene(map, server_url, client_data={&quot;name&quot;: data[&quo
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2020-11-09 03:46:37.572467+00:00
+Build Date UTC : 2020-11-09 05:10:45.356041+00:00
 -->
