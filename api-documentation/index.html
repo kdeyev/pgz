@@ -1,372 +1,647 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  
-  
-  <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>API Documentation - pgz</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>API Documentation - pgz</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
 
-  <link rel="stylesheet" href="../css/theme.css" />
-  <link rel="stylesheet" href="../css/theme_extra.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "API Documentation";
-    var mkdocs_page_input_path = "api-documentation.md";
-    var mkdocs_page_url = null;
-  </script>
-  
-  <script src="../js/jquery-2.1.1.min.js" defer></script>
-  <script src="../js/modernizr-2.8.3.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script> 
-  
-</head>
+        <script src="../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
 
-<body class="wy-body-for-nav" role="document">
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">pgz</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-  <div class="wy-grid-for-nav">
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="navitem active">
+                                <a href="./" class="nav-link">API Documentation</a>
+                            </li>
+                        </ul>
 
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-    <div class="wy-side-scroll">
-      <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> pgz</a>
-        <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
-  </form>
-</div>
-      </div>
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href=".." class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
-                    </li>
-                </ul>
-                <ul class="current">
-                    <li class="toctree-l1 current"><a class="reference internal current" href="./">API Documentation</a>
-    <ul class="current">
-    </ul>
-                    </li>
-                </ul>
-      </div>
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
     </div>
-    </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">pgz</a>
-      </nav>
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="..">Docs</a> &raquo;</li>
     
-      
-    
-    <li>API Documentation</li>
-    <li class="wy-breadcrumbs-aside">
-      
-    </li>
-  </ul>
-  
-  <hr/>
-</div>
-          <div role="main">
-            <div class="section">
-              
-                <p><a name="pgz"></a></p>
-<h1 id="pgz">pgz</h1>
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#pgz" class="nav-link">pgz</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzactor" class="nav-link">pgz.actor</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#actor" class="nav-link">Actor</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzapplication" class="nav-link">pgz.application</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#application" class="nav-link">Application</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzclock" class="nav-link">pgz.clock</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzkeyboard" class="nav-link">pgz.keyboard</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#keyboard_1" class="nav-link">Keyboard</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzloaders" class="nav-link">pgz.loaders</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzmultiplayer_scene" class="nav-link">pgz.multiplayer_scene</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzrect" class="nav-link">pgz.rect</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzscene" class="nav-link">pgz.scene</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#scene" class="nav-link">Scene</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzscenes" class="nav-link">pgz.scenes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzscenesactor_scene" class="nav-link">pgz.scenes.actor_scene</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#actorscene" class="nav-link">ActorScene</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzscenesmap_scene" class="nav-link">pgz.scenes.map_scene</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#mapscene" class="nav-link">MapScene</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzscenesmenu_scene" class="nav-link">pgz.scenes.menu_scene</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#menuscene" class="nav-link">MenuScene</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzscreen" class="nav-link">pgz.screen</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p><a name="pgz"></a></p>
+<h1 id="pgz">pgz<a class="headerlink" href="#pgz" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.actor"></a></p>
-<h1 id="pgzactor">pgz.actor</h1>
+<h1 id="pgzactor">pgz.actor<a class="headerlink" href="#pgzactor" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.actor.Actor"></a></p>
+<h2 id="actor">Actor<a class="headerlink" href="#actor" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class Actor(BaseActor)
+</code></pre>
+<p>The main Actor API is inspired from <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#actors">pgzero.Actor</a></p>
 <p><a name="pgz.application"></a></p>
-<h1 id="pgzapplication">pgz.application</h1>
+<h1 id="pgzapplication">pgz.application<a class="headerlink" href="#pgzapplication" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.application.Application"></a></p>
-<h2 id="application-objects">Application Objects</h2>
+<h2 id="application">Application<a class="headerlink" href="#application" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">class Application()
 </code></pre>
-<p>The idea and the original code was taken from EzPyGame:
-https://github.com/Mahi/EzPyGame</p>
-<p>A simple wrapper around :mod:<code>pygame</code> for running games easily.</p>
-<p>Also makes scene management seamless together with
-the :class:<code>.Scene</code> class.</p>
-<p>:param str|None title: title to display in the window's title bar
-:param tuple[int,int]|None resolution: resolution of the game window
-:param int|None update_rate: how many times per second to update</p>
+<p>The idea and the original code was taken from <a href="https://github.com/Mahi/EzPyGame">EzPyGame</a></p>
+<p>A simple wrapper around <code>pygame</code> for running games easily.</p>
+<p>Also makes scene management seamless together with the <code>Scene</code> class.</p>
+<p><a name="pgz.application.Application.__init__"></a></p>
+<h4 id="__init__">__init__<a class="headerlink" href="#__init__" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | __init__(title: Optional[str], resolution: Optional[Tuple[int, int]], update_rate: Optional[int] = None)
+</code></pre>
+<p>Create an instance of the pgz.Application</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>title</code> <em>Optional[str]</em> - title to display in the window&rsquo;s title bar</li>
+<li><code>resolution</code> <em>Optional[Tuple[int, int]]</em> - resolution of the game window</li>
+<li><code>update_rate</code> <em>Optional[int], optional</em> - how many times per second to update. Defaults to None.</li>
+</ul>
 <p>If any parameters are left to <code>None</code>, these settings must be
 defined either manually through <code>application.&lt;setting&gt; = value</code>
-or via :class:<code>.Scene</code>'s class variable settings.</p>
-<p>Example usage:</p>
-<p>.. code-block:: python</p>
-<p>class Menu(pgz.Scene):
-...</p>
-<p>class Game(pgz.Scene):
-...</p>
-<p>app = pgz.Application(
+or via <code>Scene</code>&lsquo;s class variable settings.</p>
+<p><strong>Examples</strong>:</p>
+<pre><code>class Menu(pgz.Scene):
+...
+
+class Game(pgz.Scene):
+...
+
+app = pgz.Application(
 title='My First Application',
 resolution=(1280, 720),
 update_rate=60,
 )
 main_menu = Menu()
-app.run(main_menu)</p>
+app.run(main_menu)
+</code></pre>
+<p><a name="pgz.application.Application.title"></a></p>
+<h4 id="title">title<a class="headerlink" href="#title" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | title() -&gt; str
+</code></pre>
+<p>Get application title</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>str</code> - application title</li>
+</ul>
+<p><a name="pgz.application.Application.title"></a></p>
+<h4 id="title_1">title<a class="headerlink" href="#title_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @title.setter
+ | title(value: str) -&gt; None
+</code></pre>
+<p>Change application title</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>value</code> <em>str</em> - application title to set</li>
+</ul>
+<p><a name="pgz.application.Application.resolution"></a></p>
+<h4 id="resolution">resolution<a class="headerlink" href="#resolution" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | resolution() -&gt; Tuple[int, int]
+</code></pre>
+<p>Get application screen resolution</p>
+<p><strong>Returns</strong>:</p>
+<p>Tuple[int, int]: application screen resolution</p>
+<p><a name="pgz.application.Application.resolution"></a></p>
+<h4 id="resolution_1">resolution<a class="headerlink" href="#resolution_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @resolution.setter
+ | resolution(value: Tuple[int, int]) -&gt; None
+</code></pre>
+<p>Change application screen resolution</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>value</code> <em>Tuple[int, int]</em> - application screen resolution to use</li>
+</ul>
+<p><a name="pgz.application.Application.update_rate"></a></p>
+<h4 id="update_rate">update_rate<a class="headerlink" href="#update_rate" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | update_rate() -&gt; int
+</code></pre>
+<p>Get application update rate</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>int</code> - application update rate</li>
+</ul>
+<p><a name="pgz.application.Application.update_rate"></a></p>
+<h4 id="update_rate_1">update_rate<a class="headerlink" href="#update_rate_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @update_rate.setter
+ | update_rate(value: int) -&gt; None
+</code></pre>
+<p>Change application update rate</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>value</code> <em>int</em> - application update rate to set</li>
+</ul>
+<p><a name="pgz.application.Application.screen"></a></p>
+<h4 id="screen">screen<a class="headerlink" href="#screen" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | screen() -&gt; Screen
+</code></pre>
+<p>Get application screen object</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Screen</code> - application screen object</li>
+</ul>
+<p><a name="pgz.application.Application.keyboard"></a></p>
+<h4 id="keyboard">keyboard<a class="headerlink" href="#keyboard" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | keyboard() -&gt; Keyboard
+</code></pre>
+<p>Get <code>Keyboard</code> object.</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Keyboard</code> - keyboard object</li>
+</ul>
+<p><a name="pgz.application.Application.clock"></a></p>
+<h4 id="clock">clock<a class="headerlink" href="#clock" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | clock() -&gt; Clock
+</code></pre>
+<p>Get <code>Clock</code> object.</p>
+<p>Actually returns the global clock object.</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Clock</code> - clock object</li>
+</ul>
 <p><a name="pgz.application.Application.active_scene"></a></p>
-<h4 id="active_scene">active_scene</h4>
+<h4 id="active_scene">active_scene<a class="headerlink" href="#active_scene" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | @property
  | active_scene() -&gt; Optional[Scene]
 </code></pre>
-<p>The currently active scene. Can be <code>None</code>.</p>
+<p>Get currently active scene.</p>
+<p>Can be <code>None</code>.</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Optional[Scene]</code> - currently active scene</li>
+</ul>
 <p><a name="pgz.application.Application.change_scene"></a></p>
-<h4 id="change_scene">change_scene</h4>
+<h4 id="change_scene">change_scene<a class="headerlink" href="#change_scene" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | change_scene(scene: Optional[Scene]) -&gt; None
 </code></pre>
 <p>Change the currently active scene.</p>
-<p>This will invoke :meth:<code>.Scene.on_exit</code> and
-:meth:<code>.Scene.on_enter</code> methods on the switching scenes.</p>
-<p>If <code>None</code> is provided, the application's execution will end.</p>
-<p>:param Scene|None scene: the scene to change into</p>
+<p>This will invoke <code>Scene.on_exit</code> and
+<code>Scene.on_enter</code> methods on the switching scenes.</p>
+<p>If <code>None</code> is provided, the application&rsquo;s execution will end.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>scene</code> <em>Optional[Scene]</em> - the scene to change into</li>
+</ul>
 <p><a name="pgz.application.Application.run"></a></p>
-<h4 id="run">run</h4>
+<h4 id="run">run<a class="headerlink" href="#run" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | run(scene: Optional[Scene] = None) -&gt; None
 </code></pre>
 <p>Execute the application.</p>
-<p>:param scene.Scene|None scene: scene to start the execution from</p>
-<p><a name="pgz.application.Application.mainloop"></a></p>
-<h4 id="mainloop">mainloop</h4>
-<pre><code class="language-python"> | async mainloop() -&gt; None
-</code></pre>
-<p>Run the main loop of Pygame Zero.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>scene</code> <em>Optional[Scene], optional</em> - scene to start the execution from. Defaults to None.</li>
+</ul>
 <p><a name="pgz.clock"></a></p>
-<h1 id="pgzclock">pgz.clock</h1>
+<h1 id="pgzclock">pgz.clock<a class="headerlink" href="#pgzclock" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.keyboard"></a></p>
-<h1 id="pgzkeyboard">pgz.keyboard</h1>
+<h1 id="pgzkeyboard">pgz.keyboard<a class="headerlink" href="#pgzkeyboard" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.keyboard.Keyboard"></a></p>
-<h2 id="keyboard-objects">Keyboard Objects</h2>
+<h2 id="keyboard_1">Keyboard<a class="headerlink" href="#keyboard_1" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">class Keyboard()
 </code></pre>
 <p>The current state of the keyboard.</p>
-<p>Each attribute represents a key. For example, ::</p>
+<p>Each attribute represents a key. For example,</p>
 <pre><code>keyboard.a
 </code></pre>
-<p>is True if the 'A' key is depressed, and False otherwise.</p>
+<p>is True if the &lsquo;A&rsquo; key is depressed, and False otherwise.</p>
 <p><a name="pgz.loaders"></a></p>
-<h1 id="pgzloaders">pgz.loaders</h1>
+<h1 id="pgzloaders">pgz.loaders<a class="headerlink" href="#pgzloaders" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.multiplayer_scene"></a></p>
-<h1 id="pgzmultiplayer_scene">pgz.multiplayer_scene</h1>
+<h1 id="pgzmultiplayer_scene">pgz.multiplayer_scene<a class="headerlink" href="#pgzmultiplayer_scene" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.rect"></a></p>
-<h1 id="pgzrect">pgz.rect</h1>
+<h1 id="pgzrect">pgz.rect<a class="headerlink" href="#pgzrect" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.scene"></a></p>
-<h1 id="pgzscene">pgz.scene</h1>
+<h1 id="pgzscene">pgz.scene<a class="headerlink" href="#pgzscene" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.scene.Scene"></a></p>
-<h2 id="scene-objects">Scene Objects</h2>
+<h2 id="scene">Scene<a class="headerlink" href="#scene" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">class Scene(EventDispatcher)
 </code></pre>
-<p>The idea and the original code was taken from EzPyGame:
-https://github.com/Mahi/EzPyGame</p>
+<p>The idea and the original code was taken from <a href="https://github.com/Mahi/EzPyGame">EzPyGame</a></p>
 <p>An isolated scene which can be ran by an application.</p>
-<p>Create your own scene by subclassing and overriding any methods.
-The hosting :class:<code>.Application</code> instance is accessible
-through the :attr:<code>application</code> property.</p>
-<p>Example usage with two scenes interacting:</p>
-<p>.. code-block:: python</p>
+<p>Create your own scene by subclassing and overriding any methods.</p>
+<p><strong>Example</strong>:</p>
 <pre><code>class Menu(Scene):
 
-    def __init__(self):
-        self.font = pygame.font.Font(...)
+def __init__(self):
+self.font = pygame.font.Font(...)
 
-    def on_enter(self, previous_scene):
-        self.application.title = 'Main Menu'
-        self.application.resolution = (640, 480)
-        self.application.update_rate = 30
+def on_enter(self, previous_scene):
+self.title = 'Main Menu'
+self.resolution = (640, 480)
+self.update_rate = 30
 
-    def draw(self, screen):
-        pygame.draw.rect(...)
-        text = self.font.render(...)
-        screen.blit(text, ...)
+def draw(self, screen):
+pygame.draw.rect(...)
+text = self.font.render(...)
+screen.blit(text, ...)
 
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:
-                game_size = self._get_game_size(event.pos)
-                self.change_scene(Game(game_size))
+def handle_event(self, event):
+if event.type == pygame.MOUSEBUTTONUP:
+if event.button == 1:
+game_size = self._get_game_size(event.pos)
+self.change_scene(Game(game_size))
 
-    def _get_game_size(self, mouse_pos_upon_click):
-        ...
+def _get_game_size(self, mouse_pos_upon_click):
+...
 
 
-class Game(ezpygame.Scene):
-    title = 'The Game!'
-    resolution = (1280, 720)
-    update_rate = 60
+class Game(pgz.Scene):
+title = 'The Game!'
+resolution = (1280, 720)
+update_rate = 60
 
-    def __init__(self, size):
-        super().__init__()
-        self.size = size
-        self.player = ...
-        ...
+def __init__(self, size):
+super().__init__()
+self.size = size
+self.player = ...
+...
 
-    def on_enter(self, previous_scene):
-        super().on_enter(previous_scene)
-        self.previous_scene = previous_scene
+def on_enter(self, previous_scene):
+super().on_enter(previous_scene)
+self.previous_scene = previous_scene
 
-    def draw(self, screen):
-        self.player.draw(screen)
-        for enemy in self.enemies:
-            ...
+def draw(self, screen):
+self.player.draw(screen)
+for enemy in self.enemies:
+...
 
-    def update(self, dt):
-        self.player.move(dt)
-        ...
-        if self.player.is_dead():
-            self.application.change_scene(self.previous_scene)
-        elif self.player_won():
-            self.application.change_scene(...)
+def update(self, dt):
+self.player.move(dt)
+...
+if self.player.is_dead():
+self.change_scene(self.previous_scene)
+elif self.player_won():
+self.change_scene(...)
 
-    def handle_event(self, event):
-        ...  # Player movement etc.
+def handle_event(self, event):
+...  # Player movement etc.
 </code></pre>
 <p>The above two classes use different approaches for changing
-the application's settings when the scene is entered:</p>
+the application&rsquo;s settings when the scene is entered:</p>
 <ol>
-<li>Manually set them in :meth:<code>on_enter</code>, as seen in <code>Menu</code></li>
+<li>Manually set them in <code>on_enter</code>, as seen in <code>Menu</code></li>
 <li>Use class variables, as I did with <code>Game</code></li>
 </ol>
 <p>When using class variables (2), you can leave out any setting
 (defaults to <code>None</code>) to not override that particular setting.
-If you override :meth:<code>on_enter</code> in the subclass, you must call
+If you override <code>on_enter</code> in the subclass, you must call
 <code>super().on_enter(previous_scene)</code> to use the class variables.</p>
 <p>These settings can further be overridden in individual instances:</p>
-<pre><code>    my_scene0 = MyScene()
-    my_scene0.resolution = (1280, 720)
-    my_scene1 = MyScene(title='My Second Awesome Scene')
+<pre><code>my_scene0 = MyScene()
+my_scene0.resolution = (1280, 720)
+my_scene1 = MyScene(title='My Second Awesome Scene')
 </code></pre>
-<p>Shotcuts for simpler event handling:</p>
-<p>def on_mouse_up(self, pos, button):
-    # Override this for easier events handling.
-    pass</p>
-<p>def on_mouse_down(self, pos, button):
-    # Override this for easier events handling.
-    pass</p>
-<p>def on_mouse_move(self, pos):
-    # Override this for easier events handling.
-    pass</p>
-<p>def on_key_down(self, key):
-    # Override this for easier events handling.
-    pass</p>
-<p>def on_key_up(self, key):
-    # Override this for easier events handling.
-    pass</p>
+<p><strong>Example</strong>:</p>
+<p>Shortcuts foe event gandling while <code>Scene</code> subclassing.</p>
+<pre><code>def on_mouse_up(self, pos, button):
+# Override this for easier events handling.
+pass
+
+def on_mouse_down(self, pos, button):
+# Override this for easier events handling.
+pass
+
+def on_mouse_move(self, pos):
+# Override this for easier events handling.
+pass
+
+def on_key_down(self, key):
+# Override this for easier events handling.
+pass
+
+def on_key_up(self, key):
+# Override this for easier events handling.
+pass
+</code></pre>
 <p><a name="pgz.scene.Scene.scene_uuid"></a></p>
-<h4 id="scene_uuid">scene_uuid</h4>
+<h4 id="scene_uuid">scene_uuid<a class="headerlink" href="#scene_uuid" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | @property
  | scene_uuid() -&gt; str
 </code></pre>
 <p>Get scene UUID.</p>
 <p><a name="pgz.scene.Scene.client_data"></a></p>
-<h4 id="client_data">client_data</h4>
+<h4 id="client_data">client_data<a class="headerlink" href="#client_data" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | @property
  | client_data() -&gt; Dict[str, Any]
 </code></pre>
-<p>Get data provided by cleint side.</p>
+<p>Get data provided by client side.</p>
+<p><a name="pgz.scene.Scene.title"></a></p>
+<h4 id="title_2">title<a class="headerlink" href="#title_2" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | title() -&gt; str
+</code></pre>
+<p>Get application title</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>str</code> - application title</li>
+</ul>
+<p><a name="pgz.scene.Scene.title"></a></p>
+<h4 id="title_3">title<a class="headerlink" href="#title_3" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @title.setter
+ | title(value: str) -&gt; None
+</code></pre>
+<p>Change application title</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>value</code> <em>str</em> - application title to set</li>
+</ul>
+<p><a name="pgz.scene.Scene.resolution"></a></p>
+<h4 id="resolution_2">resolution<a class="headerlink" href="#resolution_2" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | resolution() -&gt; Tuple[int, int]
+</code></pre>
+<p>Get application screen resolution</p>
+<p><strong>Returns</strong>:</p>
+<p>Tuple[int, int]: application screen resolution</p>
+<p><a name="pgz.scene.Scene.resolution"></a></p>
+<h4 id="resolution_3">resolution<a class="headerlink" href="#resolution_3" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @resolution.setter
+ | resolution(value: Tuple[int, int]) -&gt; None
+</code></pre>
+<p>Change application screen resolution</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>value</code> <em>Tuple[int, int]</em> - application screen resolution to use</li>
+</ul>
+<p><a name="pgz.scene.Scene.update_rate"></a></p>
+<h4 id="update_rate_2">update_rate<a class="headerlink" href="#update_rate_2" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | update_rate() -&gt; int
+</code></pre>
+<p>Get application update rate</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>int</code> - application update rate</li>
+</ul>
+<p><a name="pgz.scene.Scene.update_rate"></a></p>
+<h4 id="update_rate_3">update_rate<a class="headerlink" href="#update_rate_3" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @update_rate.setter
+ | update_rate(value: int) -&gt; None
+</code></pre>
+<p>Change application update rate</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>value</code> <em>int</em> - application update rate to set</li>
+</ul>
 <p><a name="pgz.scene.Scene.clock"></a></p>
-<h4 id="clock">clock</h4>
+<h4 id="clock_1">clock<a class="headerlink" href="#clock_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | @property
  | clock() -&gt; Clock
 </code></pre>
-<p>Clock object. Actually returns the global clock object.</p>
+<p>Get <code>Clock</code> object.</p>
+<p>Actually returns the global clock object.</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Clock</code> - clock object</li>
+</ul>
 <p><a name="pgz.scene.Scene.keyboard"></a></p>
-<h4 id="keyboard">keyboard</h4>
+<h4 id="keyboard_2">keyboard<a class="headerlink" href="#keyboard_2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | @property
  | keyboard() -&gt; Keyboard
 </code></pre>
-<p>Clock object. Actually returns the global clock object.</p>
+<p>Get <code>Keyboard</code> object.</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>Keyboard</code> - keyboard object</li>
+</ul>
 <p><a name="pgz.scene.Scene.draw"></a></p>
-<h4 id="draw">draw</h4>
+<h4 id="draw">draw<a class="headerlink" href="#draw" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(screen: Screen) -&gt; None
 </code></pre>
 <p>Override this with the scene drawing.</p>
-<p>:param pgz.screen.Screen screen: screen to draw the scene on</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
+</ul>
 <p><a name="pgz.scene.Scene.update"></a></p>
-<h4 id="update">update</h4>
+<h4 id="update">update<a class="headerlink" href="#update" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
 <p>Override this with the scene update tick.</p>
-<p>:param int dt: time in milliseconds since the last update</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
+</ul>
 <p><a name="pgz.scene.Scene.handle_event"></a></p>
-<h4 id="handle_event">handle_event</h4>
+<h4 id="handle_event">handle_event<a class="headerlink" href="#handle_event" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Override this to handle an event in the scene.</p>
-<p>All of :mod:<code>pygame</code>'s events are sent here, so filtering
+<p>All of <code>pygame</code>&lsquo;s events are sent here, so filtering
 should be applied manually in the subclass.</p>
-<p>:param pygame.event.Event event: event to handle</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>event</code> <em>pygame.event.Event</em> - event to handle</li>
+</ul>
 <p><a name="pgz.scene.Scene.on_enter"></a></p>
-<h4 id="on_enter">on_enter</h4>
+<h4 id="on_enter">on_enter<a class="headerlink" href="#on_enter" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | on_enter(previous_scene: Optional[&quot;Scene&quot;]) -&gt; None
 </code></pre>
 <p>Override this to initialize upon scene entering.</p>
-<p>The :attr:<code>application</code> property is initialized at this point,
-so you are free to access it through <code>self.application</code>.
-Stuff like changing resolution etc. should be done here.</p>
 <p>If you override this method and want to use class variables
-to change the application's settings, you must call
+to change the application&rsquo;s settings, you must call
 <code>super().on_enter(previous_scene)</code> in the subclass.</p>
-<p>:param Scene|None previous_scene: previous scene to run</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>previous_scene</code> <em>Optional[Scene]</em> - previous scene was running</li>
+</ul>
 <p><a name="pgz.scene.Scene.on_exit"></a></p>
-<h4 id="on_exit">on_exit</h4>
+<h4 id="on_exit">on_exit<a class="headerlink" href="#on_exit" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | on_exit(next_scene: Optional[&quot;Scene&quot;]) -&gt; None
 </code></pre>
 <p>Override this to deinitialize upon scene exiting.</p>
-<p>The :attr:<code>application</code> property is still initialized at this
-point. Feel free to do saving, settings reset, etc. here.</p>
-<p>:param Scene|None next_scene: next scene to run</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>next_scene</code> <em>Optional[Scene]</em> - next scene to run</li>
+</ul>
 <p><a name="pgz.scenes"></a></p>
-<h1 id="pgzscenes">pgz.scenes</h1>
+<h1 id="pgzscenes">pgz.scenes<a class="headerlink" href="#pgzscenes" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.scenes.actor_scene"></a></p>
-<h1 id="pgzscenesactor_scene">pgz.scenes.actor_scene</h1>
+<h1 id="pgzscenesactor_scene">pgz.scenes.actor_scene<a class="headerlink" href="#pgzscenesactor_scene" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.scenes.actor_scene.ActorScene"></a></p>
-<h2 id="actorscene-objects">ActorScene Objects</h2>
+<h2 id="actorscene">ActorScene<a class="headerlink" href="#actorscene" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">class ActorScene(Scene)
 </code></pre>
 <p>Scene implementation for management of multiple actors.</p>
 <p>Actors also can be added to different collision groups, which allows easily identify collision of an actor with a specific actor group.</p>
 <p><a name="pgz.scenes.actor_scene.ActorScene.__init__"></a></p>
-<h4 id="__init__">__init__</h4>
+<h4 id="__init___1">__init__<a class="headerlink" href="#__init___1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | __init__() -&gt; None
 </code></pre>
 <p>Create an ActorScene object</p>
 <p><a name="pgz.scenes.actor_scene.ActorScene.set_collision_detector"></a></p>
-<h4 id="set_collision_detector">set_collision_detector</h4>
+<h4 id="set_collision_detector">set_collision_detector<a class="headerlink" href="#set_collision_detector" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | set_collision_detector(collision_detector: CollisionDetector)
 </code></pre>
 <p>Set external collsinion detector object.</p>
 <p>The default collision detector can be use in the most of the cases.
 This method in used by multiplayer.</p>
 <p><a name="pgz.scenes.actor_scene.ActorScene.add_actor"></a></p>
-<h4 id="add_actor">add_actor</h4>
+<h4 id="add_actor">add_actor<a class="headerlink" href="#add_actor" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | add_actor(actor: Actor, group_name: str = &quot;&quot;) -&gt; None
 </code></pre>
 <p>Add actor to the scene and add the actor to the collision group.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
 <li><code>actor</code> <em>Actor</em> - actor to add</li>
-<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
+<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to &ldquo;&rdquo;.</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.remove_actor"></a></p>
-<h4 id="remove_actor">remove_actor</h4>
+<h4 id="remove_actor">remove_actor<a class="headerlink" href="#remove_actor" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | remove_actor(actor: Actor) -&gt; None
 </code></pre>
 <p>Remove actor from the scene.</p>
@@ -376,12 +651,12 @@ This method in used by multiplayer.</p>
 <li><code>actor</code> <em>Actor</em> - Actor to be removed</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.remove_actors"></a></p>
-<h4 id="remove_actors">remove_actors</h4>
+<h4 id="remove_actors">remove_actors<a class="headerlink" href="#remove_actors" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | remove_actors() -&gt; None
 </code></pre>
 <p>Remove all actors from the scene and the associated collision detector</p>
 <p><a name="pgz.scenes.actor_scene.ActorScene.get_actor"></a></p>
-<h4 id="get_actor">get_actor</h4>
+<h4 id="get_actor">get_actor<a class="headerlink" href="#get_actor" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | get_actor(uuid: str) -&gt; Actor
 </code></pre>
 <p>Get actor object by its UUID</p>
@@ -394,7 +669,7 @@ This method in used by multiplayer.</p>
 <li><code>Actor</code> - Actor associated with the UUID</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.get_actors"></a></p>
-<h4 id="get_actors">get_actors</h4>
+<h4 id="get_actors">get_actors<a class="headerlink" href="#get_actors" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | get_actors() -&gt; List[Actor]
 </code></pre>
 <p>Get list of actors</p>
@@ -403,39 +678,45 @@ This method in used by multiplayer.</p>
 <li><code>List[Actor]</code> - The list of actors on the scene</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.collide_group"></a></p>
-<h4 id="collide_group">collide_group</h4>
+<h4 id="collide_group">collide_group<a class="headerlink" href="#collide_group" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | collide_group(actor: Actor, group_name: str = &quot;&quot;) -&gt; Optional[Actor]
 </code></pre>
 <p>Detect collision of a ginen actor with the actors in requested collsion group.</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
 <li><code>actor</code> <em>Actor</em> - actor to detect collisions with</li>
-<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
+<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to &ldquo;&rdquo;.</li>
 </ul>
 <p><strong>Returns</strong>:</p>
 <ul>
 <li><code>Optional[Actor]</code> - A collins actor in the specified collision group</li>
 </ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.draw"></a></p>
-<h4 id="draw_1">draw</h4>
+<h4 id="draw_1">draw<a class="headerlink" href="#draw_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(surface: Screen) -&gt; None
 </code></pre>
-<p>Overriden rendering method
-Implementation of the update method for the ActorScene.</p>
+<p>Overriden rendering method</p>
+<p>Implementation of the update method for the ActorScene.</p>
 <p>The ActorScene implementation renders all the actorts attached to the scene.</p>
-<p>:param pgz.screen.Screen screen: screen to draw the scene on</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
+</ul>
 <p><a name="pgz.scenes.actor_scene.ActorScene.update"></a></p>
-<h4 id="update_1">update</h4>
+<h4 id="update_1">update<a class="headerlink" href="#update_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
-<p>Overriden update method
-Implementation of the update method for the ActorScene.</p>
+<p>Overriden update method</p>
+<p>Implementation of the update method for the ActorScene.</p>
 <p>This method updates all the actors attached to the scene.</p>
-<p>:param int dt: time in milliseconds since the last update</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
+</ul>
 <p><a name="pgz.scenes.map_scene"></a></p>
-<h1 id="pgzscenesmap_scene">pgz.scenes.map_scene</h1>
+<h1 id="pgzscenesmap_scene">pgz.scenes.map_scene<a class="headerlink" href="#pgzscenesmap_scene" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.scenes.map_scene.MapScene"></a></p>
-<h2 id="mapscene-objects">MapScene Objects</h2>
+<h2 id="mapscene">MapScene<a class="headerlink" href="#mapscene" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">class MapScene(ActorScene)
 </code></pre>
 <p>Scene implementation for Tiled map management.</p>
@@ -446,11 +727,11 @@ A tiled map can be created and modified with wonderful <a href="https://www.mape
 <p>Actors also can be added to different collision groups,
 which allows easily identify collision of an actor with a specific actor group</p>
 <p><a name="pgz.scenes.map_scene.MapScene.__init__"></a></p>
-<h4 id="__init___1">__init__</h4>
+<h4 id="__init___2">__init__<a class="headerlink" href="#__init___2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | __init__(map: Optional[ScrollMap] = None)
 </code></pre>
 <p>Create a MapScene object</p>
-<p>The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from "default.tmx" file of the resource directory:</p>
+<p>The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from &ldquo;default.tmx&rdquo; file of the resource directory:</p>
 <pre><code>tmx = pgz.maps.default
 map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
 </code></pre>
@@ -459,7 +740,7 @@ map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
 <li><code>map</code> <em>Optional[ScrollMap], optional</em> - Loaded map object. Defaults to None.</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.map"></a></p>
-<h4 id="map">map</h4>
+<h4 id="map">map<a class="headerlink" href="#map" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | @property
  | map() -&gt; ScrollMap
 </code></pre>
@@ -469,7 +750,7 @@ map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
 <li><code>ScrollMap</code> - the map object used by the scene</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.set_map"></a></p>
-<h4 id="set_map">set_map</h4>
+<h4 id="set_map">set_map<a class="headerlink" href="#set_map" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | set_map(map)
 </code></pre>
 <p>Set map object</p>
@@ -478,17 +759,17 @@ map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
 <li><code>map</code> <em>[type]</em> - map object to set</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.dispatch_event"></a></p>
-<h4 id="dispatch_event">dispatch_event</h4>
+<h4 id="dispatch_event">dispatch_event<a class="headerlink" href="#dispatch_event" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | dispatch_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Overriden events dispatch method
-Used for mouse cursor position transformation into map "world coordinates"</p>
+Used for mouse cursor position transformation into map &ldquo;world coordinates&rdquo;</p>
 <p><strong>Arguments</strong>:</p>
 <ul>
 <li><code>event</code> <em>pygame.event.Event</em> - pygame Event object</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.update"></a></p>
-<h4 id="update_2">update</h4>
+<h4 id="update_2">update<a class="headerlink" href="#update_2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | update(dt: float) -&gt; None
 </code></pre>
 <p>Overriden update method
@@ -499,7 +780,7 @@ Implementation of the update method for the MapScene.</p>
 <li><code>dt</code> <em>float</em> - time in milliseconds since the last update</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.draw"></a></p>
-<h4 id="draw_2">draw</h4>
+<h4 id="draw_2">draw<a class="headerlink" href="#draw_2" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(screen: Screen) -&gt; None
 </code></pre>
 <p>Overriden rendering method
@@ -510,7 +791,7 @@ Implementation of the update method for the MapScene.</p>
 <li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.add_actor"></a></p>
-<h4 id="add_actor_1">add_actor</h4>
+<h4 id="add_actor_1">add_actor<a class="headerlink" href="#add_actor_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | add_actor(actor: Actor, central_actor: bool = False, group_name: str = &quot;&quot;) -&gt; None
 </code></pre>
 <p>Overriden add_actor method
@@ -520,10 +801,10 @@ Implementation of the add_actor method for the MapScene.</p>
 <ul>
 <li><code>actor</code> <em>Actor</em> - actor to add</li>
 <li><code>central_actor</code> <em>bool, optional</em> - Sets the actor to be central actor for the scene. The map view will be centered on the actor. Defaults to False.</li>
-<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to "".</li>
+<li><code>group_name</code> <em>str, optional</em> - Collision group name. Defaults to &ldquo;&rdquo;.</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.remove_actor"></a></p>
-<h4 id="remove_actor_1">remove_actor</h4>
+<h4 id="remove_actor_1">remove_actor<a class="headerlink" href="#remove_actor_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | remove_actor(actor: Actor) -&gt; None
 </code></pre>
 <p>Overriden remove_actor method
@@ -533,7 +814,7 @@ Implementation of the remove_actor method for the MapScene.</p>
 <li><code>actor</code> <em>Actor</em> - actor to be removed</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.handle_event"></a></p>
-<h4 id="handle_event_1">handle_event</h4>
+<h4 id="handle_event_1">handle_event<a class="headerlink" href="#handle_event_1" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
 </code></pre>
 <p>Overriden event handler
@@ -543,7 +824,7 @@ Implementation of the event handler method for the MapScene.</p>
 <li><code>event</code> <em>pygame.event.Event</em> - pygame event object</li>
 </ul>
 <p><a name="pgz.scenes.map_scene.MapScene.collide_map"></a></p>
-<h4 id="collide_map">collide_map</h4>
+<h4 id="collide_map">collide_map<a class="headerlink" href="#collide_map" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | collide_map(actor: Actor) -&gt; bool
 </code></pre>
 <p>Detect collision with tiles in the map object used by the scene</p>
@@ -556,56 +837,156 @@ Implementation of the event handler method for the MapScene.</p>
 <li><code>bool</code> - True if the collision with map tiles is detected</li>
 </ul>
 <p><a name="pgz.scenes.menu_scene"></a></p>
-<h1 id="pgzscenesmenu_scene">pgz.scenes.menu_scene</h1>
+<h1 id="pgzscenesmenu_scene">pgz.scenes.menu_scene<a class="headerlink" href="#pgzscenesmenu_scene" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.scenes.menu_scene.MenuScene"></a></p>
+<h2 id="menuscene">MenuScene<a class="headerlink" href="#menuscene" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class MenuScene(Scene)
+</code></pre>
+<p>Base class for a scenes showing menu.</p>
+<p>MenuScene uses <code>pygame_menu.Menu</code> internally, for the additional information follow the link <a href="https://github.com/ppizarror/pygame-menu">pygame-menu</a>.</p>
+<p><strong>Examples</strong>:</p>
+<pre><code>class Menu(pgz.MenuScene):
+def __init__(self):
+super().__init__()
+import pygame_menu
+
+self.menu = pygame_menu.Menu(300, 400, &quot;Welcome&quot;, theme=pygame_menu.themes.THEME_BLUE)
+
+self.menu.add_text_input(&quot;Name :&quot;, textinput_id=&quot;name&quot;, default=&quot;John Doe&quot;)
+self.menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
+self.menu.add_button(&quot;Play&quot;, self.start_the_game)
+self.menu.add_button(&quot;Quit&quot;, pygame_menu.events.EXIT)
+
+def start_the_game(self):
+data = self.menu.get_input_data()
+
+scene = GameScene()
+tmx = pgz.maps.default
+map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
+scene.set_map(map)
+scene.set_client_data({&quot;name&quot;: data[&quot;name&quot;]})
+self.change_scene(scene)
+</code></pre>
+<p><a name="pgz.scenes.menu_scene.MenuScene.__init__"></a></p>
+<h4 id="__init___3">__init__<a class="headerlink" href="#__init___3" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | __init__(menu: Optional[pygame_menu.Menu] = None)
+</code></pre>
+<p>Create <code>MenuScene</code></p>
+<p>Receives a menu object as argument or creates its own menu object.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>menu</code> <em>Optional[pygame_menu.Menu], optional</em> - menu object. Defaults to None.</li>
+</ul>
+<p><a name="pgz.scenes.menu_scene.MenuScene.draw"></a></p>
+<h4 id="draw_3">draw<a class="headerlink" href="#draw_3" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | draw(screen: Screen) -&gt; None
+</code></pre>
+<p>Overriden rendering method
+Implementation of the update method for the ActorScene.</p>
+<p>The ActorScene implementation renders all the actorts attached to the scene.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>screen</code> <em>Screen</em> - screen to draw the scene on</li>
+</ul>
+<p><a name="pgz.scenes.menu_scene.MenuScene.on_exit"></a></p>
+<h4 id="on_exit_1">on_exit<a class="headerlink" href="#on_exit_1" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | on_exit(next_scene: Optional[Scene]) -&gt; None
+</code></pre>
+<p>Overriden deinitialization method</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>next_scene</code> <em>Optional[Scene]</em> - next scene to run</li>
+</ul>
+<p><a name="pgz.scenes.menu_scene.MenuScene.handle_event"></a></p>
+<h4 id="handle_event_2">handle_event<a class="headerlink" href="#handle_event_2" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
+</code></pre>
+<p>Overriden event handling method method</p>
+<p>All of <code>pygame</code>&lsquo;s events are sent here, so filtering
+should be applied manually in the subclass.</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>event</code> <em>pygame.event.Event</em> - event to handle</li>
+</ul>
 <p><a name="pgz.screen"></a></p>
-<h1 id="pgzscreen">pgz.screen</h1>
-              
+<h1 id="pgzscreen">pgz.screen<a class="headerlink" href="#pgzscreen" title="Permanent link">&para;</a></h1></div>
             </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
-    </div>
-  
-
-  <hr/>
-
-  <div role="contentinfo">
-    <!-- Copyright etc -->
-    
-  </div>
-
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-      
         </div>
-      </div>
 
-    </section>
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js" defer></script>
+        <script src="../search/main.js" defer></script>
 
-  </div>
-
-  <div class="rst-versions" role="note" aria-label="versions">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-      
-      
-        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
-      
-      
-    </span>
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
-            SphinxRtdTheme.Navigation.enable(true);
-        };
-    </script>
 
-</body>
+    </body>
 </html>
