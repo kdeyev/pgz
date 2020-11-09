@@ -82,10 +82,6 @@
             
             <li class="nav-item" data-level="1"><a href="#pgzactor" class="nav-link">pgz.actor</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#actor" class="nav-link">Actor</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
               </ul>
             </li>
             
@@ -117,8 +113,31 @@
               </ul>
             </li>
             
-            <li class="nav-item" data-level="1"><a href="#pgzmultiplayer_scene" class="nav-link">pgz.multiplayer_scene</a>
+            <li class="nav-item" data-level="1"><a href="#pgzmultiplayer" class="nav-link">pgz.multiplayer</a>
               <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzmultiplayermultiplayer_scene" class="nav-link">pgz.multiplayer.multiplayer_scene</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzmultiplayerrpc" class="nav-link">pgz.multiplayer.rpc</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzmultiplayerscreen_rpc" class="nav-link">pgz.multiplayer.screen_rpc</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#rpcsurfacepainter" class="nav-link">RPCSurfacePainter</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#rpcscreenserver" class="nav-link">RPCScreenServer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             
@@ -172,6 +191,39 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzutils" class="nav-link">pgz.utils</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzutilscollision_detector" class="nav-link">pgz.utils.collision_detector</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzutilsevent_dispatcher" class="nav-link">pgz.utils.event_dispatcher</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#eventdispatcher" class="nav-link">EventDispatcher</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzutilsfps_calc" class="nav-link">pgz.utils.fps_calc</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#pgzutilsscroll_map" class="nav-link">pgz.utils.scroll_map</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#scrollmap" class="nav-link">ScrollMap</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
@@ -181,11 +233,8 @@
 <h1 id="pgz">pgz<a class="headerlink" href="#pgz" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.actor"></a></p>
 <h1 id="pgzactor">pgz.actor<a class="headerlink" href="#pgzactor" title="Permanent link">&para;</a></h1>
-<p><a name="pgz.actor.Actor"></a></p>
-<h2 id="actor">Actor<a class="headerlink" href="#actor" title="Permanent link">&para;</a></h2>
-<pre><code class="language-python">class Actor(BaseActor)
-</code></pre>
-<p>The main Actor API is inspired from <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#actors">pgzero.Actor</a></p>
+<p>pgz uses the <code>pgzero.Clock</code> implementation a sprite representation.
+More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#actors">here</a></p>
 <p><a name="pgz.application"></a></p>
 <h1 id="pgzapplication">pgz.application<a class="headerlink" href="#pgzapplication" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.application.Application"></a></p>
@@ -347,8 +396,12 @@ app.run(main_menu)
 </ul>
 <p><a name="pgz.clock"></a></p>
 <h1 id="pgzclock">pgz.clock<a class="headerlink" href="#pgzclock" title="Permanent link">&para;</a></h1>
+<p>pgz uses the <code>pgzero.Clock</code> implementation for scheduling game events.
+More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#clock">here</a></p>
 <p><a name="pgz.keyboard"></a></p>
 <h1 id="pgzkeyboard">pgz.keyboard<a class="headerlink" href="#pgzkeyboard" title="Permanent link">&para;</a></h1>
+<p>pgz uses the <code>pgzero.Keyboard</code> implementation for tracking the keyboard state.
+More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#the-keyboard">here</a></p>
 <p><a name="pgz.keyboard.Keyboard"></a></p>
 <h2 id="keyboard_1">Keyboard<a class="headerlink" href="#keyboard_1" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">class Keyboard()
@@ -360,10 +413,89 @@ app.run(main_menu)
 <p>is True if the &lsquo;A&rsquo; key is depressed, and False otherwise.</p>
 <p><a name="pgz.loaders"></a></p>
 <h1 id="pgzloaders">pgz.loaders<a class="headerlink" href="#pgzloaders" title="Permanent link">&para;</a></h1>
-<p><a name="pgz.multiplayer_scene"></a></p>
-<h1 id="pgzmultiplayer_scene">pgz.multiplayer_scene<a class="headerlink" href="#pgzmultiplayer_scene" title="Permanent link">&para;</a></h1>
+<p>pgz uses the <code>pgzero</code> module implementation for the source managemens.
+More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#resource-loading">here</a></p>
+<p>The extension was provided by pgz is the <code>MapLoader</code> resource loader, which loads TMX tiled maps in the same manner as all other resources are loaded</p>
+<p><strong>Examples</strong>:</p>
+<p>The example of default.tmx file loading is shown below:</p>
+<pre><code>tmx = pgz.maps.default
+</code></pre>
+<p><a name="pgz.multiplayer"></a></p>
+<h1 id="pgzmultiplayer">pgz.multiplayer<a class="headerlink" href="#pgzmultiplayer" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.multiplayer.multiplayer_scene"></a></p>
+<h1 id="pgzmultiplayermultiplayer_scene">pgz.multiplayer.multiplayer_scene<a class="headerlink" href="#pgzmultiplayermultiplayer_scene" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.multiplayer.rpc"></a></p>
+<h1 id="pgzmultiplayerrpc">pgz.multiplayer.rpc<a class="headerlink" href="#pgzmultiplayerrpc" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.multiplayer.screen_rpc"></a></p>
+<h1 id="pgzmultiplayerscreen_rpc">pgz.multiplayer.screen_rpc<a class="headerlink" href="#pgzmultiplayerscreen_rpc" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter"></a></p>
+<h2 id="rpcsurfacepainter">RPCSurfacePainter<a class="headerlink" href="#rpcsurfacepainter" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class RPCSurfacePainter()
+</code></pre>
+<p>Interface to pygame.draw that is bound to a surface.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.line"></a></p>
+<h4 id="line">line<a class="headerlink" href="#line" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | line(start: Tuple[Any, Any], end: Tuple[Any, Any], color: Any, width: int = 1) -&gt; None
+</code></pre>
+<p>Draw a line from start to end.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.circle"></a></p>
+<h4 id="circle">circle<a class="headerlink" href="#circle" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | circle(pos: Tuple[Any, Any], radius: float, color: Any, width: int = 1) -&gt; None
+</code></pre>
+<p>Draw a circle.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.filled_circle"></a></p>
+<h4 id="filled_circle">filled_circle<a class="headerlink" href="#filled_circle" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | filled_circle(pos: Tuple[Any, Any], radius: float, color: Any) -&gt; None
+</code></pre>
+<p>Draw a filled circle.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.polygon"></a></p>
+<h4 id="polygon">polygon<a class="headerlink" href="#polygon" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | polygon(points: List[Tuple[Any, Any]], color: Any) -&gt; None
+</code></pre>
+<p>Draw a polygon.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.filled_polygon"></a></p>
+<h4 id="filled_polygon">filled_polygon<a class="headerlink" href="#filled_polygon" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | filled_polygon(points: List[Tuple[Any, Any]], color: Any) -&gt; None
+</code></pre>
+<p>Draw a filled polygon.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.rect"></a></p>
+<h4 id="rect">rect<a class="headerlink" href="#rect" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | rect(rect: ZRect, color: Any, width: int = 1) -&gt; None
+</code></pre>
+<p>Draw a rectangle.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.filled_rect"></a></p>
+<h4 id="filled_rect">filled_rect<a class="headerlink" href="#filled_rect" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | filled_rect(rect: ZRect, color: Any) -&gt; None
+</code></pre>
+<p>Draw a filled rectangle.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.text"></a></p>
+<h4 id="text">text<a class="headerlink" href="#text" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | text(*args: Any, **kwargs: Any) -&gt; None
+</code></pre>
+<p>Draw text to the screen.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCSurfacePainter.textbox"></a></p>
+<h4 id="textbox">textbox<a class="headerlink" href="#textbox" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | textbox(*args: Any, **kwargs: Any) -&gt; None
+</code></pre>
+<p>Draw text to the screen, wrapped to fit a box</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCScreenServer"></a></p>
+<h2 id="rpcscreenserver">RPCScreenServer<a class="headerlink" href="#rpcscreenserver" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class RPCScreenServer()
+</code></pre>
+<p><a name="pgz.multiplayer.screen_rpc.RPCScreenServer.bounds"></a></p>
+<h4 id="bounds">bounds<a class="headerlink" href="#bounds" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | bounds() -&gt; ZRect
+</code></pre>
+<p>Return a Rect representing the bounds of the screen.</p>
+<p><a name="pgz.multiplayer.screen_rpc.RPCScreenServer.clear"></a></p>
+<h4 id="clear">clear<a class="headerlink" href="#clear" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | clear() -&gt; None
+</code></pre>
+<p>Clear the screen to black.</p>
 <p><a name="pgz.rect"></a></p>
 <h1 id="pgzrect">pgz.rect<a class="headerlink" href="#pgzrect" title="Permanent link">&para;</a></h1>
+<p>pgz uses the <code>pgzero.rect.ZRect</code> implementation for a rectangle representation.
+More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#rect">here</a></p>
 <p><a name="pgz.scene"></a></p>
 <h1 id="pgzscene">pgz.scene<a class="headerlink" href="#pgzscene" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.scene.Scene"></a></p>
@@ -610,6 +742,13 @@ to change the application&rsquo;s settings, you must call
 </ul>
 <p><a name="pgz.scenes"></a></p>
 <h1 id="pgzscenes">pgz.scenes<a class="headerlink" href="#pgzscenes" title="Permanent link">&para;</a></h1>
+<p>pgz provides an implementation of a few tipical scene classes subclassed from the <code>pgz.Scene</code>.</p>
+<ul>
+<li><code>pgz.MenuScene</code> - implements game menu rendering as a pgz.Scene subclass</li>
+<li><code>pgz.ActorScene</code> - implements the basic actors managements, updates, rendering logic and actors collision detection.</li>
+<li><code>pgz.MapScene</code> - extends pgz.ActorScene for games based on the tiled maps. It also implements the tiles collision detection.</li>
+<li><code>pgz.RemoteScene</code> - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game</li>
+</ul>
 <p><a name="pgz.scenes.actor_scene"></a></p>
 <h1 id="pgzscenesactor_scene">pgz.scenes.actor_scene<a class="headerlink" href="#pgzscenesactor_scene" title="Permanent link">&para;</a></h1>
 <p><a name="pgz.scenes.actor_scene.ActorScene"></a></p>
@@ -877,6 +1016,16 @@ self.change_scene(scene)
 <ul>
 <li><code>menu</code> <em>Optional[pygame_menu.Menu], optional</em> - menu object. Defaults to None.</li>
 </ul>
+<p><a name="pgz.scenes.menu_scene.MenuScene.menu"></a></p>
+<h4 id="menu">menu<a class="headerlink" href="#menu" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | @property
+ | menu() -&gt; pygame_menu.Menu
+</code></pre>
+<p>Get the internal <code>pygame_menu.Menu</code> object.</p>
+<p><strong>Returns</strong>:</p>
+<ul>
+<li><code>pygame_menu.Menu</code> - internal menu object.</li>
+</ul>
 <p><a name="pgz.scenes.menu_scene.MenuScene.draw"></a></p>
 <h4 id="draw_3">draw<a class="headerlink" href="#draw_3" title="Permanent link">&para;</a></h4>
 <pre><code class="language-python"> | draw(screen: Screen) -&gt; None
@@ -909,7 +1058,52 @@ should be applied manually in the subclass.</p>
 <li><code>event</code> <em>pygame.event.Event</em> - event to handle</li>
 </ul>
 <p><a name="pgz.screen"></a></p>
-<h1 id="pgzscreen">pgz.screen<a class="headerlink" href="#pgzscreen" title="Permanent link">&para;</a></h1></div>
+<h1 id="pgzscreen">pgz.screen<a class="headerlink" href="#pgzscreen" title="Permanent link">&para;</a></h1>
+<p>pgz uses the <code>pgzero.screen.Screen</code> implementation for the screen object representation and rendering.
+More inforamation can be found <a href="https://pygame-zero.readthedocs.io/en/stable/builtins.html#screen">here</a>.</p>
+<p><a name="pgz.utils"></a></p>
+<h1 id="pgzutils">pgz.utils<a class="headerlink" href="#pgzutils" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.utils.collision_detector"></a></p>
+<h1 id="pgzutilscollision_detector">pgz.utils.collision_detector<a class="headerlink" href="#pgzutilscollision_detector" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.utils.event_dispatcher"></a></p>
+<h1 id="pgzutilsevent_dispatcher">pgz.utils.event_dispatcher<a class="headerlink" href="#pgzutilsevent_dispatcher" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.utils.event_dispatcher.EventDispatcher"></a></p>
+<h2 id="eventdispatcher">EventDispatcher<a class="headerlink" href="#eventdispatcher" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class EventDispatcher()
+</code></pre>
+<p>Adapt a pgzero game&rsquo;s raw handler function to take a Pygame Event.</p>
+<p>Returns a one-argument function of the form <code>handler(event)</code>.
+This will ensure that the correct arguments are passed to the raw
+handler based on its argument spec.</p>
+<p>The wrapped handler will also map certain parameter values using
+callables from EVENT_PARAM_MAPPERS; this ensures that the value of
+&lsquo;button&rsquo; inside the handler is a real instance of constants.mouse,
+which means (among other things) that it will print as a symbolic value
+rather than a naive integer.</p>
+<p><a name="pgz.utils.event_dispatcher.EventDispatcher.handle_event"></a></p>
+<h4 id="handle_event_3">handle_event<a class="headerlink" href="#handle_event_3" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | handle_event(event: pygame.event.Event) -&gt; None
+</code></pre>
+<p>Override me</p>
+<p><a name="pgz.utils.fps_calc"></a></p>
+<h1 id="pgzutilsfps_calc">pgz.utils.fps_calc<a class="headerlink" href="#pgzutilsfps_calc" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.utils.scroll_map"></a></p>
+<h1 id="pgzutilsscroll_map">pgz.utils.scroll_map<a class="headerlink" href="#pgzutilsscroll_map" title="Permanent link">&para;</a></h1>
+<p><a name="pgz.utils.scroll_map.ScrollMap"></a></p>
+<h2 id="scrollmap">ScrollMap<a class="headerlink" href="#scrollmap" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">class ScrollMap(object)
+</code></pre>
+<p>This class provides functionality:
+- create and manage a pyscroll group
+- load a collision layers
+- manage sprites added to the map
+- allows to detect collisions with loaded collision layers
+- render the map and the sprites on top</p>
+<p><a name="pgz.utils.scroll_map.ScrollMap.update"></a></p>
+<h4 id="update_3">update<a class="headerlink" href="#update_3" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python"> | update(dt: float) -&gt; None
+</code></pre>
+<p>Tasks that occur over time should be handled here</p></div>
             </div>
         </div>
 
