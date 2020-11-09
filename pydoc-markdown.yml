@@ -4,6 +4,7 @@ processors:
   - type: filter
   - type: smart
   - type: crossref
+  - type: sphinx
 renderer:
   type: mkdocs
   pages:
@@ -13,6 +14,15 @@ renderer:
     - title: API Documentation
       contents:
         - '*'
+  markdown:
+    # render_toc: true
+    descriptive_class_title: false
+    classdef_render_init_signature_if_needed: true
   mkdocs_config:
     site_name: pgz
-    theme: readthedocs
+    # theme: readthedocs
+    markdown_extensions:
+      - smarty
+      - toc:
+          permalink: True
+      - sane_lists
