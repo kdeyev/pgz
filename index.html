@@ -90,7 +90,7 @@
             
             <li class="nav-item" data-level="1"><a href="#documentation" class="nav-link">Documentation</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#quick-start" class="nav-link">Quick start</a>
+            <li class="nav-item" data-level="2"><a href="#quick-start" class="nav-link">Quick Start</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -98,24 +98,24 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#game-example" class="nav-link">Game example</a>
+            <li class="nav-item" data-level="2"><a href="#game-example" class="nav-link">Game Example</a>
               <ul class="nav flex-column">
               </ul>
             </li>
               </ul>
             </li>
             
-            <li class="nav-item" data-level="1"><a href="#multiplayer-game-with-pgz" class="nav-link">Multiplayer game with pgz</a>
+            <li class="nav-item" data-level="1"><a href="#multiplayer-game-with-pgz" class="nav-link">Multiplayer Game with pgz</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#multiplayer-game-server" class="nav-link">Multiplayer game server</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#multiplayer-game-client" class="nav-link">Multiplayer game client</a>
+            <li class="nav-item" data-level="2"><a href="#multiplayer-game-server" class="nav-link">Multiplayer Game Server</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#multiplayer-game-example" class="nav-link">Multiplayer game example</a>
+            <li class="nav-item" data-level="2"><a href="#multiplayer-game-client" class="nav-link">Multiplayer Game Client</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#multiplayer-game-example" class="nav-link">Multiplayer Game Example</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -145,7 +145,7 @@ pgz uses pgzero as infrastructure intensively, but makes the experience more obj
 <p>not yet</p>
 <h1 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h1>
 <p>More detailed documentation can be found <a href="https://kdeyev.github.io/pgz">here</a></p>
-<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <p>pgz heavily uses concepts and some code of <a href="https://github.com/Mahi/EzPyGame">EzPyGame</a> and <a href="https://github.com/lordmauve/pgzero">pgzero</a>.
 pgz game entry point is application, application renders scene, scene can be changed, scene manages actors.</p>
 <p>So pgz operates by 3 main concepts:</p>
@@ -252,12 +252,12 @@ alien.pos = 100, 56
 </code></pre>
 <h2 id="mapscene">MapScene<a class="headerlink" href="#mapscene" title="Permanent link">&para;</a></h2>
 <p>The usage of pgz.MapScene will require the instantiation of a map object. pgz provides a way for loading and handling <a href="https://www.mapeditor.org/">Tiled</a> maps.</p>
-<h3 id="map-loading">Map loading<a class="headerlink" href="#map-loading" title="Permanent link">&para;</a></h3>
+<h3 id="map-loading">Map Loading<a class="headerlink" href="#map-loading" title="Permanent link">&para;</a></h3>
 <p>The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from &ldquo;default.tmx&rdquo; file of the resource directory: </p>
 <pre><code>tmx = pgz.maps.default
 </code></pre>
 <p>The &ldquo;mtx&rdquo; files can be created and modified with wonderful <a href="https://www.mapeditor.org/">Tiled</a> mps editor.</p>
-<h3 id="map-management-and-rendering">Map management and rendering<a class="headerlink" href="#map-management-and-rendering" title="Permanent link">&para;</a></h3>
+<h3 id="map-management-and-rendering">Map Management and Rendering<a class="headerlink" href="#map-management-and-rendering" title="Permanent link">&para;</a></h3>
 <p>The maps loading and usage is backed by <a href="https://github.com/bitcraft/pyscroll">pyscroll</a></p>
 <p>pgz provides a pgz.ScrollMap class which covers listed functionality:
 - create and manage a pyscroll group
@@ -311,15 +311,15 @@ if scene.collide_map(ship):
         elif key == pygame.K_MINUS:
             self.map.change_zoom(-0.25)
 </code></pre>
-<h2 id="game-example">Game example<a class="headerlink" href="#game-example" title="Permanent link">&para;</a></h2>
+<h2 id="game-example">Game Example<a class="headerlink" href="#game-example" title="Permanent link">&para;</a></h2>
 <p>The game example which utilizes using all the described concepts, can be fount in demo/demo_standalone.py</p>
-<h1 id="multiplayer-game-with-pgz">Multiplayer game with pgz<a class="headerlink" href="#multiplayer-game-with-pgz" title="Permanent link">&para;</a></h1>
+<h1 id="multiplayer-game-with-pgz">Multiplayer Game with pgz<a class="headerlink" href="#multiplayer-game-with-pgz" title="Permanent link">&para;</a></h1>
 <p>pgz provides two key components for converting your single-player into multiplayer-game over the network:</p>
 <ul>
 <li>pgz.MultiplayerSceneServer</li>
 <li>pgz.RemoteSceneClient</li>
 </ul>
-<h2 id="multiplayer-game-server">Multiplayer game server<a class="headerlink" href="#multiplayer-game-server" title="Permanent link">&para;</a></h2>
+<h2 id="multiplayer-game-server">Multiplayer Game Server<a class="headerlink" href="#multiplayer-game-server" title="Permanent link">&para;</a></h2>
 <p>MultiplayerSceneServer opens a WebSocket server and instantiate a pgz.Scene per connected player(client):</p>
 <pre><code>tmx = pgz.maps.default
 map = pgz.ScrollMap((1280, 720), tmx, [&quot;Islands&quot;])
@@ -345,7 +345,7 @@ If one scene shoots the cannon ball (by implementing the CannonBall actor and ad
         # pgz.sounds.arrr.play()
         self.ship.health -= cannon_ball.hit_rate * dt
 </code></pre>
-<h2 id="multiplayer-game-client">Multiplayer game client<a class="headerlink" href="#multiplayer-game-client" title="Permanent link">&para;</a></h2>
+<h2 id="multiplayer-game-client">Multiplayer Game Client<a class="headerlink" href="#multiplayer-game-client" title="Permanent link">&para;</a></h2>
 <p>pgz.RemoteSceneClient allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:</p>
 <pre><code>data = self.menu.get_input_data()
 server_url = data[&quot;server_url&quot;]
@@ -355,7 +355,7 @@ map = pgz.ScrollMap(app.resolution, tmx, [&quot;Islands&quot;])
 game = pgz.RemoteSceneClient(map, server_url, client_data={&quot;name&quot;: data[&quot;name&quot;]})
 </code></pre>
 <p>Pay attention that client process needs to have access to the same external resources (like map files, images,&hellip;) as the game server.</p>
-<h2 id="multiplayer-game-example">Multiplayer game example<a class="headerlink" href="#multiplayer-game-example" title="Permanent link">&para;</a></h2>
+<h2 id="multiplayer-game-example">Multiplayer Game Example<a class="headerlink" href="#multiplayer-game-example" title="Permanent link">&para;</a></h2>
 <p>The multiplayer game example can be found in demo/demo_server.py and demo/demo_client.py</p>
 <h2 id="demo">Demo<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
 <p><img alt="Alt Text" src="img/demo.gif" /></p></div>
@@ -442,5 +442,5 @@ game = pgz.RemoteSceneClient(map, server_url, client_data={&quot;name&quot;: dat
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2020-11-09 05:13:53.150907+00:00
+Build Date UTC : 2020-11-09 05:14:41.095943+00:00
 -->
