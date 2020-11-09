@@ -1,3 +1,8 @@
+"""
+pgz uses the `pgzero.actor.Actor` implementation a sprite representation.
+More inforamation can be found [here](https://pygame-zero.readthedocs.io/en/stable/builtins.html#actors)
+"""
+
 import json
 from typing import Any, Callable, Dict, Optional, cast
 from uuid import uuid4
@@ -70,10 +75,6 @@ class SpriteDelegate(pygame.sprite.Sprite):
 
 
 class Actor(BaseActor):
-    """
-    The main Actor API is inspired from [pgzero.Actor](https://pygame-zero.readthedocs.io/en/stable/builtins.html#actors)
-    """
-
     # DELEGATED_ATTRIBUTES = [a for a in dir(Actor) if not a.startswith("_")] + Actor.DELEGATED_ATTRIBUTES
     ATTRIBUTES_TO_TRACK = BaseActor.DELEGATED_ATTRIBUTES + ["angle", "image"]
 

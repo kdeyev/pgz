@@ -6,7 +6,7 @@ from .loaders import images  # noqa
 from .loaders import maps  # noqa
 from .loaders import sounds  # noqa
 from .loaders import set_root as set_resource_root  # noqa
-from .multiplayer_scene import MultiplayerSceneServer, RemoteScene  # noqa
+from .multiplayer import MultiplayerSceneServer, RemoteSceneClient  # noqa
 from .rect import ZRect  # noqa
 from .scene import EventDispatcher, Scene  # noqa
 from .scenes.actor_scene import ActorScene  # noqa

@@ -1,3 +1,8 @@
+"""
+pgz uses the `pgzero.keyboard.Keyboard` implementation for tracking the keyboard state.
+More inforamation can be found [here](https://pygame-zero.readthedocs.io/en/stable/builtins.html#the-keyboard)
+"""
+
 import re
 from typing import Any, Set
 from warnings import warn

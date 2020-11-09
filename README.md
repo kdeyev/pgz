@@ -87,7 +87,7 @@ Good news that pgz provides a few pgz.Scene derived scenes for common use cases.
 - `pgz.MenuScene` - implements game menu rendering as a pgz.Scene subclass
 - `pgz.ActorScene` - implements the basic actors managements, updates, rendering logic and actors collision detection.
 - `pgz.MapScene` - extends pgz.ActorScene for games based on the tiled maps. It also implements the tiles collision detection.
-- `pgz.RemoteScene` - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game
+- `pgz.RemoteSceneClient` - allows to render the view of remote pgz.MapScene or pgz.ActorScene using WebSocket connection. It might be useful handy for building of a multiplayer game
 
 ### Actors
 
@@ -222,7 +222,7 @@ The game example which utilizes using all the described concepts, can be fount i
 pgz provides two key components for converting your single-player into multiplayer-game over the network:
 
 - pgz.MultiplayerSceneServer
-- pgz.RemoteScene
+- pgz.RemoteSceneClient
 
 ## Multiplayer game server
 
@@ -258,14 +258,14 @@ def update(self, dt):
 
 ## Multiplayer game client
 
-pgz.RemoteScene allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:
+pgz.RemoteSceneClient allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:
 ```
 data = self.menu.get_input_data()
 server_url = data["server_url"]
 
 tmx = pgz.maps.default
 map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
-game = pgz.RemoteScene(map, server_url, client_data={"name": data["name"]})
+game = pgz.RemoteSceneClient(map, server_url, client_data={"name": data["name"]})
 ```
 Pay attention that client process needs to have access to the same external resources (like map files, images,...) as the game server.
 

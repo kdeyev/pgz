@@ -13,14 +13,14 @@ import websockets
 from pygame import event
 
 # import jsonrpc_base
-from .actor import Actor
-from .keyboard import Keyboard
-from .scene import EventDispatcher, Scene
-from .scenes.map_scene import MapScene
-from .screen import Screen
-from .utils.collision_detector import CollisionDetector
-from .utils.screen_rpc import RPCScreenClient, RPCScreenServer
-from .utils.scroll_map import ScrollMap
+from ..actor import Actor
+from ..keyboard import Keyboard
+from ..scene import EventDispatcher, Scene
+from ..scenes.map_scene import MapScene
+from ..screen import Screen
+from ..utils.collision_detector import CollisionDetector
+from ..utils.scroll_map import ScrollMap
+from .screen_rpc import RPCScreenClient, RPCScreenServer
 
 nest_asyncio.apply()
 
@@ -58,11 +58,52 @@ class StateNotification(pydantic.BaseModel):
 
 
 class MultiplayerSceneServer:
-    def __init__(self, map: ScrollMap, HeadlessSceneClass: Any):
+    """
+    Scene server implementation.
+
+    MultiplayerSceneServer opens a WebSocket server and instantiate a pgz.Scene per connected player(client):
+    ```
+    tmx = pgz.maps.default
+    map = pgz.ScrollMap((1280, 720), tmx, ["Islands"])
+
+    # Build and start game server
+    self.server = pgz.MultiplayerSceneServer(map, GameScene)
+    self.server.start_server(port=self.port)
+    ```
+
+    All the scenes will share the map object and collision detector object. So, the communication between different players scenes is done with collision detection.
+    If one scene shoots the cannon ball (by implementing the CannonBall actor and adding its instance to the map):
+    ```
+    def on_mouse_down(self, pos, button):
+        start_point = self.calc_cannon_ball_start_pos(pos)
+        if start_point:
+            ball = CannonBall(pos=start_point, target=pos)
+            self.add_actor(ball, group_name="cannon_balls")
+    ```
+    Another player(scene) might be harmed by the cannon ball using the collision detection:
+    ```
+    def update(self, dt):
+        super().update(dt)
+
+        cannon_ball = self.collide_group(self.ship, "cannon_balls")
+        if cannon_ball:
+            # pgz.sounds.arrr.play()
+            self.ship.health -= cannon_ball.hit_rate * dt
+    ```
+    """
+
+    def __init__(self, map: ScrollMap, HeadlessSceneClass: Scene):
+        """Create MultiplayerSceneServer instance.
+
+        Args:
+            map (ScrollMap): a `pgz.ScrollMap` object. Will be shared across all the scenes in the server
+            HeadlessSceneClass (Callable): a scene class. HeadlessSceneClass will be used as a scene object factory.
+        """
         super().__init__()
 
         # The map object will be shared between all the headless scenes
         self._map = map
+        # The collision detector object will be shared between all the headless scenes
         self._collision_detector = CollisionDetector()
 
         self._latest_actors = {}
@@ -76,11 +117,18 @@ class MultiplayerSceneServer:
         self._HeadlessSceneClass = HeadlessSceneClass
 
     def update(self, dt: float) -> None:
+        """Update method similar to the `pgz.scene.Scene.update` method.
+
+        Args:
+            dt (float): time in milliseconds since the last update
+        """
+
+        # Update all the client scenes
         self._map.update(dt)
         for scenes in self._clients.values():
             scenes.update(dt)
 
-        # server calls internal redraw
+        # Server calls internal redraw
         for ws in self._clients:
             scene = self._clients[ws]
             screen = self._screens[ws]
@@ -88,26 +136,35 @@ class MultiplayerSceneServer:
             # Update screen
             scene.draw(screen)
 
+        # Get state of all the actors
         actors_changed, actors_state_notification = self._get_actors_state()
 
         for websocket in self._clients:
             scene = self._clients[websocket]
             screen = self._screens[websocket]
 
-            # Get changes
+            # Get changes from the client's screen
             screen_changed, data = screen.get_messages()
             if not screen_changed and not actors_changed:
+                # Nothing was changed skip notification sending
                 continue
 
+            # Create a notification object
             state_notification = StateNotification(actors=actors_state_notification)
 
             if screen_changed:
-                # Send to client
+                # Attach the screen update to the notification
                 state_notification.screen = data
 
+            # Sent the notification
             asyncio.ensure_future(websocket.send(state_notification.json()))
 
-    def _get_actors_state(self):
+    def _get_actors_state(self) -> ActorsStateNotification:
+        """Collect the state of all the known actors.
+
+        Returns:
+            ActorsStateNotification: the actors state
+        """
         actors_state = ActorsStateNotification()
         changed = False
         current_actors = []
@@ -132,17 +189,30 @@ class MultiplayerSceneServer:
         return changed, actors_state
 
     async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: Scene) -> None:
+        """Receive handshake message from recently connected client.
+
+        Args:
+            websocket (websockets.WebSocketClientProtocol): ws client object
+            scene (Scene): a scene object associated with the client
+        """
         massage = await websocket.recv()
-        massage = json.loads(massage)
-        resolution = massage["resolution"]
+        json_massage = json.loads(massage)
+        resolution = json_massage["resolution"]
 
         rpc_screen = RPCScreenServer(resolution)
         self._screens[websocket] = rpc_screen
 
-        scene.set_client_data(massage["client_data"])
+        scene.set_client_data(json_massage["client_data"])
 
     async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: Scene) -> None:
+        """Send handshake method.
 
+        The handshake message will include the current state of the actors attached to the map object
+
+        Args:
+            websocket (websockets.WebSocketClientProtocol): ws client object
+            scene (Scene): a scene object associated with the client
+        """
         actors: List[Actor] = []
         for sc in self._clients.values():
             actors += sc.get_actors()
@@ -155,22 +225,42 @@ class MultiplayerSceneServer:
         await websocket.send(json.dumps(massage))
 
     async def _register_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
+        """Register a connected client.
+
+        Create a scene and prepare it for multiplayer game.
+
+        Args:
+            websocket (websockets.WebSocketClientProtocol): ws client object
+        """
         # Create a headless scene
         scene = self._HeadlessSceneClass()
-        # Create init the scene
+        # Set a shared map
         scene.set_map(self._map)
+        # Set a shared collision detector
         scene.set_collision_detector(self._collision_detector)
+
+        # block `pgz.actor.Actor.update` method for all the actors will be attached to the scene
         scene.block_update = True
+        # block `pgz.actor.Actor.draw` method for all the actors will be attached to the scene
         scene.block_draw = True
+        # Notify actors to accumulate incremental changes.
         scene.accumulate_changes = True
 
         await self._recv_handshake(websocket, scene)
         await self._send_handshake(websocket, scene)
 
         self._clients[websocket] = scene
+
+        # Finally call on_enter of the new scene
         scene.on_enter(None)
 
     async def _unregister_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
+        """Unregister a client.
+
+        Usually happens on the client disconnetion.
+        Args:
+            websocket (websockets.WebSocketClientProtocol): ws client object to unregister
+        """
         scene = self._clients[websocket]
 
         # First of all remove dead client
@@ -181,6 +271,12 @@ class MultiplayerSceneServer:
         scene.remove_actors()
 
     def _handle_client_message(self, websocket: websockets.WebSocketClientProtocol, message: str) -> None:
+        """Handle a message from a WebSocket client.
+
+        Args:
+            websocket (websockets.WebSocketClientProtocol): ws client object sent a message
+            message (str): message body
+        """
         try:
             scene = self._clients[websocket]
             events_notification = EventsNotification.parse_raw(message)
@@ -190,7 +286,14 @@ class MultiplayerSceneServer:
             print(f"_handle_client_message: {e}")
 
     async def _serve_client(self, websocket: websockets.WebSocketClientProtocol, path: str) -> None:
-        # register(websocket) sends user_event() to websocket
+        """Handler funcion for incoming websocket connection.
+
+        Args:
+            websocket (websockets.WebSocketClientProtocol): incoming ws client object
+            path (str): connection path used by the client
+        """
+
+        # Register the client (create a client scene)
         await self._register_client(websocket)
         try:
             async for message in websocket:
@@ -202,14 +305,47 @@ class MultiplayerSceneServer:
             await self._unregister_client(websocket)
 
     def start_server(self, host: str = "localhost", port: int = 8765) -> None:
+        """Start the scene server.
+
+        Args:
+            host (str, optional): host name. Defaults to "localhost".
+            port (int, optional): port number for listeting of a incoming WebSocket connections. Defaults to 8765.
+        """
         self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
 
     def stop_server(self) -> None:
+        """Stop the server and disconnect all the clients"""
         self._server_task.cancel()
 
 
-class RemoteScene(MapScene):
+class RemoteSceneClient(MapScene):
+    """
+    pgz.RemoteSceneClient allows to communicate with pgz.MultiplayerSceneServer and render the remote scene locally:
+    ```
+    data = self.menu.get_input_data()
+    server_url = data["server_url"]
+
+    tmx = pgz.maps.default
+    map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
+    game = pgz.RemoteSceneClient(map, server_url, client_data={"name": data["name"]})
+    ```
+    Pay attention that client process needs to have access to the same external resources (like map files, images,...) as the game server.
+
+    Pay attention that the `RemoteSceneClient` uses `pgz.RPCScreenClient` instead of `pgz.Screen`.
+    """
+
     def __init__(self, map: ScrollMap, server_url: str, client_data: JSON = {}) -> None:
+        """Create a remote scene client object.
+
+        `client_data` will be send to the remote scene object. The common usage - remote scene configuration.
+        For example the used select the players avatar image: the image name should be a part of the client_data object.
+        So the remote scene will be able to load a correct sprite and the actor's state with other clients.
+
+        Args:
+            map (ScrollMap): map object will be used for actors management and rendering
+            server_url (str): remote server URL
+            client_data (JSON, optional): data will be sent to the remote scene object. Defaults to {}.
+        """
         super().__init__(map)
 
         self._websocket: Optional[websockets.WebSocketClientProtocol] = None
@@ -219,6 +355,12 @@ class RemoteScene(MapScene):
         self._client_data = client_data
 
     def on_exit(self, next_scene: Optional[Scene]) -> None:
+        """
+        Overriden deinitialization method
+
+        Args:
+            next_scene (Optional[Scene]): next scene to run
+        """
         super().on_exit(next_scene)
 
         if self._websocket:
@@ -226,6 +368,12 @@ class RemoteScene(MapScene):
             self._websocket = None
 
     def on_enter(self, previous_scene: Optional[Scene]) -> None:
+        """
+        Overriden initialization method
+
+        Args:
+            previous_scene (Optional[Scene]): previous scene was running
+        """
         super().on_enter(previous_scene)
 
         asyncio.get_event_loop().run_until_complete(self.connect_to_server())
@@ -233,15 +381,28 @@ class RemoteScene(MapScene):
             raise Exception("Cannot connect")
 
     def update(self, dt: float) -> None:
+        """
+        Overriden update method
+
+        Args:
+            dt (float): time in milliseconds since the last update
+        """
         asyncio.ensure_future(self._flush_messages())
         super().update(dt)
 
     def draw(self, screen: Screen) -> None:
+        """
+        Overriden rendering method
+
+        Args:
+            screen (Screen): screen to draw the scene on
+        """
         super().draw(screen)
         self._screen_client.draw(screen)
         screen.draw.text(self.server_url, pos=(300, 0))
 
     async def _flush_messages(self) -> None:
+        """Combine all the accumulated event into notification and send to the remote scene."""
         if self._websocket and len(self._event_notification_queue):
             # create one json array
             events_notification = EventsNotification(events=self._event_notification_queue)
@@ -250,6 +411,15 @@ class RemoteScene(MapScene):
             await self._websocket.send(events_notification.json())
 
     def handle_event(self, event: pygame.event.Event) -> None:
+        """
+        Overriden event handler
+
+        Events will be accumulated internally and flushed all together to the remote scene.
+
+        Args:
+            event (pygame.event.Event): pygame event object
+        """
+
         super().handle_event(event)
 
         if not self._websocket:
@@ -264,6 +434,14 @@ class RemoteScene(MapScene):
             return
 
     async def connect_to_server(self, attempts: int = 10) -> bool:
+        """Connect to the remote scene server.
+
+        Args:
+            attempts (int, optional): number of attempts to connect. Defaults to 10.
+
+        Returns:
+            bool: True if connected successfully
+        """
         websocket: Optional[websockets.WebSocketClientProtocol] = None
 
         for attempt in range(attempts):
@@ -303,29 +481,44 @@ class RemoteScene(MapScene):
             self.add_actor(actor)
 
     async def _handle_messages(self) -> None:
+        """Handle notifications coming form remote scene."""
         message: str
         async for message in self._websocket:  # type: ignore
             try:
+                # Parse the message
                 state_notification = StateNotification.parse_raw(message)
                 uuid: str
                 added_actor: AddedActor
+
+                # Add new actors if required
                 for uuid, added_actor in state_notification.actors.added.items():
-                    self.add_actor_on_client(uuid, added_actor.scene_uuid, added_actor.image, added_actor.is_central)
+                    self._add_actor_on_client(uuid, added_actor.scene_uuid, added_actor.image, added_actor.is_central)
 
                 acrtor_state: Dict[str, Any]
+                # Modify actors if required
                 for uuid, acrtor_state in state_notification.actors.modified.items():
-                    self.on_actor_prop_change(uuid, acrtor_state)
+                    self._modify_actor(uuid, acrtor_state)
 
+                # Delete actors if required
                 for uuid in state_notification.actors.removed:
-                    self.remove_actor_on_client(uuid)
+                    self._remove_actor_on_client(uuid)
 
+                # Modify screen object if required
                 if state_notification.screen:
-                    self.on_screen_redraw(state_notification.screen)
+                    self._modify_screnn(state_notification.screen)
 
             except Exception as e:
                 print(f"_handle_messages: {e}")
 
-    def add_actor_on_client(self, uuid: UUID, scene_uuid: UUID, image: str, central_actor: bool) -> None:
+    def _add_actor_on_client(self, uuid: UUID, scene_uuid: UUID, image: str, central_actor: bool) -> None:
+        """Add actor to the scene.
+
+        Args:
+            uuid (UUID): [description]
+            scene_uuid (UUID): [description]
+            image (str): [description]
+            central_actor (bool): [description]
+        """
         actor = Actor(image, uuid=uuid)
 
         if scene_uuid != self.scene_uuid:
@@ -334,14 +527,30 @@ class RemoteScene(MapScene):
 
         self.add_actor(actor, central_actor)
 
-    def remove_actor_on_client(self, uuid: UUID) -> None:
+    def _remove_actor_on_client(self, uuid: UUID) -> None:
+        """Remove an actor from the scene
+
+        Args:
+            uuid (UUID): [description]
+        """
         actor: Actor = self.get_actor(uuid)
         self.remove_actor(actor)
 
-    def on_actor_prop_change(self, uuid: UUID, props: Dict[str, Any]) -> None:
+    def _modify_actor(self, uuid: UUID, props: Dict[str, Any]) -> None:
+        """Modify an actor.
+
+        Args:
+            uuid (UUID): [description]
+            props (Dict[str, Any]): [description]
+        """
         actor = self.get_actor(uuid)
         for prop, value in props.items():
             actor.__setattr__(prop, value)
 
-    def on_screen_redraw(self, data: List[JSON]) -> None:
+    def _modify_screnn(self, data: List[JSON]) -> None:
+        """Modify the screen object
+
+        Args:
+            data (List[JSON]): [description]
+        """
         self._screen_client.set_messages(data)

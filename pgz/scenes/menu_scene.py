@@ -52,13 +52,13 @@ class MenuScene(Scene):
         if not self.menu:
             self.menu = pygame_menu.Menu(300, 400, "Welcome", theme=pygame_menu.themes.THEME_BLUE)
 
-        # self.menu.add_text_input("Name :", default="John Doe")
-        # # self.menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
-        # self.menu.add_button("Play", self.start_the_game)
-        # self.menu.add_button("Quit", pygame_menu.events.EXIT)
-
     @property
     def menu(self) -> pygame_menu.Menu:
+        """Get the internal `pygame_menu.Menu` object.
+
+        Returns:
+            pygame_menu.Menu: internal menu object.
+        """
         return self._menu
 
     @menu.setter

@@ -24,7 +24,7 @@ class Menu(pgz.MenuScene):
 
         tmx = pgz.maps.default
         map = pgz.ScrollMap(app.resolution, tmx, ["Islands"])
-        game = pgz.RemoteScene(map, server_url, client_data={"name": data["name"]})
+        game = pgz.RemoteSceneClient(map, server_url, client_data={"name": data["name"]})
         self.change_scene(game)
 
 

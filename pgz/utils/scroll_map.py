@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import pygame
 import pyscroll
 import pyscroll.data
+import pytmx
 from pgzero.screen import Screen
 from pyscroll.group import PyscrollGroup
-from pytmx import TiledMap
 
 
-def extract_collision_objects_from_object_layers(tmx_data: TiledMap) -> List[pygame.Rect]:
+def extract_collision_objects_from_object_layers(tmx_data: pytmx.TiledMap) -> List[pygame.Rect]:
     collison_objects = list()
     for object in tmx_data.objects:
         collison_objects.append(pygame.Rect(object.x, object.y, object.width, object.height))
@@ -16,7 +16,7 @@ def extract_collision_objects_from_object_layers(tmx_data: TiledMap) -> List[pyg
     return collison_objects
 
 
-def extract_collision_objects_from_tile_layers(tmx_data: TiledMap, collision_layer_names: List[str]) -> List[pygame.Rect]:
+def extract_collision_objects_from_tile_layers(tmx_data: pytmx.TiledMap, collision_layer_names: List[str]) -> List[pygame.Rect]:
     collison_objects = list()
 
     for layer_name in collision_layer_names:
@@ -37,7 +37,10 @@ def extract_collision_objects_from_tile_layers(tmx_data: TiledMap, collision_lay
 
 
 class ScrollMap(object):
-    """
+    """Scroll Map object.
+
+    The implementation is based on [pyscroll](https://github.com/bitcraft/pyscroll)
+
     This class provides functionality:
     - create and manage a pyscroll group
     - load a collision layers
@@ -46,7 +49,14 @@ class ScrollMap(object):
     - render the map and the sprites on top
     """
 
-    def __init__(self, screen_size: Tuple[int, int], tmx: TiledMap, collision_layers: List[str] = []) -> None:
+    def __init__(self, screen_size: Tuple[int, int], tmx: pytmx.TiledMap, collision_layers: List[str] = []) -> None:
+        """Create scroll map object.
+
+        Args:
+            screen_size (Tuple[int, int]): screen resolution will be used to the map rendering
+            tmx (pytmx.TiledMap): loaded `pytmx.TiledMap` object
+            collision_layers (List[str], optional): List of `pytmx.TiledMap` layer names will be used for tiles collision detection. Defaults to [].
+        """
         self._tmx = tmx
 
         # create new data source for pyscroll
@@ -67,6 +77,14 @@ class ScrollMap(object):
         self.add_collision_layers(collision_layers)
 
     def add_collision_layers(self, collision_layers: List[str]) -> None:
+        """Load `pytmx.TiledMap` layer tiles for collision detection.
+
+        Some layer in the `pytmx.TiledMap` might be be used for collision detection.
+        For example: the layer includes "island tiles" might be used for collision detection with a "ship" actor.
+
+        Args:
+            collision_layers (List[str]): List of `pytmx.TiledMap` layer names will be used for tiles collision detection.
+        """
         # setup level geometry with simple pygame rects, loaded from pytmx
         self._map_collision_obj += extract_collision_objects_from_tile_layers(self._tmx, collision_layers)
 
@@ -77,17 +95,40 @@ class ScrollMap(object):
         return (pos[0] + self._map_group.view.left, pos[1] + self._map_group.view.top)
 
     def draw(self, screen: Screen) -> None:
-        # draw the map and all sprites
+        """Draw method similar to the `pgz.scene.Scene.draw` method.
+
+        Will draw the map and all actors on top.
+
+        Args:
+            dt (float): time in milliseconds since the last update
+        """
+
         self._map_group.draw(screen.surface)
 
     def update(self, dt: float) -> None:
-        """Tasks that occur over time should be handled here"""
+        """Update method similar to the `pgz.scene.Scene.update` method.
+
+        All the actors attached to the map will be updated.
+
+        Args:
+            dt (float): time in milliseconds since the last update
+        """
         self._map_group.update(dt)
 
-    def add_sprite(self, sprite: pygame.sprite.Sprite, group_name: str = "") -> None:
+    def add_sprite(self, sprite: pygame.sprite.Sprite) -> None:
+        """Add actor/sprite to the map
+
+        Args:
+            sprite (pygame.sprite.Sprite): sprite object to add
+        """
         self._map_group.add(sprite)
 
     def remove_sprite(self, sprite: pygame.sprite.Sprite) -> None:
+        """Remove sprite/actor from the map.
+
+        Args:
+            sprite (pygame.sprite.Sprite): sprite object to remove
+        """
         sprite.remove(self._map_group)
 
     def set_center(self, point: Tuple[int, int]) -> None:
@@ -107,6 +148,14 @@ class ScrollMap(object):
         self.map_layer.set_size(size)
 
     def collide_map(self, sprite: pygame.sprite.Sprite) -> bool:
+        """Detect a collision with tiles on the map
+
+        Args:
+            sprite (pygame.sprite.Sprite): sprite/actor for detection
+
+        Returns:
+            bool: True is the collision with the colision layers was detected
+        """
         if not sprite.rect:
             return False
         return bool(sprite.rect.collidelist(self._map_collision_obj) > -1)

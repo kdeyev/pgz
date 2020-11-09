@@ -5,13 +5,15 @@ from deepdiff import DeepDiff
 from pgzero.rect import RECT_CLASSES, ZRect
 from pgzero.screen import Screen, make_color, ptext, round_pos
 
-from ..utils.rpc import SimpleRPC, serialize_json_message
+from .rpc import SimpleRPC, serialize_json_message
 
 JSON = Dict[str, Any]
 
 
 class RPCSurfacePainter:
-    """Interface to pygame.draw that is bound to a surface."""
+    """
+    Interface to pygame.draw that is bound to a surface.
+    """
 
     def __init__(self, massages: List[JSON]) -> None:
         self._messages = massages
