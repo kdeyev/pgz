@@ -147,41 +147,38 @@ class MultiplayerSceneServer:
         """
 
         with self._clients_lock:
-            # Clone the Dict
-            clients = {a: b for a, b in self._clients.items()}
+            # Update all the client scenes
+            self._map.update(dt)
+            for client in self._clients.values():
+                client.scene.update(dt)
 
-        # Update all the client scenes
-        self._map.update(dt)
-        for client in clients.values():
-            client.scene.update(dt)
+            # Server calls internal redraw
+            for client in self._clients.values():
+                # Update screen
+                client.scene.draw(client.screen)
 
-        # Server calls internal redraw
-        for client in clients.values():
-            # Update screen
-            client.scene.draw(client.screen)
+            # Get state of all the actors
+            actors_changed, actors_state_notification = self._get_actors_state()
 
-        # Get state of all the actors
-        actors_changed, actors_state_notification = self._get_actors_state()
+            for websocket, client in self._clients.items():
 
-        for websocket, client in clients.items():
+                # Get changes from the client's screen
+                screen_changed, data = client.screen.get_messages()
+                if not screen_changed and not actors_changed:
+                    # Nothing was changed skip notification sending
+                    continue
 
-            # Get changes from the client's screen
-            screen_changed, data = client.screen.get_messages()
-            if not screen_changed and not actors_changed:
-                # Nothing was changed skip notification sending
-                continue
+                # Create a notification object
+                state_notification = StateNotification(actors=actors_state_notification)
+                if PROFILE:
+                    state_notification.time = datetime.datetime.now()
 
-            # Create a notification object
-            state_notification = StateNotification(actors=actors_state_notification)
-            if PROFILE:
-                state_notification.time = datetime.datetime.now()
+                if screen_changed:
+                    # Attach the screen update to the notification
+                    state_notification.screen = data
 
-            if screen_changed:
-                # Attach the screen update to the notification
-                state_notification.screen = data
-
-            # Sent the notification
-            asyncio.ensure_future(websocket.send(state_notification.json()))
+                # Sent the notification
+                asyncio.ensure_future(websocket.send(state_notification.json()))
 
     # @profile()
     def _get_actors_state(self) -> ActorsStateNotification:
@@ -276,8 +273,8 @@ class MultiplayerSceneServer:
         with self._clients_lock:
             self._clients[websocket] = client
 
-        # Finally call on_enter of the new scene
-        scene.on_enter(None)
+            # Finally call on_enter of the new scene
+            scene.on_enter(None)
 
     async def _unregister_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
         """Unregister a client.
@@ -289,8 +286,8 @@ class MultiplayerSceneServer:
         with self._clients_lock:
             client = self._clients[websocket]
 
-        # First of all remove dead client
-        del self._clients[websocket]
+            # First of all remove dead client
+            del self._clients[websocket]
 
         client.scene.on_exit(None)
         client.scene.remove_actors()
@@ -353,7 +350,7 @@ class MultiplayerSceneServer:
             port (int, optional): port number for listeting of a incoming WebSocket connections. Defaults to 8765.
         """
 
-        self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
+        # self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
 
         thread = threading.Thread(target=self._start, args=(host, port))
         thread.start()
