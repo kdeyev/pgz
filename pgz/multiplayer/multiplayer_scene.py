@@ -70,9 +70,11 @@ class StateNotification(pydantic.BaseModel):
 
 
 class ClientInfo:
-    def __init__(self, scene, screen) -> None:
+    def __init__(self, scene, websocket, screen) -> None:
         self.scene = scene
+        self.websocket = websocket
         self.screen = screen
+        self.events: List[pygame.event.Event] = []
 
 
 class MultiplayerSceneServer:
@@ -128,11 +130,13 @@ class MultiplayerSceneServer:
 
         # Dict of connected clients
         self._clients: Dict[websockets.WebSocketClientProtocol, ClientInfo] = {}
-        self._clients_lock = threading.RLock()
 
         # Class of the headless scenes. Server will instantiate a scene object per connected client
         assert issubclass(HeadlessSceneClass, Scene)
         self._HeadlessSceneClass = HeadlessSceneClass
+
+        self._clients_to_add: List[ClientInfo] = []
+        self._clients_to_delete: List[ClientInfo] = []
 
         if PROFILE:
             self.processing_calc = FPSCalc()
@@ -146,39 +150,59 @@ class MultiplayerSceneServer:
             dt (float): time in microseconds/1000. since the last update
         """
 
-        with self._clients_lock:
-            # Update all the client scenes
-            self._map.update(dt)
-            for client in self._clients.values():
-                client.scene.update(dt)
+        for client in self._clients_to_delete:
+            # First of all remove dead client
+            del self._clients[client.websocket]
 
-            # Server calls internal redraw
-            for client in self._clients.values():
-                # Update screen
-                client.scene.draw(client.screen)
+            client.scene.on_exit(None)
+            client.scene.remove_actors()
+        self._clients_to_delete = []
 
-            # Get state of all the actors
-            actors_changed, actors_state_notification = self._get_actors_state()
+        for client in self._clients_to_add:
+            self._clients[client.websocket] = client
 
-            for websocket, client in self._clients.items():
+            # Finally call on_enter of the new scene
+            client.scene.on_enter(None)
+        self._clients_to_add = []
 
-                # Get changes from the client's screen
-                screen_changed, data = client.screen.get_messages()
-                if not screen_changed and not actors_changed:
-                    # Nothing was changed skip notification sending
-                    continue
+        # Dispatch all the accumulated events
+        for client in self._clients.values():
+            for event in client.events:
+                client.scene.dispatch_event(event)
+            client.events = []
 
-                # Create a notification object
-                state_notification = StateNotification(actors=actors_state_notification)
-                if PROFILE:
-                    state_notification.time = datetime.datetime.now()
+        # Update all the client scenes
+        self._map.update(dt)
+        for client in self._clients.values():
+            client.scene.update(dt)
 
-                if screen_changed:
-                    # Attach the screen update to the notification
-                    state_notification.screen = data
+        # Server calls internal redraw
+        for client in self._clients.values():
+            # Update screen
+            client.scene.draw(client.screen)
 
-                # Sent the notification
-                asyncio.ensure_future(websocket.send(state_notification.json()))
+        # Get state of all the actors
+        actors_changed, actors_state_notification = self._get_actors_state()
+
+        for websocket, client in self._clients.items():
+
+            # Get changes from the client's screen
+            screen_changed, data = client.screen.get_messages()
+            if not screen_changed and not actors_changed:
+                # Nothing was changed skip notification sending
+                continue
+
+            # Create a notification object
+            state_notification = StateNotification(actors=actors_state_notification)
+            if PROFILE:
+                state_notification.time = datetime.datetime.now()
+
+            if screen_changed:
+                # Attach the screen update to the notification
+                state_notification.screen = data
+
+            # Sent the notification
+            asyncio.ensure_future(websocket.send(state_notification.json()))
 
     # @profile()
     def _get_actors_state(self) -> ActorsStateNotification:
@@ -265,16 +289,12 @@ class MultiplayerSceneServer:
         # Notify actors to accumulate incremental changes.
         scene.accumulate_changes = True
 
-        client = ClientInfo(scene=scene, screen=None)
+        client = ClientInfo(scene=scene, websocket=websocket, screen=None)
 
         await self._recv_handshake(websocket, client)
         await self._send_handshake(websocket, client)
 
-        with self._clients_lock:
-            self._clients[websocket] = client
-
-            # Finally call on_enter of the new scene
-            scene.on_enter(None)
+        self._clients_to_add.append(client)
 
     async def _unregister_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
         """Unregister a client.
@@ -283,14 +303,9 @@ class MultiplayerSceneServer:
         Args:
             websocket (websockets.WebSocketClientProtocol): ws client object to unregister
         """
-        with self._clients_lock:
-            client = self._clients[websocket]
+        client = self._clients[websocket]
 
-            # First of all remove dead client
-            del self._clients[websocket]
-
-        client.scene.on_exit(None)
-        client.scene.remove_actors()
+        self._clients_to_delete.append(client)
 
     # @profile()
     def _handle_client_message(self, websocket: websockets.WebSocketClientProtocol, message: str) -> None:
@@ -301,8 +316,7 @@ class MultiplayerSceneServer:
             message (str): message body
         """
         try:
-            with self._clients_lock:
-                client = self._clients[websocket]
+            client = self._clients[websocket]
             events_notification = EventsNotification.parse_raw(message)
 
             if PROFILE:
@@ -310,7 +324,8 @@ class MultiplayerSceneServer:
                 delivery = now - events_notification.time
 
             for event in events_notification.events:
-                client.scene.dispatch_event(pygame.event.Event(event.event_type, **event.attributes))
+                # Accumulate events
+                client.events.append(pygame.event.Event(event.event_type, **event.attributes))
 
             if PROFILE:
                 processing = datetime.datetime.now() - now
