@@ -74,7 +74,7 @@ class ClientInfo:
         self.scene = scene
         self.websocket = websocket
         self.screen = screen
-        self.events: List[pygame.event.Event] = []
+        self.events = asyncio.Queue()
 
 
 class MultiplayerSceneServer:
@@ -135,8 +135,8 @@ class MultiplayerSceneServer:
         assert issubclass(HeadlessSceneClass, Scene)
         self._HeadlessSceneClass = HeadlessSceneClass
 
-        self._clients_to_add: List[ClientInfo] = []
-        self._clients_to_delete: List[ClientInfo] = []
+        self._clients_to_add = asyncio.Queue()
+        self._clients_to_delete = asyncio.Queue()
 
         if PROFILE:
             self.processing_calc = FPSCalc()
@@ -150,26 +150,34 @@ class MultiplayerSceneServer:
             dt (float): time in microseconds/1000. since the last update
         """
 
-        for client in self._clients_to_delete:
-            # First of all remove dead client
-            del self._clients[client.websocket]
+        try:
+            while True:
+                client = self._clients_to_delete.get_nowait()
+                # First of all remove dead client
+                del self._clients[client.websocket]
 
-            client.scene.on_exit(None)
-            client.scene.remove_actors()
-        self._clients_to_delete = []
+                client.scene.on_exit(None)
+                client.scene.remove_actors()
+        except asyncio.QueueEmpty:
+            pass
 
-        for client in self._clients_to_add:
-            self._clients[client.websocket] = client
-
-            # Finally call on_enter of the new scene
-            client.scene.on_enter(None)
-        self._clients_to_add = []
+        try:
+            while True:
+                client = self._clients_to_add.get_nowait()
+                self._clients[client.websocket] = client
+                # Finally call on_enter of the new scene
+                client.scene.on_enter(None)
+        except asyncio.QueueEmpty:
+            pass
 
         # Dispatch all the accumulated events
         for client in self._clients.values():
-            for event in client.events:
-                client.scene.dispatch_event(event)
-            client.events = []
+            try:
+                while True:
+                    event = client.events.get_nowait()
+                    client.scene.dispatch_event(event)
+            except asyncio.QueueEmpty:
+                pass
 
         # Update all the client scenes
         self._map.update(dt)
@@ -294,7 +302,7 @@ class MultiplayerSceneServer:
         await self._recv_handshake(websocket, client)
         await self._send_handshake(websocket, client)
 
-        self._clients_to_add.append(client)
+        self._clients_to_add.put_nowait(client)
 
     async def _unregister_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
         """Unregister a client.
@@ -305,7 +313,7 @@ class MultiplayerSceneServer:
         """
         client = self._clients[websocket]
 
-        self._clients_to_delete.append(client)
+        self._clients_to_delete.put_nowait(client)
 
     # @profile()
     def _handle_client_message(self, websocket: websockets.WebSocketClientProtocol, message: str) -> None:
@@ -325,7 +333,7 @@ class MultiplayerSceneServer:
 
             for event in events_notification.events:
                 # Accumulate events
-                client.events.append(pygame.event.Event(event.event_type, **event.attributes))
+                client.events.put_nowait(pygame.event.Event(event.event_type, **event.attributes))
 
             if PROFILE:
                 processing = datetime.datetime.now() - now
