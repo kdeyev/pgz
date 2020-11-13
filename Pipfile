@@ -12,6 +12,7 @@ numpy = "*"
 deepdiff = "*"
 pgzero = "*"
 pydantic = "*"
+asgiref = "*"
 
 [dev-packages]
 pre-commit = "*"

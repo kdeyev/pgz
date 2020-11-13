@@ -13,6 +13,7 @@ import nest_asyncio
 import pydantic
 import pygame
 import websockets
+from asgiref.sync import async_to_sync
 from pygame import event
 from websockets import client
 
@@ -138,6 +139,8 @@ class MultiplayerSceneServer:
         self._clients_to_add = asyncio.Queue()
         self._clients_to_delete = asyncio.Queue()
 
+        self._notifications_to_send = asyncio.Queue()
+
         if PROFILE:
             self.processing_calc = FPSCalc()
             self.delivery_calc = FPSCalc()
@@ -209,8 +212,9 @@ class MultiplayerSceneServer:
                 # Attach the screen update to the notification
                 state_notification.screen = data
 
+            self._notifications_to_send.put_nowait((websocket, state_notification))
             # Sent the notification
-            asyncio.ensure_future(websocket.send(state_notification.json()))
+            # async_to_sync(websocket.send)(state_notification.json())
 
     # @profile()
     def _get_actors_state(self) -> ActorsStateNotification:
@@ -365,6 +369,11 @@ class MultiplayerSceneServer:
         finally:
             await self._unregister_client(websocket)
 
+    async def _send_notifications(self) -> None:
+        while True:
+            (websocket, notification) = await self._notifications_to_send.get()
+            asyncio.ensure_future(websocket.send(notification.json()))
+
     def start_server(self, host: str = "localhost", port: int = 8765) -> None:
         """Start the scene server.
 
@@ -373,18 +382,8 @@ class MultiplayerSceneServer:
             port (int, optional): port number for listeting of a incoming WebSocket connections. Defaults to 8765.
         """
 
-        # self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
-
-        thread = threading.Thread(target=self._start, args=(host, port))
-        thread.start()
-
-    def _start(self, host: str, port: int):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        asyncio.ensure_future(websockets.serve(self._serve_client, host, port))
-        loop.run_forever()
-        # self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
+        self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
+        asyncio.ensure_future(self._send_notifications())
 
     def stop_server(self) -> None:
         """Stop the server and disconnect all the clients"""
@@ -423,7 +422,7 @@ class RemoteSceneClient(MapScene):
 
         self._websocket: Optional[websockets.WebSocketClientProtocol] = None
         self.server_url = server_url
-        self._event_notification_queue: List[EventNotification] = []
+        self._event_notification_queue = asyncio.Queue()
         self._screen_client = RPCScreenClient()
         self._client_data = client_data
 
@@ -466,7 +465,7 @@ class RemoteSceneClient(MapScene):
         Args:
             dt (float): time in microseconds/1000. since the last update
         """
-        asyncio.ensure_future(self._flush_messages())
+        async_to_sync(self._flush_messages)()
         super().update(dt)
 
     # @profile()
@@ -483,17 +482,37 @@ class RemoteSceneClient(MapScene):
 
     async def _flush_messages(self) -> None:
         """Combine all the accumulated event into notification and send to the remote scene."""
-        if self._websocket and len(self._event_notification_queue):
+        if self._websocket:
+            events = []
+            last_mouse_mov = None
+            try:
+                while True:
+                    event = self._event_notification_queue.get_nowait()
+
+                    if event.event_type == pygame.MOUSEMOTION:
+                        # Mouse events optimization
+                        if last_mouse_mov:
+                            last_mouse_mov.attributes = event.__dict__
+                            continue
+                        else:
+                            last_mouse_mov = event
+
+                    events.append(event)
+            except asyncio.QueueEmpty:
+                pass
+
+            if not events:
+                return
+
             # create one json array
-            events_notification = EventsNotification(events=self._event_notification_queue)
+            events_notification = EventsNotification(events=events)
 
             if PROFILE:
                 events_notification.time = datetime.datetime.now()
-                self.events_count.push(len(self._event_notification_queue))
+                self.events_count.push(len(events))
                 if self.events_count.counter == 100:
                     print(f"Event queue {self.events_count.aver()}")
 
-            self._event_notification_queue = []
             # send message
             await self._websocket.send(events_notification.json())
 
@@ -515,15 +534,8 @@ class RemoteSceneClient(MapScene):
             return
 
         try:
-            if event.type == pygame.MOUSEMOTION:
-                # Mouse events optimization
-                for event_notification in self._event_notification_queue:
-                    if event_notification.event_type == event.type:
-                        event_notification.attributes = event.__dict__
-                        return
-
             event_notification = EventNotification(event_type=event.type, attributes=event.__dict__)
-            self._event_notification_queue.append(event_notification)
+            self._event_notification_queue.put_nowait(event_notification)
         except Exception as e:
             print(f"handle_event: {e}")
             return
