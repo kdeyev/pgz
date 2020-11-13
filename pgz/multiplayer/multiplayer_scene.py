@@ -1,28 +1,19 @@
 import asyncio
 import datetime
 import json
-import threading
-import time
-from email import message
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
-
-# from re import T
-from uuid import uuid4
+from typing import Any, Dict, List, Optional
 
 import nest_asyncio
 import pydantic
 import pygame
 import websockets
 from asgiref.sync import async_to_sync
-from pygame import event
-from websockets import client
 
 from pgz.utils.fps_calc import FPSCalc
 
 # import jsonrpc_base
 from ..actor import Actor
-from ..keyboard import Keyboard
-from ..scene import EventDispatcher, Scene
+from ..scene import Scene
 from ..scenes.map_scene import MapScene
 from ..screen import Screen
 from ..utils.collision_detector import CollisionDetector

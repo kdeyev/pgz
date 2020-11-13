@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import pygame_menu
 from my_pirate_game import GameScene

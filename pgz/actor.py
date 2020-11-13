@@ -82,7 +82,7 @@ class Actor(BaseActor):
         super().__init__(*args, **kwargs)
 
         self.scene_uuid: str = ""
-        self._incremental_changes = {}
+        self._incremental_changes: Dict[str, Any] = {}
 
         self.keyboard = None
         self.accumulate_changes = True
@@ -96,7 +96,7 @@ class Actor(BaseActor):
 
         super().__setattr__(attr, value)
 
-    def get_incremental_changes(self):
+    def get_incremental_changes(self) -> Dict[str, Any]:
         incremental_changes = self._incremental_changes
         self._incremental_changes = {}
         return incremental_changes

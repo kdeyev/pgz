@@ -13,7 +13,7 @@ tmx = pgz.maps.default
 """
 
 
-from pgzero.loaders import ResourceLoader, fonts, images, set_root, sounds
+from pgzero.loaders import ResourceLoader, fonts, images, set_root, sounds  # noqa
 from pytmx import TiledMap
 from pytmx.util_pygame import load_pygame
 

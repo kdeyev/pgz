@@ -147,15 +147,15 @@ scene.add_actor(ship)
 The usage of pgz.MapScene will require the instantiation of a map object. pgz provides a way for loading and handling [Tiled](https://www.mapeditor.org/) maps.
 
 ### Map Loading
-The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from "default.tmx" file of the resource directory: 
+The map object loading is done with the map loader (a-la pgzero resource loaders). So for loading a map from "default.tmx" file of the resource directory:
 ```
 tmx = pgz.maps.default
 ```
 The "mtx" files can be created and modified with wonderful [Tiled](https://www.mapeditor.org/) mps editor.
 
-### Map Management and Rendering 
+### Map Management and Rendering
 The maps loading and usage is backed by [pyscroll](https://github.com/bitcraft/pyscroll)
-    
+
 pgz provides a pgz.ScrollMap class which covers listed functionality:
 - create and manage a pyscroll group
 - load a collision layers
@@ -272,6 +272,6 @@ Pay attention that client process needs to have access to the same external reso
 ## Multiplayer Game Example
 The multiplayer game example can be found in demo/demo_server.py and demo/demo_client.py
 
-## Demo 
+## Demo
 
 ![Alt Text](img/demo.gif)

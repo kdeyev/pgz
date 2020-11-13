@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 import pygame
 
-from ..actor import Actor, SpriteDelegate
+from ..actor import Actor
 
 
 class CollisionDetector(object):

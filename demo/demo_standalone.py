@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 from my_pirate_game import GameScene
 
 import pgz
