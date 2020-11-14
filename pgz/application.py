@@ -3,6 +3,7 @@ import sys
 from typing import Optional, Tuple
 
 import pygame
+from asgiref.sync import sync_to_async
 
 #
 from pgz.scene import Scene
@@ -259,8 +260,8 @@ class Application:
                 fps = fps_calc.aver()
                 print(f"fps {fps}")
 
-            self._update(dt)
-            self._draw()
+            await sync_to_async(self._update)(dt)
+            await sync_to_async(self._draw)()
 
             self._screen.draw.text(f"FPS: {fps}", pos=(0, 0))
 

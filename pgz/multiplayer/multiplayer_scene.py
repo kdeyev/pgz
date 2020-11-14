@@ -1,31 +1,33 @@
 import asyncio
+import datetime
 import json
-from email import message
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple
-
-# from re import T
-from uuid import uuid4
+from typing import Any, Dict, List, Optional
 
 import nest_asyncio
 import pydantic
 import pygame
 import websockets
-from pygame import event
+from asgiref.sync import async_to_sync
+
+from pgz.utils.fps_calc import FPSCalc
 
 # import jsonrpc_base
 from ..actor import Actor
-from ..keyboard import Keyboard
-from ..scene import EventDispatcher, Scene
+from ..scene import Scene
 from ..scenes.map_scene import MapScene
 from ..screen import Screen
 from ..utils.collision_detector import CollisionDetector
 from ..utils.scroll_map import ScrollMap
 from .screen_rpc import RPCScreenClient, RPCScreenServer
 
+# from pgz.utils.profiler import profile
+
+
 nest_asyncio.apply()
 
 UUID = str
 JSON = Dict[str, Any]
+PROFILE = True
 
 
 class EventNotification(pydantic.BaseModel):
@@ -35,6 +37,7 @@ class EventNotification(pydantic.BaseModel):
 
 class EventsNotification(pydantic.BaseModel):
     events: List[EventNotification]
+    time: Optional[datetime.datetime]
 
 
 class AddedActor(pydantic.BaseModel):
@@ -55,6 +58,15 @@ class ActorsStateNotification(pydantic.BaseModel):
 class StateNotification(pydantic.BaseModel):
     actors: ActorsStateNotification
     screen: List[Dict[str, Any]] = []
+    time: Optional[datetime.datetime]
+
+
+class ClientInfo:
+    def __init__(self, scene, websocket, screen) -> None:
+        self.scene = scene
+        self.websocket = websocket
+        self.screen = screen
+        self.events = asyncio.Queue()
 
 
 class MultiplayerSceneServer:
@@ -109,56 +121,93 @@ class MultiplayerSceneServer:
         self._latest_actors = {}
 
         # Dict of connected clients
-        self._clients: Dict[websockets.WebSocketClientProtocol, Scene] = {}
-        self._screens: Dict[websockets.WebSocketClientProtocol, RPCScreenServer] = {}
+        self._clients: Dict[websockets.WebSocketClientProtocol, ClientInfo] = {}
 
         # Class of the headless scenes. Server will instantiate a scene object per connected client
         assert issubclass(HeadlessSceneClass, Scene)
         self._HeadlessSceneClass = HeadlessSceneClass
 
+        self._clients_to_add = asyncio.Queue()
+        self._clients_to_delete = asyncio.Queue()
+
+        self._notifications_to_send = asyncio.Queue()
+
+        if PROFILE:
+            self.processing_calc = FPSCalc()
+            self.delivery_calc = FPSCalc()
+
+    # @profile()
     def update(self, dt: float) -> None:
         """Update method similar to the `pgz.scene.Scene.update` method.
 
         Args:
-            dt (float): time in milliseconds since the last update
+            dt (float): time in microseconds/1000. since the last update
         """
+
+        try:
+            while True:
+                client = self._clients_to_delete.get_nowait()
+                # First of all remove dead client
+                del self._clients[client.websocket]
+
+                client.scene.on_exit(None)
+                client.scene.remove_actors()
+        except asyncio.QueueEmpty:
+            pass
+
+        try:
+            while True:
+                client = self._clients_to_add.get_nowait()
+                self._clients[client.websocket] = client
+                # Finally call on_enter of the new scene
+                client.scene.on_enter(None)
+        except asyncio.QueueEmpty:
+            pass
+
+        # Dispatch all the accumulated events
+        for client in self._clients.values():
+            try:
+                while True:
+                    event = client.events.get_nowait()
+                    client.scene.dispatch_event(event)
+            except asyncio.QueueEmpty:
+                pass
 
         # Update all the client scenes
         self._map.update(dt)
-        for scenes in self._clients.values():
-            scenes.update(dt)
+        for client in self._clients.values():
+            client.scene.update(dt)
 
         # Server calls internal redraw
-        for ws in self._clients:
-            scene = self._clients[ws]
-            screen = self._screens[ws]
-
+        for client in self._clients.values():
             # Update screen
-            scene.draw(screen)
+            client.scene.draw(client.screen)
 
         # Get state of all the actors
         actors_changed, actors_state_notification = self._get_actors_state()
 
-        for websocket in self._clients:
-            scene = self._clients[websocket]
-            screen = self._screens[websocket]
+        for websocket, client in self._clients.items():
 
             # Get changes from the client's screen
-            screen_changed, data = screen.get_messages()
+            screen_changed, data = client.screen.get_messages()
             if not screen_changed and not actors_changed:
                 # Nothing was changed skip notification sending
                 continue
 
             # Create a notification object
             state_notification = StateNotification(actors=actors_state_notification)
+            if PROFILE:
+                state_notification.time = datetime.datetime.now()
 
             if screen_changed:
                 # Attach the screen update to the notification
                 state_notification.screen = data
 
+            self._notifications_to_send.put_nowait((websocket, state_notification))
             # Sent the notification
-            asyncio.ensure_future(websocket.send(state_notification.json()))
+            # async_to_sync(websocket.send)(state_notification.json())
 
+    # @profile()
     def _get_actors_state(self) -> ActorsStateNotification:
         """Collect the state of all the known actors.
 
@@ -188,7 +237,7 @@ class MultiplayerSceneServer:
 
         return changed, actors_state
 
-    async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: Scene) -> None:
+    async def _recv_handshake(self, websocket: websockets.WebSocketClientProtocol, client: ClientInfo) -> None:
         """Receive handshake message from recently connected client.
 
         Args:
@@ -199,12 +248,12 @@ class MultiplayerSceneServer:
         json_massage = json.loads(massage)
         resolution = json_massage["resolution"]
 
-        rpc_screen = RPCScreenServer(resolution)
-        self._screens[websocket] = rpc_screen
+        # Create screen for the client
+        client.screen = RPCScreenServer(resolution)
 
-        scene.set_client_data(json_massage["client_data"])
+        client.scene.set_client_data(json_massage["client_data"])
 
-    async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, scene: Scene) -> None:
+    async def _send_handshake(self, websocket: websockets.WebSocketClientProtocol, client: ClientInfo) -> None:
         """Send handshake method.
 
         The handshake message will include the current state of the actors attached to the map object
@@ -213,15 +262,12 @@ class MultiplayerSceneServer:
             websocket (websockets.WebSocketClientProtocol): ws client object
             scene (Scene): a scene object associated with the client
         """
-        actors: List[Actor] = []
-        for sc in self._clients.values():
-            actors += sc.get_actors()
-
+        actors: List[Actor] = self._collision_detector.get_actors()
         actors_states = {actor.uuid: actor.serialize_state() for actor in actors}
 
-        rpc_screen = self._screens[websocket]
+        rpc_screen = client.screen
 
-        massage = {"uuid": scene.scene_uuid, "actors_states": actors_states, "screen_state": rpc_screen.get_messages()}
+        massage = {"uuid": client.scene.scene_uuid, "actors_states": actors_states, "screen_state": rpc_screen.get_messages()}
         await websocket.send(json.dumps(massage))
 
     async def _register_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
@@ -246,13 +292,12 @@ class MultiplayerSceneServer:
         # Notify actors to accumulate incremental changes.
         scene.accumulate_changes = True
 
-        await self._recv_handshake(websocket, scene)
-        await self._send_handshake(websocket, scene)
+        client = ClientInfo(scene=scene, websocket=websocket, screen=None)
 
-        self._clients[websocket] = scene
+        await self._recv_handshake(websocket, client)
+        await self._send_handshake(websocket, client)
 
-        # Finally call on_enter of the new scene
-        scene.on_enter(None)
+        self._clients_to_add.put_nowait(client)
 
     async def _unregister_client(self, websocket: websockets.WebSocketClientProtocol) -> None:
         """Unregister a client.
@@ -261,15 +306,11 @@ class MultiplayerSceneServer:
         Args:
             websocket (websockets.WebSocketClientProtocol): ws client object to unregister
         """
-        scene = self._clients[websocket]
+        client = self._clients[websocket]
 
-        # First of all remove dead client
-        del self._clients[websocket]
-        del self._screens[websocket]
+        self._clients_to_delete.put_nowait(client)
 
-        scene.on_exit(None)
-        scene.remove_actors()
-
+    # @profile()
     def _handle_client_message(self, websocket: websockets.WebSocketClientProtocol, message: str) -> None:
         """Handle a message from a WebSocket client.
 
@@ -278,10 +319,25 @@ class MultiplayerSceneServer:
             message (str): message body
         """
         try:
-            scene = self._clients[websocket]
+            client = self._clients[websocket]
             events_notification = EventsNotification.parse_raw(message)
+
+            if PROFILE:
+                now = datetime.datetime.now()
+                delivery = now - events_notification.time
+
             for event in events_notification.events:
-                scene.dispatch_event(pygame.event.Event(event.event_type, **event.attributes))
+                # Accumulate events
+                client.events.put_nowait(pygame.event.Event(event.event_type, **event.attributes))
+
+            if PROFILE:
+                processing = datetime.datetime.now() - now
+
+                self.delivery_calc.push(delivery.microseconds / 1000.0)
+                self.processing_calc.push(processing.microseconds / 1000.0)
+                if self.delivery_calc.counter == 100:
+                    print(f"EventsNotification delivery {self.delivery_calc.aver()} processing {self.processing_calc.aver()}")
+
         except Exception as e:
             print(f"_handle_client_message: {e}")
 
@@ -294,7 +350,7 @@ class MultiplayerSceneServer:
         """
 
         # Register the client (create a client scene)
-        await self._register_client(websocket)
+        await asyncio.ensure_future(self._register_client(websocket))  # type: ignore
         try:
             async for message in websocket:
                 try:
@@ -304,6 +360,11 @@ class MultiplayerSceneServer:
         finally:
             await self._unregister_client(websocket)
 
+    async def _send_notifications(self) -> None:
+        while True:
+            (websocket, notification) = await self._notifications_to_send.get()
+            asyncio.ensure_future(websocket.send(notification.json()))
+
     def start_server(self, host: str = "localhost", port: int = 8765) -> None:
         """Start the scene server.
 
@@ -311,7 +372,9 @@ class MultiplayerSceneServer:
             host (str, optional): host name. Defaults to "localhost".
             port (int, optional): port number for listeting of a incoming WebSocket connections. Defaults to 8765.
         """
+
         self._server_task = asyncio.ensure_future(websockets.serve(self._serve_client, host, port))  # type: ignore
+        asyncio.ensure_future(self._send_notifications())
 
     def stop_server(self) -> None:
         """Stop the server and disconnect all the clients"""
@@ -350,9 +413,14 @@ class RemoteSceneClient(MapScene):
 
         self._websocket: Optional[websockets.WebSocketClientProtocol] = None
         self.server_url = server_url
-        self._event_notification_queue: List[EventNotification] = []
+        self._event_notification_queue = asyncio.Queue()
         self._screen_client = RPCScreenClient()
         self._client_data = client_data
+
+        if PROFILE:
+            self.processing_calc = FPSCalc()
+            self.delivery_calc = FPSCalc()
+            self.events_count = FPSCalc()
 
     def on_exit(self, next_scene: Optional[Scene]) -> None:
         """
@@ -380,16 +448,18 @@ class RemoteSceneClient(MapScene):
         if not self._websocket:
             raise Exception("Cannot connect")
 
+    # @profile()
     def update(self, dt: float) -> None:
         """
         Overriden update method
 
         Args:
-            dt (float): time in milliseconds since the last update
+            dt (float): time in microseconds/1000. since the last update
         """
-        asyncio.ensure_future(self._flush_messages())
+        async_to_sync(self._flush_messages)()
         super().update(dt)
 
+    # @profile()
     def draw(self, screen: Screen) -> None:
         """
         Overriden rendering method
@@ -403,13 +473,41 @@ class RemoteSceneClient(MapScene):
 
     async def _flush_messages(self) -> None:
         """Combine all the accumulated event into notification and send to the remote scene."""
-        if self._websocket and len(self._event_notification_queue):
+        if self._websocket:
+            events = []
+            last_mouse_mov = None
+            try:
+                while True:
+                    event = self._event_notification_queue.get_nowait()
+
+                    if event.event_type == pygame.MOUSEMOTION:
+                        # Mouse events optimization
+                        if last_mouse_mov:
+                            last_mouse_mov.attributes = event.__dict__
+                            continue
+                        else:
+                            last_mouse_mov = event
+
+                    events.append(event)
+            except asyncio.QueueEmpty:
+                pass
+
+            if not events:
+                return
+
             # create one json array
-            events_notification = EventsNotification(events=self._event_notification_queue)
-            self._event_notification_queue = []
+            events_notification = EventsNotification(events=events)
+
+            if PROFILE:
+                events_notification.time = datetime.datetime.now()
+                self.events_count.push(len(events))
+                if self.events_count.counter == 100:
+                    print(f"Event queue {self.events_count.aver()}")
+
             # send message
             await self._websocket.send(events_notification.json())
 
+    # @profile()
     def handle_event(self, event: pygame.event.Event) -> None:
         """
         Overriden event handler
@@ -428,7 +526,7 @@ class RemoteSceneClient(MapScene):
 
         try:
             event_notification = EventNotification(event_type=event.type, attributes=event.__dict__)
-            self._event_notification_queue.append(event_notification)
+            self._event_notification_queue.put_nowait(event_notification)
         except Exception as e:
             print(f"handle_event: {e}")
             return
@@ -487,9 +585,13 @@ class RemoteSceneClient(MapScene):
             try:
                 # Parse the message
                 state_notification = StateNotification.parse_raw(message)
+
+                if PROFILE:
+                    now = datetime.datetime.now()
+                    delivery = now - state_notification.time
+
                 uuid: str
                 added_actor: AddedActor
-
                 # Add new actors if required
                 for uuid, added_actor in state_notification.actors.added.items():
                     self._add_actor_on_client(uuid, added_actor.scene_uuid, added_actor.image, added_actor.is_central)
@@ -507,6 +609,13 @@ class RemoteSceneClient(MapScene):
                 if state_notification.screen:
                     self._modify_screnn(state_notification.screen)
 
+                if PROFILE:
+                    processing = datetime.datetime.now() - now
+
+                    self.delivery_calc.push(delivery.microseconds / 1000.0)
+                    self.processing_calc.push(processing.microseconds / 1000.0)
+                    if self.delivery_calc.counter == 100:
+                        print(f"StateNotification delivery {self.delivery_calc.aver()} processing {self.processing_calc.aver()}")
             except Exception as e:
                 print(f"_handle_messages: {e}")
 

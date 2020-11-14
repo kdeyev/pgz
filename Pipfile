@@ -9,9 +9,9 @@ pygame-menu = "*"
 websockets = "*"
 nest-asyncio = "*"
 numpy = "*"
-deepdiff = "*"
 pgzero = "*"
 pydantic = "*"
+asgiref = "*"
 
 [dev-packages]
 pre-commit = "*"

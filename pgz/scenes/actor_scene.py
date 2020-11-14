@@ -1,7 +1,5 @@
 from typing import Dict, List, Optional
 
-import pygame
-
 from ..actor import Actor, SpriteDelegate
 from ..scene import Scene
 from ..screen import Screen
@@ -121,7 +119,7 @@ class ActorScene(Scene):
     def draw(self, surface: Screen) -> None:
         """
         Overriden rendering method
-        
+
         Implementation of the update method for the ActorScene.
 
         The ActorScene implementation renders all the actorts attached to the scene.
@@ -136,7 +134,7 @@ class ActorScene(Scene):
     def update(self, dt: float) -> None:
         """
         Overriden update method
-        
+
         Implementation of the update method for the ActorScene.
 
         This method updates all the actors attached to the scene.
