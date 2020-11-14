@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple
 
 import pygame
+from dictdiffer import diff, patch, revert, swap
 from pgzero.rect import RECT_CLASSES, ZRect
 from pgzero.screen import Screen, make_color, ptext, round_pos
 
@@ -94,7 +95,9 @@ class RPCScreenServer:
         self.width, self.height = size
 
     def get_messages(self) -> Tuple[bool, List[JSON]]:
+
         if self._prev_messages == self._messages:
+            self._messages.clear()
             return False, []
 
         self._prev_messages = self._messages[:]
