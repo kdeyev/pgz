@@ -16,14 +16,39 @@ GREEN = tuple(pygame.Color("GREEN"))
 
 class Ship(pgz.Actor):
     def __init__(self) -> None:
-        super().__init__(random.choice(["ship (1)", "ship (2)", "ship (3)", "ship (4)", "ship (5)", "ship (6)"]))
+        self.image_num = random.randrange(1, 6)
+        super().__init__(f"ship ({self.image_num}) (1)")
 
         self.speed = 200
         self.health = 100.0
         self.velocity = [0, 0]
         self._old_pos = self.pos
+        self._old_health = self.health
+
+    def is_dead(self) -> bool:
+        return self.health <= 0
+
+    def update_sprite(self):
+        num = 1
+        if self.health <= 0:
+            num = 4
+        elif self.health <= 33:
+            num = 3
+        elif self.health <= 66:
+            num = 2
+
+        ang = self.angle
+        self.image = f"ship ({self.image_num}) ({num})"
+        self.angle = ang
+        self._old_health = self.health
 
     def update(self, dt):
+        if self.health != self._old_health:
+            self.update_sprite()
+
+        if self.is_dead():
+            return
+
         self._old_pos = self.pos[:]
 
         # pressed = pygame.key.get_pressed()
@@ -128,6 +153,9 @@ class GameScene(pgz.MapScene):
         """Tasks that occur over time should be handled here"""
         super().update(dt)
 
+        if self.ship.is_dead():
+            return
+
         if self.collide_map(self.ship):
             self.ship.move_back(dt)
 
@@ -138,10 +166,16 @@ class GameScene(pgz.MapScene):
             self.ship.health -= cannon_ball.hit_rate * dt
 
     def on_mouse_move(self, pos):
+        if self.ship.is_dead():
+            return
+
         angle = self.ship.angle_to(pos) + 90
         self.ship.angle = angle
 
     def on_mouse_down(self, pos, button):
+        if self.ship.is_dead():
+            return
+
         start_point = self.calc_cannon_ball_start_pos(pos)
         if start_point:
             ball = CannonBall(pos=start_point, target=pos)
