@@ -12,7 +12,15 @@ pgz uses pgzero as infrastructure intensively, but makes the experience more obj
 
 ## Installation
 
-not yet
+Assuming you have Python and Pip is installed, the easiest way to install pgz is with Pip:
+```
+pip install pgzero
+```
+
+Linux and MacOS users can now test the installation by copy-pasting the following commands into your terminal-emulator:
+```
+echo -e "def draw():\n    screen.draw.text('Success! :D', (100, 100), color='white')" > pgztest.py && pgzrun pgztest.py && rm pgztest.py
+```
 
 # Documentation
 
